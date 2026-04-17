@@ -128,6 +128,27 @@
 
       <div class="app-header__actions">
 
+        <!-- Feed-Manager-Button -->
+        <button
+          id="btn-open-feed-manager"
+          class="icon-button"
+          aria-label="Feeds verwalten"
+          title="Feeds verwalten"
+          aria-haspopup="dialog"
+          aria-controls="feed-manager"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <line x1="8"  y1="6"  x2="21" y2="6"></line>
+            <line x1="8"  y1="12" x2="21" y2="12"></line>
+            <line x1="8"  y1="18" x2="21" y2="18"></line>
+            <line x1="3"  y1="6"  x2="3.01" y2="6"></line>
+            <line x1="3"  y1="12" x2="3.01" y2="12"></line>
+            <line x1="3"  y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
+
         <!-- Manueller Refresh-Button -->
         <button
           id="btn-refresh"
@@ -308,6 +329,14 @@
         </span>
       </div>
 
+      <p class="modal__section-title">Feeds</p>
+      <div style="margin-top: var(--space-2)">
+        <button id="btn-open-feed-manager-from-settings" class="btn btn--ghost btn--full"
+                onclick="openFeedManager()">
+          Feeds verwalten &amp; hinzufügen →
+        </button>
+      </div>
+
       <p class="modal__section-title">Angemeldet als</p>
       <!-- auth.js befüllt diesen Bereich mit Name und E-Mail per textContent -->
       <div id="settings-user-info" style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">
@@ -330,21 +359,120 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       SCRIPTS
-       Reihenfolge ist wichtig — jede Datei setzt die vorherige voraus:
-         config.js   → definiert CONFIG (globales Objekt, kein Export)
-         auth.js     → liest CONFIG.GOOGLE_CLIENT_ID, schreibt User-State
-         filter.js   → liest CONFIG.STORAGE_KEYS, schreibt localStorage
-         feed.js     → liest CONFIG.FEEDS, CONFIG.PROXY_*, ruft filter.js auf
-         ui.js       → liest alles, schreibt DOM
-       defer: Skripte laden parallel, führen aber erst nach dem HTML-Parsing aus.
+       FEED-MANAGER MODAL
        ═══════════════════════════════════════════════════════════════════ -->
-  <script src="config.js"   defer></script>
-  <script src="auth.js"     defer></script>
-  <script src="filter.js"   defer></script>
-  <script src="feed.js"     defer></script>
-  <script src="ui-cards.js" defer></script>
-  <script src="ui.js"       defer></script>
+  <div
+    id="feed-manager-backdrop"
+    class="modal-backdrop"
+    role="presentation"
+    aria-hidden="true"
+  >
+    <div
+      id="feed-manager"
+      class="modal modal--wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="feed-manager-title"
+    >
+      <div class="modal__header">
+        <h2 id="feed-manager-title" class="modal__title">Feeds verwalten</h2>
+        <button id="btn-close-feed-manager" class="icon-button" aria-label="Feed-Manager schließen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6"  y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Suchfeld — filtert die Liste live -->
+      <input
+        id="feed-search"
+        type="search"
+        class="feed-search"
+        placeholder="Feeds durchsuchen …"
+        autocomplete="off"
+        spellcheck="false"
+      >
+
+      <!-- Feed-Liste — wird von feed-manager.js befüllt -->
+      <div id="feed-list" role="list" aria-label="Verfügbare Feeds"></div>
+
+      <!-- Eigener Feed hinzufügen -->
+      <details class="custom-feed-section" id="custom-feed-section">
+        <summary class="custom-feed-section__toggle">➕ Eigenen Feed hinzufügen</summary>
+
+        <form id="custom-feed-form" class="custom-feed-form" novalidate>
+
+          <div class="form-row form-row--url">
+            <div style="flex:1; display:flex; flex-direction:column; gap:var(--space-1)">
+              <label for="cf-url">Feed-URL *</label>
+              <input id="cf-url" name="url" type="url"
+                     placeholder="https://example.com/feed.xml" required>
+            </div>
+            <button type="button" id="btn-check-feed" class="btn btn--ghost"
+                    style="align-self:flex-end; white-space:nowrap">
+              Überprüfen
+            </button>
+          </div>
+
+          <!-- Vorschau nach URL-Check — wird von feed-manager.js befüllt -->
+          <div id="feed-preview" class="feed-preview" style="display:none"></div>
+
+          <div class="form-row">
+            <label for="cf-name">Name *</label>
+            <input id="cf-name" name="name" type="text" placeholder="Mein Blog" required>
+          </div>
+
+          <div class="form-row">
+            <label for="cf-category">Kategorie</label>
+            <select id="cf-category" name="category">
+              <!-- Wird von feed-manager.js aus CONFIG.CATEGORIES befüllt -->
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="cf-language">Sprache</label>
+            <select id="cf-language" name="language">
+              <option value="de">Deutsch</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--full">
+            Feed hinzufügen
+          </button>
+
+        </form>
+      </details>
+
+    </div><!-- /feed-manager -->
+  </div><!-- /feed-manager-backdrop -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       SCRIPTS — Ladereihenfolge:
+         config.js        → CONFIG (Einstellungen, Kategorien, Storage-Keys)
+         feeds.js         → FEED_CATALOGUE (alle vordefinierten Feeds)
+         auth.js          → Google OAuth
+         filter.js        → Filterregeln & Dismiss
+         feed-manager.js  → Feed-Auswahl, getActiveFeeds(), Custom-Feeds
+         feed.js          → RSS laden via getActiveFeeds()
+         ui-cards.js      → Card-Rendering & Swipe
+         ui.js            → App-Koordinator
+       defer: parallel laden, sequenziell ausführen nach DOM-Parse.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="style-feed-manager.css">
+  <script src="config.js"        defer></script>
+  <script src="feeds.js"         defer></script>
+  <script src="auth.js"          defer></script>
+  <script src="filter.js"        defer></script>
+  <script src="feed-manager.js"    defer></script>
+  <script src="feed-manager-ui.js" defer></script>
+  <script src="feed.js"            defer></script>
+  <script src="ui-cards.js"      defer></script>
+  <script src="ui.js"            defer></script>
 
 </body>
 </html>

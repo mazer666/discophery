@@ -44,7 +44,7 @@
  * @returns {Promise<DiscopheryArticle[]>} - Alle Artikel, neueste zuerst
  */
 async function loadAllFeeds() {
-  const activeFeeds = CONFIG.FEEDS.filter(f => f.enabled !== false);
+  const activeFeeds = getActiveFeeds();  // feed-manager.js
 
   // Alle Feeds gleichzeitig starten — nicht sequenziell warten
   const results = await Promise.allSettled(
