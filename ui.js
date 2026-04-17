@@ -406,7 +406,7 @@ function _wireStaticButtons() {
       if (!_contextArticle) { _closeContextMenu(); return; }
       const cat = _contextArticle.category;
       // Alle Feeds dieser Kategorie blockieren
-      CONFIG.FEEDS
+      FEED_CATALOGUE
         .filter(f => f.category === cat)
         .forEach(f => blockSource(f.id));  // filter.js
       _closeContextMenu();
@@ -429,4 +429,8 @@ function _wireStaticButtons() {
 document.addEventListener('DOMContentLoaded', () => {
   _wireStaticButtons();
   _showState('loading');
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
 });
