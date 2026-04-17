@@ -98,13 +98,6 @@ function _initGoogleSignIn(attempt = 0) {
     return;
   }
 
-  // Client ID aus dem g_id_onload-Element setzen (Sam: nicht im HTML hardcoden,
-  // damit config.js die einzige Stelle bleibt wo die ID vorkommt)
-  const onloadEl = document.getElementById('g_id_onload');
-  if (onloadEl) {
-    onloadEl.setAttribute('data-client_id', CONFIG.GOOGLE_CLIENT_ID);
-  }
-
   google.accounts.id.initialize({
     client_id: CONFIG.GOOGLE_CLIENT_ID,
     callback:  handleGoogleSignIn,
