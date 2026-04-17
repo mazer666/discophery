@@ -204,6 +204,8 @@ const CONFIG = {
     CUSTOM_FEEDS:        'discophery_custom_feeds',
     /** Zahl in Minuten: Auto-Refresh-Intervall (0 = deaktiviert) */
     REFRESH_INTERVAL:    'discophery_refresh_interval',
+    /** 'light' | 'dark' | nicht vorhanden = automatisch */
+    THEME:               'discophery_theme',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

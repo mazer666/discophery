@@ -242,6 +242,7 @@ function _openSettingsModal() {
 
   _renderSettingsContent();
   _loadRefreshIntervalSetting();
+  _loadThemeSetting();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
   // Fokus auf Schließen-Button für Tastaturnutzer
@@ -349,6 +350,22 @@ function _loadRefreshIntervalSetting() {
   if (sel) sel.value = saved;
 }
 
+function _applyTheme(value) {
+  if (value === 'light' || value === 'dark') {
+    document.documentElement.dataset.theme = value;
+    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, value);
+  } else {
+    delete document.documentElement.dataset.theme;
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.THEME);
+  }
+}
+
+function _loadThemeSetting() {
+  const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
+  const sel   = document.getElementById('select-theme');
+  if (sel) sel.value = saved ?? 'auto';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // BUTTON-VERDRAHTUNG
 // ═══════════════════════════════════════════════════════════════════════════
@@ -378,6 +395,10 @@ function _wireStaticButtons() {
     ?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) _closeSettingsModal();
     });
+
+  // Erscheinungsbild (Theme)
+  document.getElementById('select-theme')
+    ?.addEventListener('change', (e) => _applyTheme(e.target.value));
 
   // Auto-Sync-Intervall
   document.getElementById('select-refresh-interval')
