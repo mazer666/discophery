@@ -240,41 +240,64 @@ function _createActionButtons(article) {
  * @returns {void}
  */
 function _setupSwipe(cardEl, article) {
-  let startX   = 0;
-  let currentX = 0;
-  let moved    = false;
+  let startX    = 0;
+  let startY    = 0;
+  let currentX  = 0;
+  let moved     = false;
+  let axis      = null;  // 'h' = horizontal, 'v' = vertikal, null = noch offen
+
+  const reset = () => {
+    cardEl.style.transition = 'transform 200ms ease-out';
+    cardEl.style.transform  = '';
+    cardEl.classList.remove('card--swiping-left', 'card--swiping-right');
+    axis = null;
+    moved = false;
+  };
 
   cardEl.addEventListener('touchstart', (e) => {
-    startX   = e.touches[0].clientX;
+    startX  = e.touches[0].clientX;
+    startY  = e.touches[0].clientY;
     currentX = startX;
-    moved    = false;
+    moved   = false;
+    axis    = null;
     cardEl.style.transition = 'none';
   }, { passive: true });
 
   cardEl.addEventListener('touchmove', (e) => {
-    currentX    = e.touches[0].clientX;
-    const delta = currentX - startX;
-    if (Math.abs(delta) < SWIPE_TAP_LIMIT) return;
+    currentX      = e.touches[0].clientX;
+    const deltaX  = currentX - startX;
+    const deltaY  = e.touches[0].clientY - startY;
+
+    // Achse beim ersten signifikanten Ausschlag festlegen
+    if (axis === null) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      if (absX < SWIPE_TAP_LIMIT && absY < SWIPE_TAP_LIMIT) return;
+      axis = absX >= absY ? 'h' : 'v';
+    }
+
+    // Vertikales Scrollen → Card in Ruhe lassen
+    if (axis === 'v') return;
+
     moved = true;
-    cardEl.style.transform = `translateX(${delta}px) rotate(${delta * 0.04}deg)`;
-    cardEl.classList.toggle('card--swiping-left',  delta < -20);
-    cardEl.classList.toggle('card--swiping-right', delta >  20);
+    cardEl.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.025}deg)`;
+    cardEl.classList.toggle('card--swiping-left',  deltaX < -20);
+    cardEl.classList.toggle('card--swiping-right', deltaX >  20);
   }, { passive: true });
 
   cardEl.addEventListener('touchend', () => {
-    const delta = currentX - startX;
+    if (axis === 'v') { axis = null; return; }
 
+    const delta = currentX - startX;
     if (!moved || Math.abs(delta) < SWIPE_THRESHOLD) {
-      // Nicht weit genug → sanft zurückschnappen
-      cardEl.style.transition = 'transform 200ms ease-out';
-      cardEl.style.transform  = '';
-      cardEl.classList.remove('card--swiping-left', 'card--swiping-right');
+      reset();
       return;
     }
-
-    // Transition bleibt 'none' — _animateDismiss startet von der aktuellen Position
     _animateDismiss(cardEl, delta < 0 ? 'left' : 'right', article.id);
   });
+
+  // Abgebrochene Geste (z.B. eingehender Anruf) sauber zurücksetzen
+  cardEl.addEventListener('touchcancel', reset);
 }
 
 /**
