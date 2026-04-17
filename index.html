@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <!--
+    viewport: width=device-width verhindert dass Mobile die Seite heranzoomt.
+    viewport-fit=cover: füllt den Bereich hinter der iPhone-Notch.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!--
+    Content Security Policy — Sam:
+    Schränkt ein welche Ressourcen der Browser laden darf.
+    Schützt vor XSS-Angriffen durch injizierte Scripts.
+
+    script-src:  Nur eigene Skripte + Google Identity Services (für OAuth)
+    frame-src:   Google benötigt iframes für den OAuth-Popup-Flow
+    connect-src: Fetch-Aufrufe erlaubt zu: CORS-Proxys, Google News RSS
+    img-src:     Vorschaubilder kommen von beliebigen HTTPS-Quellen
+    style-src:   unsafe-inline nötig weil Google Sign-In Button Inline-Styles injiziert
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self' https://accounts.google.com/gsi/client;
+    frame-src   https://accounts.google.com;
+    connect-src 'self'
+                https://api.allorigins.win
+                https://corsproxy.io
+                https://news.google.com
+                https://rss.golem.de
+                https://www.heise.de
+                https://rss.orf.at
+                https://www.derstandard.at
+                https://diepresse.com;
+    img-src     'self' data: https:;
+    style-src   'self' 'unsafe-inline';
+  ">
+
+  <title>Discophery</title>
+
+  <!-- Progressive-Web-App Metadaten -->
+  <meta name="description" content="Persönlicher RSS-Feed – werbefreier News-Reader ähnlich Google Discover">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f2f7">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Open Graph (für das Teilen via URL) -->
+  <meta property="og:title"       content="Discophery">
+  <meta property="og:description" content="Persönlicher RSS-Feed – werbefreier News-Reader">
+  <meta property="og:type"        content="website">
+
+  <!--
+    Stylesheets: zuerst das Design-System (Custom Properties),
+    dann die Komponenten die darauf aufbauen.
+  -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-components.css">
+
+  <!--
+    Google Identity Services — Einzige externe Bibliothek.
+    async: blockiert das HTML-Parsing nicht.
+    Die Bibliothek ruft window.onGoogleLibraryLoad auf wenn sie bereit ist.
+  -->
+  <script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LOGIN-SCREEN
+       Wird angezeigt wenn AUTH_REQUIRED=true und kein User eingeloggt ist.
+       auth.js schaltet zwischen Login-Screen und App-Shell um.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div id="login-screen" class="login-screen" role="main" aria-label="Anmeldung">
+
+    <div class="login-screen__logo" aria-label="Discophery Logo">Discophery</div>
+
+    <p class="login-screen__tagline">
+      Dein persönlicher News-Feed.<br>Werbefrei. Ohne Algorithmen.
+    </p>
+
+    <!--
+      Google Sign-In Button wird von auth.js hier hineingerendert.
+      Das div mit data-client_id ist der Einstiegspunkt für Google Identity Services.
+      id="g_id_onload" ist der Standard-Hook den Google erwartet.
+    -->
+    <div
+      id="g_id_onload"
+      data-client_id=""
+      data-callback="handleGoogleSignIn"
+      data-auto_select="true"
+      data-cancel_on_tap_outside="false"
+    ></div>
+
+    <!-- Rendered-Button: Google ersetzt dieses div durch den echten Button -->
+    <div
+      class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="outline"
+      data-text="signin_with"
+      data-locale="de"
+    ></div>
+
+    <p class="login-screen__legal">
+      Mit dem Login stimmst du der
+      <a id="link-privacy" href="#" target="_blank" rel="noopener">Datenschutzerklärung</a>
+      und den
+      <a id="link-terms"   href="#" target="_blank" rel="noopener">Nutzungsbedingungen</a>
+      zu.
+    </p>
+
+  </div><!-- /login-screen -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       APP-SHELL
+       Wird erst sichtbar wenn der User eingeloggt ist (oder AUTH_REQUIRED=false).
+       Startet versteckt — auth.js setzt aria-hidden="false" nach dem Login.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div id="app-shell" aria-hidden="true" style="display:none">
+
+    <!-- ── Header ─────────────────────────────────────────────────── -->
+    <header class="app-header" role="banner">
+
+      <span class="app-header__logo">Discophery</span>
+
+      <div class="app-header__actions">
+
+        <!-- Manueller Refresh-Button -->
+        <button
+          id="btn-refresh"
+          class="icon-button"
+          aria-label="Feeds aktualisieren"
+          title="Feeds aktualisieren"
+        >
+          <!-- SVG inline damit kein externes Bild geladen werden muss (Sam: keine img-src-Ausnahme nötig) -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+
+        <!-- Einstellungs-Button (öffnet Modal) -->
+        <button
+          id="btn-settings"
+          class="icon-button"
+          aria-label="Einstellungen öffnen"
+          title="Einstellungen"
+          aria-haspopup="dialog"
+          aria-controls="settings-modal"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <!-- User-Avatar (wird von auth.js befüllt) -->
+        <button
+          id="btn-user"
+          class="icon-button"
+          aria-label="Benutzer-Menü"
+          title="Angemeldet als …"
+          style="padding:0; overflow:hidden;"
+        >
+          <!-- auth.js fügt hier ein <img> oder Initialen-Span ein -->
+        </button>
+
+      </div>
+    </header><!-- /app-header -->
+
+
+    <!-- ── Filter-Chips ───────────────────────────────────────────── -->
+    <!--
+      ui.js rendert hier dynamisch einen Chip pro aktiver Kategorie.
+      "Alle" ist immer der erste Chip.
+      Keine statischen Chips im HTML — Kategorien kommen aus config.js.
+    -->
+    <nav id="filter-chips" class="filter-chips" role="navigation" aria-label="Kategorie-Filter">
+      <!-- Wird von ui.js befüllt -->
+    </nav>
+
+
+    <!-- ── Haupt-Inhalt ───────────────────────────────────────────── -->
+    <main id="app-main" class="app-main" role="main">
+
+      <!-- Ladeindikator — sichtbar während feed.js arbeitet -->
+      <div id="loading-indicator" class="status-message" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="status-message__text">Feeds werden geladen …</p>
+      </div>
+
+      <!-- Fehlermeldung — sichtbar wenn alle Feeds fehlgeschlagen sind -->
+      <div id="error-message" class="status-message" role="alert" aria-live="assertive" style="display:none">
+        <div class="status-message__icon" aria-hidden="true">⚠️</div>
+        <p class="status-message__text">Feeds konnten nicht geladen werden.</p>
+        <p class="status-message__sub">Bitte Internetverbindung prüfen und erneut versuchen.</p>
+      </div>
+
+      <!-- Leer-Zustand — alle Artikel weggefiltert oder weggewischt -->
+      <div id="empty-message" class="status-message" style="display:none">
+        <div class="status-message__icon" aria-hidden="true">✅</div>
+        <p class="status-message__text">Alles gelesen!</p>
+        <p class="status-message__sub">Keine weiteren Artikel für diese Auswahl.</p>
+      </div>
+
+      <!-- Card-Grid — ui.js rendert hier die Artikel-Cards -->
+      <section
+        id="card-grid"
+        class="card-grid"
+        aria-label="Artikel-Feed"
+        style="display:none"
+      >
+        <!-- Wird von ui.js befüllt — kein innerHTML, nur createElement -->
+      </section>
+
+    </main><!-- /app-main -->
+
+  </div><!-- /app-shell -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       "WENIGER DAVON"-MENÜ (Context-Menu / Bottom-Sheet)
+       Außerhalb der App-Shell damit z-index-Stacking korrekt funktioniert.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div
+    id="context-menu"
+    class="context-menu"
+    role="menu"
+    aria-label="Artikel-Optionen"
+    aria-hidden="true"
+  >
+    <div class="context-menu__handle" aria-hidden="true"></div>
+    <p class="context-menu__title" id="context-menu-title">Optionen</p>
+
+    <button id="ctx-block-source" class="context-menu__item" role="menuitem">
+      <!-- Text wird von ui.js per textContent gesetzt — kein innerHTML -->
+      <span aria-hidden="true">🚫</span>
+      <span id="ctx-block-source-label">Quelle blockieren</span>
+    </button>
+
+    <button id="ctx-block-keyword" class="context-menu__item" role="menuitem">
+      <span aria-hidden="true">🔕</span>
+      <span id="ctx-block-keyword-label">Keyword blockieren</span>
+    </button>
+
+    <button id="ctx-hide-category" class="context-menu__item" role="menuitem">
+      <span aria-hidden="true">👁️</span>
+      <span id="ctx-hide-category-label">Kategorie ausblenden</span>
+    </button>
+
+  </div><!-- /context-menu -->
+
+  <!-- Backdrop für Context-Menu auf Mobile -->
+  <div id="context-menu-backdrop" style="display:none; position:fixed; inset:0; z-index:199;"
+       aria-hidden="true"></div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       EINSTELLUNGS-MODAL
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div
+    id="settings-modal-backdrop"
+    class="modal-backdrop"
+    role="presentation"
+    aria-hidden="true"
+  >
+    <div
+      id="settings-modal"
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-modal-title"
+    >
+
+      <div class="modal__header">
+        <h2 id="settings-modal-title" class="modal__title">Einstellungen</h2>
+        <button id="btn-close-settings" class="icon-button" aria-label="Einstellungen schließen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6"  y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p class="modal__section-title">Blockierte Quellen</p>
+      <!-- ui.js rendert hier Tags per createElement — kein innerHTML -->
+      <div id="settings-blocked-sources" aria-live="polite">
+        <!-- Platzhalter-Text wenn Liste leer -->
+        <span style="color: var(--color-text-tertiary); font-size: var(--font-size-sm)">
+          Keine blockierten Quellen.
+        </span>
+      </div>
+
+      <p class="modal__section-title">Blockierte Keywords</p>
+      <div id="settings-blocked-keywords" aria-live="polite">
+        <span style="color: var(--color-text-tertiary); font-size: var(--font-size-sm)">
+          Keine blockierten Keywords.
+        </span>
+      </div>
+
+      <p class="modal__section-title">Angemeldet als</p>
+      <!-- auth.js befüllt diesen Bereich mit Name und E-Mail per textContent -->
+      <div id="settings-user-info" style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">
+      </div>
+
+      <div style="margin-top: var(--space-4)">
+        <button id="btn-logout" class="btn btn--ghost btn--full">Abmelden</button>
+      </div>
+
+      <!--
+        "Alles zurücksetzen" ganz unten — bewusst weit weg von anderen Buttons.
+        filter.js zeigt einen Bestätigungsdialog bevor Daten gelöscht werden.
+      -->
+      <button id="btn-reset-all" class="btn btn--destructive btn--full">
+        Alle Daten zurücksetzen
+      </button>
+
+    </div><!-- /settings-modal -->
+  </div><!-- /settings-modal-backdrop -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       SCRIPTS
+       Reihenfolge ist wichtig — jede Datei setzt die vorherige voraus:
+         config.js   → definiert CONFIG (globales Objekt, kein Export)
+         auth.js     → liest CONFIG.GOOGLE_CLIENT_ID, schreibt User-State
+         filter.js   → liest CONFIG.STORAGE_KEYS, schreibt localStorage
+         feed.js     → liest CONFIG.FEEDS, CONFIG.PROXY_*, ruft filter.js auf
+         ui.js       → liest alles, schreibt DOM
+       defer: Skripte laden parallel, führen aber erst nach dem HTML-Parsing aus.
+       ═══════════════════════════════════════════════════════════════════ -->
+  <script src="config.js"  defer></script>
+  <script src="auth.js"    defer></script>
+  <script src="filter.js"  defer></script>
+  <script src="feed.js"    defer></script>
+  <script src="ui.js"      defer></script>
+
+</body>
+</html>
