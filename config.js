@@ -62,7 +62,7 @@ const CONFIG = {
    *
    * @type {string}
    */
-  GOOGLE_CLIENT_ID: 'DEINE-CLIENT-ID-HIER.apps.googleusercontent.com',
+  GOOGLE_CLIENT_ID: '528050138023-cenaoksa4vc3o67mtras7nf4t6r1b4rc.apps.googleusercontent.com',
 
   /**
    * Steuert ob ein Google-Login Pflicht ist.
