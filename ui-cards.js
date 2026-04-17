@@ -21,6 +21,10 @@ const SWIPE_THRESHOLD = 80;
 /** Ab dieser Distanz (px) gilt ein Touch als Swipe — darunter als Tap */
 const SWIPE_TAP_LIMIT = 5;
 
+/** Undo-Toast: aktives Element und Timer */
+let _undoToastEl = null;
+let _undoTimer   = null;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ÖFFENTLICHE API
 // ═══════════════════════════════════════════════════════════════════════════
@@ -268,12 +272,13 @@ function _setupSwipe(cardEl, article) {
     const deltaX  = currentX - startX;
     const deltaY  = e.touches[0].clientY - startY;
 
-    // Achse beim ersten signifikanten Ausschlag festlegen
+    // Achse erst nach 15px Gesamtbewegung festlegen;
+    // horizontal nur wenn X-Anteil mindestens doppelt so groß wie Y → stabiles Scrollen
     if (axis === null) {
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
-      if (absX < SWIPE_TAP_LIMIT && absY < SWIPE_TAP_LIMIT) return;
-      axis = absX >= absY ? 'h' : 'v';
+      if (absX + absY < 15) return;
+      axis = absX >= absY * 2 ? 'h' : 'v';
     }
 
     // Vertikales Scrollen → Card in Ruhe lassen
@@ -314,8 +319,7 @@ function _animateDismiss(cardEl, direction, articleId) {
   cardEl.classList.remove('card--swiping-left', 'card--swiping-right');
   cardEl.style.pointerEvents = 'none';
 
-  // JS-Transition startet von der aktuellen Swipe-Position — kein Snap-Back
-  cardEl.style.transition = 'transform var(--transition-slow) ease-in, opacity var(--transition-slow) ease-in';
+  cardEl.style.transition = 'transform 220ms ease-in, opacity 220ms ease-in';
   cardEl.style.transform  = direction === 'left'
     ? 'translateX(-115%) rotate(-8deg)'
     : 'translateX(115%) rotate(8deg)';
@@ -323,18 +327,57 @@ function _animateDismiss(cardEl, direction, articleId) {
 
   const collapse = () => {
     const h = cardEl.offsetHeight;
-    cardEl.style.transition = 'height 200ms ease, margin 200ms ease, padding 200ms ease';
+    cardEl.style.transition = 'height 120ms ease, margin 120ms ease, padding 120ms ease';
     cardEl.style.overflow   = 'hidden';
     cardEl.style.height     = h + 'px';
-    void cardEl.offsetWidth;  // Reflow
+    void cardEl.offsetWidth;
     cardEl.style.height  = '0';
     cardEl.style.margin  = '0';
     cardEl.style.padding = '0';
-    setTimeout(() => cardEl.remove(), 220);
+    setTimeout(() => cardEl.remove(), 140);
   };
 
   cardEl.addEventListener('transitionend', collapse, { once: true });
-  setTimeout(collapse, 500);  // Fallback
+  setTimeout(collapse, 280);  // Fallback
+
+  _showUndoToast(articleId);
+}
+
+function _showUndoToast(articleId) {
+  if (_undoToastEl) { _undoToastEl.remove(); clearTimeout(_undoTimer); }
+
+  const toast = document.createElement('div');
+  toast.className = 'undo-toast';
+
+  const msg = document.createElement('span');
+  msg.textContent = 'Artikel entfernt';
+
+  const btn = document.createElement('button');
+  btn.className   = 'undo-toast__btn';
+  btn.textContent = 'Rückgängig';
+  btn.addEventListener('click', () => {
+    undismissArticle(articleId);  // filter.js
+    document.dispatchEvent(new CustomEvent('discophery:filter-changed'));
+    _hideUndoToast();
+  });
+
+  toast.append(msg, btn);
+  document.body.appendChild(toast);
+  _undoToastEl = toast;
+
+  // Doppeltes rAF stellt sicher dass der Browser die initiale opacity:0 rendert
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('undo-toast--visible')));
+  _undoTimer = setTimeout(_hideUndoToast, 4000);
+}
+
+function _hideUndoToast() {
+  if (!_undoToastEl) return;
+  clearTimeout(_undoTimer);
+  const el = _undoToastEl;
+  _undoToastEl = null;
+  el.classList.remove('undo-toast--visible');
+  el.addEventListener('transitionend', () => el.remove(), { once: true });
+  setTimeout(() => el.remove(), 400);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

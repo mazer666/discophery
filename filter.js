@@ -186,6 +186,20 @@ function isDismissed(articleId) {
 }
 
 /**
+ * Macht einen Dismiss rückgängig (für den Undo-Toast in ui-cards.js).
+ *
+ * @param {string} articleId
+ * @returns {void}
+ */
+function undismissArticle(articleId) {
+  _ensureLoaded();
+  const idx = _state.dismissed.indexOf(articleId);
+  if (idx === -1) return;
+  _state.dismissed.splice(idx, 1);
+  _writeArray(CONFIG.STORAGE_KEYS.DISMISSED, _state.dismissed);
+}
+
+/**
  * Setzt alle weggewischten Artikel zurück (Dismissed-Liste leeren).
  * Wird aus dem Einstellungs-Modal aufgerufen.
  *
