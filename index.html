@@ -320,6 +320,25 @@
         </span>
       </div>
 
+      <p class="modal__section-title">Auto-Sync</p>
+      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
+        <label for="select-refresh-interval"
+               style="font-size:var(--font-size-sm); color:var(--color-text-secondary); white-space:nowrap">
+          Alle
+        </label>
+        <select id="select-refresh-interval"
+                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
+                       border:1px solid var(--color-border); background:var(--color-surface-2);
+                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
+          <option value="0">Manuell (deaktiviert)</option>
+          <option value="5">5 Minuten</option>
+          <option value="10">10 Minuten</option>
+          <option value="15">15 Minuten</option>
+          <option value="30" selected>30 Minuten</option>
+          <option value="60">60 Minuten</option>
+        </select>
+      </div>
+
       <p class="modal__section-title">Feeds</p>
       <div style="margin-top: var(--space-2)">
         <button id="btn-open-feed-manager-from-settings" class="btn btn--ghost btn--full"

@@ -55,35 +55,7 @@
 .card--swiping-left  { background: var(--color-swipe-left); }
 .card--swiping-right { background: var(--color-swipe-right); }
 
-/* ─── Swipe-Dismiss-Animationen ─────────────────────────────────────────── */
-
-@keyframes dismiss-left {
-  to { transform: translateX(-110%) rotate(-8deg); opacity: 0; }
-}
-
-@keyframes dismiss-right {
-  to { transform: translateX(110%) rotate(8deg); opacity: 0; }
-}
-
-.card--dismissing-left {
-  animation: dismiss-left var(--transition-slow) ease-in forwards;
-  pointer-events: none;
-}
-
-.card--dismissing-right {
-  animation: dismiss-right var(--transition-slow) ease-in forwards;
-  pointer-events: none;
-}
-
-/* Höhen-Kollaps nach dem Dismiss — verhindert Sprünge im Grid */
-@keyframes collapse-height {
-  to { margin: 0; padding: 0; height: 0; opacity: 0; border: none; }
-}
-
-.card--collapsed {
-  animation: collapse-height 200ms ease forwards;
-  overflow: hidden;
-}
+/* Dismiss-Animationen via JS-Transitions (ui-cards.js _animateDismiss) */
 
 /* ─── Card-Innenleben ────────────────────────────────────────────────────── */
 

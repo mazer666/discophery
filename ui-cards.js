@@ -240,44 +240,39 @@ function _createActionButtons(article) {
  * @returns {void}
  */
 function _setupSwipe(cardEl, article) {
-  let startX    = 0;
-  let currentX  = 0;
-  let moved     = false;
+  let startX   = 0;
+  let currentX = 0;
+  let moved    = false;
 
   cardEl.addEventListener('touchstart', (e) => {
     startX   = e.touches[0].clientX;
     currentX = startX;
     moved    = false;
-    cardEl.style.transition = 'none';  // Flüssiges Drag ohne CSS-Transition
+    cardEl.style.transition = 'none';
   }, { passive: true });
 
   cardEl.addEventListener('touchmove', (e) => {
     currentX    = e.touches[0].clientX;
     const delta = currentX - startX;
-
     if (Math.abs(delta) < SWIPE_TAP_LIMIT) return;
     moved = true;
-
-    // Visuelle Rückmeldung: Card folgt dem Finger
-    const rotation = delta * 0.04;
-    cardEl.style.transform = `translateX(${delta}px) rotate(${rotation}deg)`;
-
+    cardEl.style.transform = `translateX(${delta}px) rotate(${delta * 0.04}deg)`;
     cardEl.classList.toggle('card--swiping-left',  delta < -20);
     cardEl.classList.toggle('card--swiping-right', delta >  20);
   }, { passive: true });
 
   cardEl.addEventListener('touchend', () => {
-    cardEl.style.transition = '';  // CSS-Transition wieder aktivieren
-
     const delta = currentX - startX;
 
     if (!moved || Math.abs(delta) < SWIPE_THRESHOLD) {
-      // Nicht weit genug gewischt → zurückschnappen
-      cardEl.style.transform = '';
+      // Nicht weit genug → sanft zurückschnappen
+      cardEl.style.transition = 'transform 200ms ease-out';
+      cardEl.style.transform  = '';
       cardEl.classList.remove('card--swiping-left', 'card--swiping-right');
       return;
     }
 
+    // Transition bleibt 'none' — _animateDismiss startet von der aktuellen Position
     _animateDismiss(cardEl, delta < 0 ? 'left' : 'right', article.id);
   });
 }
@@ -292,17 +287,31 @@ function _setupSwipe(cardEl, article) {
  * @returns {void}
  */
 function _animateDismiss(cardEl, direction, articleId) {
+  dismissArticle(articleId);  // filter.js
   cardEl.classList.remove('card--swiping-left', 'card--swiping-right');
-  cardEl.style.transform = '';
+  cardEl.style.pointerEvents = 'none';
 
-  dismissArticle(articleId);  // filter.js: in localStorage speichern
+  // JS-Transition startet von der aktuellen Swipe-Position — kein Snap-Back
+  cardEl.style.transition = 'transform var(--transition-slow) ease-in, opacity var(--transition-slow) ease-in';
+  cardEl.style.transform  = direction === 'left'
+    ? 'translateX(-115%) rotate(-8deg)'
+    : 'translateX(115%) rotate(8deg)';
+  cardEl.style.opacity = '0';
 
-  cardEl.classList.add(`card--dismissing-${direction}`);
+  const collapse = () => {
+    const h = cardEl.offsetHeight;
+    cardEl.style.transition = 'height 200ms ease, margin 200ms ease, padding 200ms ease';
+    cardEl.style.overflow   = 'hidden';
+    cardEl.style.height     = h + 'px';
+    void cardEl.offsetWidth;  // Reflow
+    cardEl.style.height  = '0';
+    cardEl.style.margin  = '0';
+    cardEl.style.padding = '0';
+    setTimeout(() => cardEl.remove(), 220);
+  };
 
-  cardEl.addEventListener('animationend', () => {
-    cardEl.classList.add('card--collapsed');
-    cardEl.addEventListener('animationend', () => cardEl.remove(), { once: true });
-  }, { once: true });
+  cardEl.addEventListener('transitionend', collapse, { once: true });
+  setTimeout(collapse, 500);  // Fallback
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

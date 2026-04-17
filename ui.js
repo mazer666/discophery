@@ -241,6 +241,7 @@ function _openSettingsModal() {
   if (!backdrop) return;
 
   _renderSettingsContent();
+  _loadRefreshIntervalSetting();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
   // Fokus auf Schließen-Button für Tastaturnutzer
@@ -335,10 +336,17 @@ function _renderFilterTags(container, items, emptyText, onRemove) {
  */
 function _startAutoRefresh() {
   if (_refreshTimer) clearInterval(_refreshTimer);
-  if (!CONFIG.REFRESH_INTERVAL_MINUTES) return;
+  const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL);
+  const mins  = saved !== null ? parseInt(saved, 10) : CONFIG.REFRESH_INTERVAL_MINUTES;
+  if (!mins) return;
+  _refreshTimer = setInterval(() => loadAllFeeds(), mins * 60_000);  // feed.js
+}
 
-  const ms = CONFIG.REFRESH_INTERVAL_MINUTES * 60 * 1000;
-  _refreshTimer = setInterval(() => loadAllFeeds(), ms);  // feed.js
+function _loadRefreshIntervalSetting() {
+  const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL);
+  if (saved === null) return;
+  const sel = document.getElementById('select-refresh-interval');
+  if (sel) sel.value = saved;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -369,6 +377,13 @@ function _wireStaticButtons() {
   document.getElementById('settings-modal-backdrop')
     ?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) _closeSettingsModal();
+    });
+
+  // Auto-Sync-Intervall
+  document.getElementById('select-refresh-interval')
+    ?.addEventListener('change', (e) => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, e.target.value);
+      _startAutoRefresh();
     });
 
   // Alle Daten zurücksetzen

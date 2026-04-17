@@ -201,7 +201,9 @@ const CONFIG = {
     /** Array von Feed-IDs die der User aktiviert hat (aus FEED_CATALOGUE in feeds.js) */
     ACTIVE_FEEDS:     'discophery_active_feeds',
     /** Array von selbst hinzugefügten Feed-Objekten {id,name,url,category,language} */
-    CUSTOM_FEEDS:     'discophery_custom_feeds',
+    CUSTOM_FEEDS:        'discophery_custom_feeds',
+    /** Zahl in Minuten: Auto-Refresh-Intervall (0 = deaktiviert) */
+    REFRESH_INTERVAL:    'discophery_refresh_interval',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
