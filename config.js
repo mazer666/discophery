@@ -244,6 +244,9 @@ const CONFIG = {
     umwelt:        { bg: '#0d2b0d', text: '#4ade80' },  // Waldgrün    — Umwelt & Klima
     kultur:        { bg: '#2d1a3d', text: '#9b51e0' },  // Lila        — Kultur
     sport:         { bg: '#1a3a1a', text: '#27ae60' },  // Dunkelgrün  — Sport
+    fashion:       { bg: '#3d1a2d', text: '#f9a8d4' },  // Rosa        — Mode & Fashion
+    lifestyle:     { bg: '#2d1e1a', text: '#fdba74' },  // Pfirsich    — Lifestyle & Living
+    magazine:      { bg: '#1a1e3d', text: '#93c5fd' },  // Hellindigo  — Magazine & Kultur
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

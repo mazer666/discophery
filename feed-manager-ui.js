@@ -22,6 +22,12 @@
  * @returns {void}
  */
 function openFeedManager() {
+  // Einstellungs-Modal schließen falls geöffnet
+  const settingsBackdrop = document.getElementById('settings-modal-backdrop');
+  if (settingsBackdrop?.classList.contains('modal-backdrop--open')) {
+    settingsBackdrop.classList.remove('modal-backdrop--open');
+    settingsBackdrop.ariaHidden = 'true';
+  }
   _renderFeedManager();
   const backdrop = document.getElementById('feed-manager-backdrop');
   if (!backdrop) return;

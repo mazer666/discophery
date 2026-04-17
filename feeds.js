@@ -198,4 +198,35 @@ const FEED_CATALOGUE = [
   { id: 'kicker',       name: 'Kicker',                url: 'https://www.kicker.de/news/rss/',                                category: 'sport',        language: 'de', enabled: false },
   { id: 'sport1',       name: 'Sport1',                url: 'https://www.sport1.de/news.rss',                                 category: 'sport',        language: 'de', enabled: false },
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // FASHION & MODE
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'vogue-de',     name: 'Vogue Deutschland',     url: 'https://www.vogue.de/feed/rss',                                  category: 'fashion',      language: 'de', enabled: false },
+  { id: 'elle-de',      name: 'Elle Deutschland',      url: 'https://www.elle.com/de/feed/',                                  category: 'fashion',      language: 'de', enabled: false },
+  { id: 'vogue-en',     name: 'Vogue (EN)',             url: 'https://www.vogue.com/feed/rss',                                 category: 'fashion',      language: 'en', enabled: false },
+  { id: 'wwd',          name: 'WWD (Women\'s Wear Daily)', url: 'https://wwd.com/feed/',                                      category: 'fashion',      language: 'en', enabled: false },
+  { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/.rss',                                   category: 'fashion',      language: 'en', enabled: false },
+  { id: 'business-of-fashion', name: 'Business of Fashion', url: 'https://www.businessoffashion.com/feed',                   category: 'fashion',      language: 'en', enabled: false },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LIFESTYLE
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'brigitte',     name: 'Brigitte',               url: 'https://www.brigitte.de/feed/rss/',                              category: 'lifestyle',    language: 'de', enabled: false },
+  { id: 'stern-leben',  name: 'Stern Leben',            url: 'https://www.stern.de/lifestyle/rss.xml',                         category: 'lifestyle',    language: 'de', enabled: false },
+  { id: 'instyle-de',   name: 'InStyle Deutschland',   url: 'https://www.instyle.de/feed/rss/',                               category: 'lifestyle',    language: 'de', enabled: false },
+  { id: 'lifehacker',   name: 'Lifehacker',             url: 'https://lifehacker.com/feed/rss',                                category: 'lifestyle',    language: 'en', enabled: false },
+  { id: 'refinery29',   name: 'Refinery29',             url: 'https://www.refinery29.com/rss.xml',                             category: 'lifestyle',    language: 'en', enabled: false },
+  { id: 'apartmenttherapy', name: 'Apartment Therapy', url: 'https://www.apartmenttherapy.com/main.rss',                      category: 'lifestyle',    language: 'en', enabled: false },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MAGAZINE & KULTUR
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'zeit-magazin', name: 'ZEIT Magazin',           url: 'https://www.zeit.de/zeit-magazin/index.xml',                    category: 'magazine',     language: 'de', enabled: false },
+  { id: 'spiegel-kul',  name: 'Spiegel Kultur',         url: 'https://www.spiegel.de/kultur/index.rss',                       category: 'magazine',     language: 'de', enabled: false },
+  { id: 'sz-mag',       name: 'SZ Magazin',             url: 'https://www.sz-magazin.de/rss',                                 category: 'magazine',     language: 'de', enabled: false },
+  { id: 'newyorker',    name: 'The New Yorker',          url: 'https://www.newyorker.com/feed/everything',                     category: 'magazine',     language: 'en', enabled: false },
+  { id: 'atlantic',     name: 'The Atlantic',            url: 'https://www.theatlantic.com/feed/all/',                         category: 'magazine',     language: 'en', enabled: false },
+  { id: 'esquire-en',   name: 'Esquire',                 url: 'https://www.esquire.com/rss/all.xml/',                          category: 'magazine',     language: 'en', enabled: false },
+  { id: 'gq-en',        name: 'GQ',                      url: 'https://www.gq.com/feed/rss',                                   category: 'magazine',     language: 'en', enabled: false },
+
 ];
