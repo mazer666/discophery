@@ -1,0 +1,463 @@
+/**
+ * Discophery — Komponenten-Styles
+ *
+ * Setzt style.css voraus (Custom Properties müssen bereits definiert sein).
+ *
+ * Diese Datei enthält:
+ *  - Card-Grid & Card-Komponente
+ *  - Swipe-Animationen & Dismiss
+ *  - Kategorie-Label auf der Card
+ *  - "Weniger davon"-Menü (Bottom-Sheet / Dropdown)
+ *  - Lade-Spinner & Fehlerzustände
+ *  - Einstellungs-Modal
+ *  - Login-Screen
+ *  - Responsive Erweiterungen für Komponenten
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD-GRID
+   Mobile-First: 1 Spalte → Tablet 2 → Desktop 3
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD-KOMPONENTE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 3px var(--color-shadow);
+  border: 1px solid var(--color-border);
+  position: relative;
+  /* Swipe-Drehpunkt unten — Card "kippt" beim Wegwischen realistischer */
+  transform-origin: center bottom;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  /* Verhindert Text-Selektion beim Swipen */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Erlaubt vertikales Scrollen, blockiert horizontales für Swipe-Handling via JS */
+  touch-action: pan-y;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px var(--color-shadow-md);
+}
+
+/* Visuelles Swipe-Feedback — wird per JS als Klasse gesetzt */
+.card--swiping-left  { background: var(--color-swipe-left); }
+.card--swiping-right { background: var(--color-swipe-right); }
+
+/* ─── Swipe-Dismiss-Animationen ─────────────────────────────────────────── */
+
+@keyframes dismiss-left {
+  to { transform: translateX(-110%) rotate(-8deg); opacity: 0; }
+}
+
+@keyframes dismiss-right {
+  to { transform: translateX(110%) rotate(8deg); opacity: 0; }
+}
+
+.card--dismissing-left {
+  animation: dismiss-left var(--transition-slow) ease-in forwards;
+  pointer-events: none;
+}
+
+.card--dismissing-right {
+  animation: dismiss-right var(--transition-slow) ease-in forwards;
+  pointer-events: none;
+}
+
+/* Höhen-Kollaps nach dem Dismiss — verhindert Sprünge im Grid */
+@keyframes collapse-height {
+  to { margin: 0; padding: 0; height: 0; opacity: 0; border: none; }
+}
+
+.card--collapsed {
+  animation: collapse-height 200ms ease forwards;
+  overflow: hidden;
+}
+
+/* ─── Card-Innenleben ────────────────────────────────────────────────────── */
+
+.card__image-wrap {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: var(--color-surface-2);
+}
+
+.card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.card:hover .card__image { transform: scale(1.03); }
+
+.card__body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.card__source {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card__date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.card__title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  line-height: 1.4;
+  /* Maximal 3 Zeilen, Rest mit Ellipsis */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.card__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Kategorie-Label ────────────────────────────────────────────────────── */
+
+/* Farben kommen als CSS Custom Properties vom JS (--cat-bg, --cat-text) */
+.card__category {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background-color: var(--cat-bg, var(--color-surface-2));
+  color: var(--cat-text, var(--color-text-secondary));
+  margin-top: var(--space-3);
+}
+
+/* ─── Action-Buttons (Dismiss + Weniger davon) ───────────────────────────── */
+
+.card__actions {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+/* Buttons sichtbar bei Hover (Desktop) */
+.card:hover .card__actions,
+.card:focus-within .card__actions { opacity: 1; }
+
+/* Auf Touch-Geräten immer sichtbar — kein Hover-State vorhanden */
+@media (hover: none) {
+  .card__actions { opacity: 1; }
+}
+
+.card__action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.card__action-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   "WENIGER DAVON"-MENÜ
+   Mobile: Bottom-Sheet (fährt von unten hoch)
+   Desktop: kleines Dropdown (erscheint neben dem Button)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.context-menu {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--space-4);
+  z-index: 200;
+  box-shadow: 0 -4px 20px var(--color-shadow-md);
+  /* Startet außerhalb des Viewports */
+  transform: translateY(100%);
+  transition: transform var(--transition-normal);
+}
+
+.context-menu--open { transform: translateY(0); }
+
+/* Anfass-Griff oben am Bottom-Sheet */
+.context-menu__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  margin: 0 auto var(--space-4);
+}
+
+.context-menu__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.context-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  text-align: left;
+  min-height: 52px;
+  transition: background-color var(--transition-fast);
+}
+
+.context-menu__item:hover { background: var(--color-surface-2); }
+
+.context-menu__item--destructive { color: var(--color-error); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LADE-SPINNER & STATUS-MELDUNGEN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+  margin: var(--space-8) auto;
+}
+
+.status-message {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.status-message__icon { font-size: 2.5rem; margin-bottom: var(--space-3); }
+.status-message__text { font-size: var(--font-size-base); margin-bottom: var(--space-2); }
+.status-message__sub  { font-size: var(--font-size-sm); color: var(--color-text-tertiary); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EINSTELLUNGS-MODAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-backdrop--open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  transform: translateY(100%);
+  transition: transform var(--transition-normal);
+}
+
+.modal-backdrop--open .modal { transform: translateY(0); }
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.modal__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.modal__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* Filter-Tags (blockierte Quellen / Keywords) */
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  margin: var(--space-1);
+}
+
+.filter-tag__remove {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.filter-tag__remove:hover { color: var(--color-error); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOGIN-SCREEN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.login-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  gap: var(--space-6);
+}
+
+.login-screen__logo {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.login-screen__tagline {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  max-width: 28ch;
+  line-height: 1.4;
+}
+
+.login-screen__legal {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  max-width: 36ch;
+}
+
+.login-screen__legal a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (600px) & Desktop (1024px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 600px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Context-Menü als kleines Dropdown statt Bottom-Sheet */
+  .context-menu {
+    position: absolute;
+    bottom: auto; left: auto;
+    right: var(--space-2);
+    top: var(--space-8);
+    width: 260px;
+    border-radius: var(--radius-md);
+    /* Dropdown-Einblend-Animation */
+    transform: scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+  }
+
+  .context-menu--open {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .context-menu__handle { display: none; }
+
+  /* Modal als zentriertes Fenster statt Bottom-Sheet */
+  .modal-backdrop {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal {
+    border-radius: var(--radius-lg);
+    width: 480px;
+    max-height: 80dvh;
+    transform: scale(0.95);
+  }
+
+  .modal-backdrop--open .modal { transform: scale(1); }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+  }
+}
