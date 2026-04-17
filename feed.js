@@ -145,26 +145,23 @@ async function _fetchWithPrimaryProxy(url) {
     throw new Error('Primärer Proxy: leere Antwort (kein contents-Feld)');
   }
 
-  return data.contents;
+  return _fixMojibake(data.contents);
 }
 
-/**
- * Lädt eine URL über den Fallback-Proxy (corsproxy.io).
- * Antwortformat: direkt XML-Text (kein JSON-Wrapper).
- *
- * @param {string} url - Zu ladende Feed-URL
- * @returns {Promise<string>} - Roher XML-Text
- */
+/** Lädt URL via Fallback-Proxy; erkennt Encoding aus XML-Deklaration. */
 async function _fetchWithFallbackProxy(url) {
-  const proxyUrl = CONFIG.PROXY_FALLBACK + encodeURIComponent(url);
+  const resp = await _fetchWithTimeout(CONFIG.PROXY_FALLBACK + encodeURIComponent(url), CONFIG.FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status} vom Fallback-Proxy`);
+  const buf     = await resp.arrayBuffer();
+  const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
+  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
+  return new TextDecoder(charset, { fatal: false }).decode(buf);
+}
 
-  const response = await _fetchWithTimeout(proxyUrl, CONFIG.FETCH_TIMEOUT_MS);
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} vom Fallback-Proxy`);
-  }
-
-  return response.text();
+/** Repariert Mojibake (UTF-8-als-Latin-1) wenn allorigins ISO-8859-1-Feeds falsch liest. */
+function _fixMojibake(s) {
+  try { return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(s,c=>c.charCodeAt(0))); }
+  catch { return s; }
 }
 
 /**
@@ -208,8 +205,9 @@ async function _fetchWithTimeout(url, timeoutMs) {
  * @returns {DiscopheryArticle[]}
  */
 function _parseXml(xmlText, feed) {
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(xmlText, 'text/xml');
+  // Encoding-Deklaration entfernen — JS-Strings sind Unicode; non-UTF-8-Deklarationen verwirren DOMParser
+  const xml = xmlText.replace(/(<\?xml\b[^>]*?)\s*encoding=["'][^"']*["']/i, '$1');
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
 
   // Parsing-Fehler erkennen (DOMParser wirft keine Exception — er setzt ein Error-Element)
   const parseError = doc.querySelector('parsererror');

@@ -202,12 +202,43 @@ function clearDismissed() {
 // FILTER-FUNKTION
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Marker die zuverlässig auf Werbung/Sponsored Content hinweisen */
+const _AD_MARKERS = [
+  '[anzeige]', '(anzeige)', 'anzeige:', 'anzeige |', '| anzeige',
+  '[werbung]', '(werbung)', 'werbung:',
+  'advertorial', 'sponsored post', 'sponsored content', 'sponsored by',
+  'bezahlter inhalt', 'partnerinhalt', 'partnerangebot',
+  'in kooperation mit', 'paid post', 'paid content',
+];
+
+/**
+ * Erkennt Werbeartikel anhand von Marker-Strings in Titel und Beschreibung.
+ * Golem und andere DE-Medien kennzeichnen Ads typisch mit [Anzeige] im Titel.
+ *
+ * @param {import('./feed.js').DiscopheryArticle} article
+ * @returns {boolean}
+ */
+function _isAdvertisement(article) {
+  const title = article.title.toLowerCase();
+  const desc  = (article.description || '').toLowerCase();
+
+  for (const m of _AD_MARKERS) {
+    if (title.includes(m) || desc.includes(m)) return true;
+  }
+
+  // "Anzeige" am Titelanfang (ohne Klammern), z.B. "Anzeige: Jetzt kaufen …"
+  if (/^anzeige[\s:|\-–]/.test(title)) return true;
+
+  return false;
+}
+
 /**
  * Prüft ob ein Artikel angezeigt werden soll.
  *
  * Filtert aus wenn:
  *  - Artikel wurde weggewischt (dismissed)
  *  - Quelle ist blockiert
+ *  - Artikel ist als Werbung erkannt (_isAdvertisement)
  *  - Titel enthält ein blockiertes Keyword
  *
  * @param {import('./feed.js').DiscopheryArticle} article
@@ -216,8 +247,9 @@ function clearDismissed() {
 function shouldShowArticle(article) {
   _ensureLoaded();
 
-  if (article.dismissed)                     return false;
+  if (article.dismissed)                          return false;
   if (_state.blockedSources.has(article.sourceId)) return false;
+  if (_isAdvertisement(article))                   return false;
 
   // Keyword-Check: Titel in Kleinbuchstaben gegen alle blockierten Keywords
   if (_state.blockedKeywords.size > 0) {
