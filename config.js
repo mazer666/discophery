@@ -198,6 +198,10 @@ const CONFIG = {
     SETTINGS:         'discophery_settings',
     /** Unix-Timestamp des letzten erfolgreichen Refresh */
     LAST_REFRESH:     'discophery_last_refresh',
+    /** Array von Feed-IDs die der User aktiviert hat (aus FEED_CATALOGUE in feeds.js) */
+    ACTIVE_FEEDS:     'discophery_active_feeds',
+    /** Array von selbst hinzugefügten Feed-Objekten {id,name,url,category,language} */
+    CUSTOM_FEEDS:     'discophery_custom_feeds',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -219,173 +223,38 @@ const CONFIG = {
    * @type {Object.<string, CategoryStyle>}
    */
   CATEGORIES: {
-    tech:    { bg: '#1a3a5c', text: '#7eb8f7' },  // Blau       — Technologie & IT
-    android: { bg: '#1a3d2b', text: '#6fcf97' },  // Grün       — Android-spezifisch
-    mobile:  { bg: '#2d2a1e', text: '#f2c94c' },  // Bernstein  — Mobile allgemein
-    musik:   { bg: '#3d1a2d', text: '#eb5aae' },  // Pink       — Musik & Audio
-    gadgets: { bg: '#1e2d3d', text: '#56ccf2' },  // Hellblau   — Hardware & Gadgets
-    design:  { bg: '#2d1a1e', text: '#f2994a' },  // Orange     — Design & Kreatives
-    news:    { bg: '#252525', text: '#bdbdbd' },  // Grau       — Allgemeine Nachrichten
-    politik: { bg: '#3d1a1a', text: '#eb5757' },  // Rot        — Politik
-    kultur:  { bg: '#2d1a3d', text: '#9b51e0' },  // Lila       — Kultur & Gesellschaft
-    sport:   { bg: '#1a3a1a', text: '#27ae60' },  // Dunkelgrün — Sport
+    tech:          { bg: '#1a3a5c', text: '#7eb8f7' },  // Blau        — Technologie & IT
+    web:           { bg: '#0d2b40', text: '#4fc3f7' },  // Cyan        — Web & Entwicklung
+    android:       { bg: '#1a3d2b', text: '#6fcf97' },  // Grün        — Android
+    mobile:        { bg: '#2d2a1e', text: '#f2c94c' },  // Bernstein   — Mobile
+    gadgets:       { bg: '#1e2d3d', text: '#56ccf2' },  // Hellblau    — Hardware & Gadgets
+    maker:         { bg: '#1a2d1a', text: '#a8d5a2' },  // Hellgrün    — DIY & Maker
+    politik:       { bg: '#3d1a1a', text: '#eb5757' },  // Rot         — Politik
+    wirtschaft:    { bg: '#3d2a0d', text: '#f2ae4a' },  // Gold        — Wirtschaft
+    news:          { bg: '#252525', text: '#bdbdbd' },  // Grau        — Nachrichten
+    lokal:         { bg: '#1a2d3d', text: '#7eb8d4' },  // Stahlblau   — Lokalnachrichten
+    wissenschaft:  { bg: '#1e1a3d', text: '#a78bfa' },  // Indigo      — Wissenschaft
+    weltraum:      { bg: '#0d0d2b', text: '#818cf8' },  // Dunkelblau  — Weltraum & Space
+    gaming:        { bg: '#2d1a3d', text: '#c084fc' },  // Violett     — Gaming
+    film:          { bg: '#3d1a2a', text: '#f472b6' },  // Magenta     — Film & Serien
+    musik:         { bg: '#3d1a2d', text: '#eb5aae' },  // Pink        — Musik & Audio
+    design:        { bg: '#2d1a1e', text: '#f2994a' },  // Orange      — Design & Kreatives
+    fotografie:    { bg: '#2a1e0d', text: '#fbbf24' },  // Amber       — Fotografie
+    auto:          { bg: '#1a1a1a', text: '#94a3b8' },  // Silber      — Automobil
+    umwelt:        { bg: '#0d2b0d', text: '#4ade80' },  // Waldgrün    — Umwelt & Klima
+    kultur:        { bg: '#2d1a3d', text: '#9b51e0' },  // Lila        — Kultur
+    sport:         { bg: '#1a3a1a', text: '#27ae60' },  // Dunkelgrün  — Sport
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // RSS-FEEDS
-  // Das Herzstück der App — hier definierst du welche Quellen geladen werden.
-  //
-  // Feed hinzufügen: Neues Objekt ans Array anhängen (Vorlage weiter unten).
-  // Feed pausieren: enabled: false setzen (Feed bleibt in der Liste, wird übersprungen).
-  // Feed entfernen: Das ganze Objekt löschen.
+  // FEED-KATALOG
+  // Der komplette Feed-Katalog lebt in feeds.js (FEED_CATALOGUE).
+  // Welche Feeds aktiv sind wird vom User über den Feed-Manager gewählt
+  // und in localStorage (STORAGE_KEYS.ACTIVE_FEEDS) gespeichert.
+  // feed-manager.js stellt getActiveFeeds() bereit.
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /**
-   * Aktive RSS/Atom-Feed Konfigurationen.
-   *
-   * Vorlage für einen neuen Feed:
-   * {
-   *   id:       'mein-blog',                         // Eindeutig, keine Leerzeichen
-   *   name:     'Mein Blog',                         // Anzeigename in der UI
-   *   url:      'https://mein-blog.de/feed.xml',     // RSS oder Atom URL
-   *   category: 'tech',                              // Muss in CATEGORIES existieren
-   *   language: 'de',                                // 'de' oder 'en'
-   *   enabled:  true,
-   * }
-   *
-   * @type {FeedConfig[]}
-   */
-  FEEDS: [
-
-    // ── Technologie (Deutsch) ──────────────────────────────────────────────
-
-    {
-      id:       'golem',
-      name:     'Golem.de',
-      url:      'https://rss.golem.de/rss.php?feed=RSS2.0',
-      category: 'tech',
-      language: 'de',
-      enabled:  true,
-    },
-    {
-      id:       'heise',
-      name:     'Heise Online',
-      url:      'https://www.heise.de/rss/heise-atom.xml',
-      category: 'tech',
-      language: 'de',
-      enabled:  true,
-    },
-
-    // ── Technologie (Englisch) ─────────────────────────────────────────────
-
-    {
-      id:       'geeks-are-sexy',
-      name:     'Geeks Are Sexy',
-      url:      'https://www.geeksaresexy.net/feed',
-      category: 'tech',
-      language: 'en',
-      enabled:  true,
-    },
-    {
-      // Google News liefert curated Topics als RSS.
-      // Die lange ID in der URL identifiziert das Thema "Technologie, deutsche Ausgabe".
-      // Diese URL kann sich ändern — bei Problemen googeln nach "Google News RSS Technologie".
-      id:       'google-news-tech',
-      name:     'Google News: Technologie',
-      url:      'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlBQVAB',
-      category: 'tech',
-      language: 'de',
-      enabled:  true,
-    },
-
-    // ── Android & Mobile ───────────────────────────────────────────────────
-
-    {
-      id:       'android-central',
-      name:     'Android Central',
-      url:      'https://www.androidcentral.com/rss.xml',
-      category: 'android',
-      language: 'en',
-      enabled:  true,
-    },
-    {
-      id:       'mobi-blog',
-      name:     'mobi-blog.org',
-      url:      'https://www.mobi-blog.org/feed',
-      category: 'mobile',
-      language: 'de',
-      enabled:  true,
-    },
-
-    // ── Gadgets & Hardware ─────────────────────────────────────────────────
-
-    {
-      id:       'geeky-gadgets',
-      name:     'Geeky Gadgets',
-      url:      'https://www.geeky-gadgets.com/feed',
-      category: 'gadgets',
-      language: 'en',
-      enabled:  true,
-    },
-
-    // ── Design & Lifestyle ─────────────────────────────────────────────────
-
-    {
-      id:       'likecool',
-      name:     'likecool.com',
-      url:      'https://www.likecool.com/rss.xml',
-      category: 'design',
-      language: 'en',
-      enabled:  true,
-    },
-
-    // ── Musik & Audio ──────────────────────────────────────────────────────
-
-    {
-      id:       'amazona',
-      name:     'amazona.de',
-      url:      'https://www.amazona.de/feed',
-      category: 'musik',
-      language: 'de',
-      enabled:  true,
-    },
-    {
-      id:       'musikreviews',
-      name:     'musikreviews.de',
-      url:      'https://www.musikreviews.de/rss.xml',
-      category: 'musik',
-      language: 'de',
-      enabled:  true,
-    },
-
-    // ── Nachrichten: Österreich ────────────────────────────────────────────
-
-    {
-      id:       'orf',
-      name:     'ORF.at',
-      url:      'https://rss.orf.at/news.xml',
-      category: 'news',
-      language: 'de',
-      enabled:  true,
-    },
-    {
-      id:       'derstandard',
-      name:     'Der Standard',
-      url:      'https://www.derstandard.at/rss',
-      category: 'news',
-      language: 'de',
-      enabled:  true,
-    },
-    {
-      id:       'diepresse',
-      name:     'Die Presse',
-      url:      'https://diepresse.com/rss/alle',
-      category: 'news',
-      language: 'de',
-      enabled:  true,
-    },
-
-  ],
+  // Hinweis: Kein FEEDS-Array mehr hier — der Katalog lebt in feeds.js
 
   // ═══════════════════════════════════════════════════════════════════════════
   // RECHTLICHES
