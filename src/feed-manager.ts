@@ -17,8 +17,8 @@
 /**
  * Gibt alle Feeds zurück die der User aktuell aktiviert hat.
  *
- * Beim ersten Start (noch kein localStorage-Eintrag): Standard-Auswahl
- * aus FEED_CATALOGUE (alle Einträge mit enabled:true) + Custom-Feeds.
+ * Beim ersten Start (noch kein localStorage-Eintrag): Leeres Array,
+ * damit der Feed-Manager automatisch öffnet (siehe main.ts).
  *
  * @returns {import('./config.js').FeedConfig[]}
  */
@@ -27,7 +27,7 @@ function getActiveFeeds() {
   const custom   = getCustomFeeds();
 
   if (savedIds === null) {
-    return custom;
+    return []; // Frischer Start ohne Feeds
   }
 
   const fromCatalogue = FEED_CATALOGUE.filter(f => savedIds.includes(f.id));

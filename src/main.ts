@@ -16,8 +16,8 @@ import './ui.ts';
  * Wenn keine Feeds ausgewählt sind, wird der Feed-Manager automatisch geöffnet.
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Sofort startklar signalisieren (da kein Login mehr nötig)
-  document.dispatchEvent(new CustomEvent('discophery:ready', { detail: { user: null } }));
+  // App-Shell anzeigen (über ui.ts)
+  _ensureShellVisible();
 
   // Auto-Open Feed Manager wenn keine Quellen gewählt sind
   const activeFeeds = getActiveFeeds();

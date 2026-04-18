@@ -13,14 +13,14 @@ let _searchQuery    = '';
 let _refreshTimer   = null;
 let _contextArticle = null;
 
-document.addEventListener('discophery:ready', () => {
+export function _ensureShellVisible() {
   const shell = document.getElementById('app-shell');
   if (shell) {
     shell.style.display = 'block';
     shell.ariaHidden = 'false';
   }
   _startAutoRefresh();
-});
+}
 
 document.addEventListener('discophery:articles', (e: CustomEvent) => {
   _allArticles = e.detail.articles ?? [];
@@ -475,6 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
 (window as any)._closeSettingsModal = _closeSettingsModal;
 (window as any)._renderSettingsContent = _renderSettingsContent;
 (window as any)._renderFilterTags = _renderFilterTags;
+(window as any)._ensureShellVisible = _ensureShellVisible;
 (window as any)._startAutoRefresh = _startAutoRefresh;
 (window as any)._loadRefreshIntervalSetting = _loadRefreshIntervalSetting;
 (window as any)._applyTheme = _applyTheme;
