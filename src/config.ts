@@ -40,41 +40,6 @@
  */
 export const CONFIG = {
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GOOGLE OAUTH
-  // Einmalig einrichten, dann nie wieder anfassen.
-  // Anleitung: README.md → Abschnitt "Google OAuth einrichten"
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Deine Google OAuth 2.0 Client ID.
-   *
-   * So erhältst du sie (kostenlos, ca. 5 Minuten):
-   *   1. console.cloud.google.com → Neues Projekt → "discophery"
-   *   2. APIs & Dienste → Anmeldedaten → OAuth-Client-ID erstellen
-   *   3. Anwendungstyp: Webanwendung
-   *   4. Autorisierte JavaScript-Quellen: https://mazer666.github.io + http://localhost
-   *   5. Die generierte ID unten eintragen (Format: 123456-abc.apps.googleusercontent.com)
-   *
-   * SICHERHEITSHINWEIS (Sam): Die Client ID ist kein Geheimnis — sie steht im
-   * Quelltext und das ist bei OAuth für SPAs so vorgesehen. Der eigentliche
-   * Schutz läuft über die autorisierten Domains in der Google Cloud Console.
-   *
-   * @type {string}
-   */
-  GOOGLE_CLIENT_ID: '528050138023-cenaoksa4vc3o67mtras7nf4t6r1b4rc.apps.googleusercontent.com',
-
-  /**
-   * Steuert ob ein Google-Login Pflicht ist.
-   *
-   * true  → Login-Screen wird angezeigt, App startet erst nach Anmeldung.
-   * false → App startet sofort ohne Login (nützlich für lokale Entwicklung).
-   *
-   * Empfehlung: true für den produktiven Einsatz auf GitHub Pages.
-   *
-   * @type {boolean}
-   */
-  AUTH_REQUIRED: false,
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CORS-PROXY
@@ -141,6 +106,12 @@ export const CONFIG = {
    * @type {number}
    */
   FETCH_DELAY_BETWEEN_FEEDS_MS: 200,
+
+  /**
+   * Standard-Größe für Favicons in Pixeln.
+   * @type {number}
+   */
+  ICON_SIZE_DEFAULT: 24,
 
   /**
    * Maximale Anzahl Artikel die pro Feed geladen und verarbeitet werden.
@@ -210,6 +181,8 @@ export const CONFIG = {
     AUTH_ENABLED:        'discophery_auth_enabled',
     /** 'date-desc' | 'date-asc' — Sortierreihenfolge der Artikel */
     SORT_ORDER:          'discophery_sort_order',
+    /** Zahl: Favicon-Größe in Pixeln */
+    FAVICON_SIZE:        'discophery_favicon_size',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -107,6 +107,18 @@ function _createCategoryGroup(cat, feeds, activeCount) {
   badge.textContent = `${activeCount}/${feeds.length}`;
   badge.dataset.cat = cat;
 
+  const bulkBtn = document.createElement('button');
+  bulkBtn.className = 'feed-group__bulk-btn';
+  bulkBtn.textContent = (activeCount === feeds.length) ? 'Alle aus' : 'Alle an';
+  bulkBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const shouldActivate = activeCount < feeds.length;
+    setCategoryActive(cat, shouldActivate);
+    _renderFeedManager();
+    document.dispatchEvent(new CustomEvent('discophery:feeds-changed'));
+  });
+
   const arrow = document.createElement('span');
   arrow.className   = 'feed-group__arrow';
   arrow.textContent = '▾';
@@ -114,6 +126,7 @@ function _createCategoryGroup(cat, feeds, activeCount) {
 
   summary.appendChild(titleEl);
   summary.appendChild(badge);
+  summary.appendChild(bulkBtn);
   summary.appendChild(arrow);
   details.appendChild(summary);
 
@@ -164,6 +177,19 @@ function _createFeedRow(feed, isCustom) {
   row.className        = 'feed-row';
   row.dataset.feedId   = feed.id;
   row.dataset.feedName = feed.name.toLowerCase();
+
+  // --- Favicon hinzufügen ---
+  const iconSize = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT;
+  const icon = document.createElement('img');
+  icon.className = 'feed-row__icon';
+  // Fallback zu einem generischen Icon falls Domain nicht extractbar
+  let domain = '';
+  try { domain = new URL(feed.url).hostname; } catch {}
+  icon.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=${iconSize * 2}`; // Höhere Auflösung für Retina
+  icon.style.width = iconSize + 'px';
+  icon.style.height = iconSize + 'px';
+  icon.alt = '';
+  row.appendChild(icon);
 
   const info = document.createElement('div');
   info.className = 'feed-row__info';

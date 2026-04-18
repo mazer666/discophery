@@ -27,7 +27,7 @@ function getActiveFeeds() {
   const custom   = getCustomFeeds();
 
   if (savedIds === null) {
-    return [...FEED_CATALOGUE.filter(f => f.enabled), ...custom];
+    return custom;
   }
 
   const fromCatalogue = FEED_CATALOGUE.filter(f => savedIds.includes(f.id));
@@ -67,6 +67,37 @@ function setFeedActive(feedId, active) {
     localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_FEEDS, JSON.stringify(ids));
   } catch (err) {
     console.warn('Feed-Auswahl konnte nicht gespeichert werden:', err.message);
+  }
+}
+
+/**
+ * Aktiviert oder deaktiviert alle Feeds einer bestimmten Kategorie.
+ *
+ * @param {string}  category - Kategorie-Name
+ * @param {boolean} active   - true = aktivieren, false = deaktivieren
+ * @returns {void}
+ */
+function setCategoryActive(category, active) {
+  let ids = _loadActiveIds();
+  if (ids === null) ids = [];
+
+  const categoryFeedIds = FEED_CATALOGUE
+    .filter(f => f.category === category)
+    .map(f => f.id);
+
+  if (active) {
+    // Alle hinzufügen (Set sorgt für Eindeutigkeit)
+    ids = [...new Set([...ids, ...categoryFeedIds])];
+  } else {
+    // Alle IDs dieser Kategorie aus dem aktiven Array entfernen
+    const catSet = new Set(categoryFeedIds);
+    ids = ids.filter(id => !catSet.has(id));
+  }
+
+  try {
+    localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_FEEDS, JSON.stringify(ids));
+  } catch (err) {
+    console.warn('Kategorie-Auswahl konnte nicht gespeichert werden:', err.message);
   }
 }
 
@@ -179,6 +210,7 @@ function _loadActiveIds() {
 (window as any).getActiveFeeds = getActiveFeeds;
 (window as any).getCustomFeeds = getCustomFeeds;
 (window as any).setFeedActive = setFeedActive;
+(window as any).setCategoryActive = setCategoryActive;
 (window as any).isFeedActive = isFeedActive;
 (window as any).addCustomFeed = addCustomFeed;
 (window as any).removeCustomFeed = removeCustomFeed;

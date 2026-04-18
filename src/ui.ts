@@ -189,9 +189,8 @@ function _openSettingsModal() {
   if (!backdrop) return;
   _renderSettingsContent();
   _loadRefreshIntervalSetting();
-  _loadThemeSetting();
-  _loadAuthSetting();
   _loadSortSetting();
+  _loadIconSizeSetting();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
   document.getElementById('btn-close-settings')?.focus();
@@ -206,14 +205,121 @@ function _closeSettingsModal() {
 }
 
 function _renderSettingsContent() {
-  _renderFilterTags(
-    document.getElementById('settings-blocked-sources'),
-    getBlockedSources(), 'Keine blockierten Quellen.', (id) => unblockSource(id)
-  );
-  _renderFilterTags(
-    document.getElementById('settings-blocked-keywords'),
-    getBlockedKeywords(), 'Keine blockierten Keywords.', (kw) => unblockKeyword(kw)
-  );
+  const container = document.getElementById('settings-content'); // Wir brauchen einen Wrapper im HTML
+  if (!container) return;
+  container.innerHTML = '';
+
+  // 1. Karte: ANZEIGE
+  container.appendChild(_createSettingsCard('Anzeige', [
+    _createSettingsRow('Theme', _createSelect('select-theme', [
+      { v: 'auto', t: 'Automatisch' },
+      { v: 'light', t: 'Hell' },
+      { v: 'dark', t: 'Dunkel' }
+    ], localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto', (e) => _applyTheme(e.target.value))),
+    _createSettingsRow('Sortierung', _createSelect('select-sort-order', [
+      { v: 'date-desc', t: 'Neueste zuerst' },
+      { v: 'date-asc', t: 'Älteste zuerst' }
+    ], localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc', (e) => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, e.target.value);
+      _renderUI();
+    })),
+    _createSettingsRow('Icon-Größe (px)', _createNumberInput('input-icon-size',
+      parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT,
+      16, 48, (e) => {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, e.target.value);
+        // Live Update falls der Manager offen ist? (Optional)
+      }))
+  ]));
+
+  // 2. Karte: INHALT
+  const blockedSourcesContainer = document.createElement('div');
+  blockedSourcesContainer.className = 'filter-tags-container';
+  _renderFilterTags(blockedSourcesContainer, getBlockedSources(), 'Keine blockierten Quellen.', (id) => unblockSource(id));
+
+  const blockedKeywordsContainer = document.createElement('div');
+  blockedKeywordsContainer.className = 'filter-tags-container';
+  _renderFilterTags(blockedKeywordsContainer, getBlockedKeywords(), 'Keine blockierten Keywords.', (kw) => unblockKeyword(kw));
+
+  container.appendChild(_createSettingsCard('Filter & Quellen', [
+    _createSettingsRow('', _createButton('btn-open-feed-manager-from-settings', 'Feeds verwalten →', 'btn--ghost', () => {
+      _closeSettingsModal();
+      openFeedManager();
+    })),
+    _createSettingsRow('Blockierte Quellen', blockedSourcesContainer),
+    _createSettingsRow('Blockierte Keywords', blockedKeywordsContainer)
+  ]));
+
+  // 3. Karte: SYSTEM
+  container.appendChild(_createSettingsCard('System', [
+    _createSettingsRow('Sync-Intervall', _createSelect('select-refresh-interval', [
+      { v: '0', t: 'Manuell' },
+      { v: '5', t: '5 Min' },
+      { v: '10', t: '10 Min' },
+      { v: '30', t: '30 Min' },
+      { v: '60', t: '60 Min' }
+    ], localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '30', (e) => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, e.target.value);
+      _startAutoRefresh();
+    })),
+    _createSettingsRow('', _createButton('btn-reset-all', 'Alle Daten zurücksetzen', 'btn--destructive', () => {
+      if (resetAllData()) {
+        _allArticles = []; _closeSettingsModal(); _showState('loading'); loadAllFeeds();
+      }
+    }))
+  ]));
+}
+
+// ── Hilfsfunktionen für Card-UI ────────────────────────────────────────────────
+
+function _createSettingsCard(title, rows) {
+  const card = document.createElement('div');
+  card.className = 'settings-card';
+  const h3 = document.createElement('h3');
+  h3.className = 'settings-card__title';
+  h3.textContent = title;
+  card.appendChild(h3);
+  rows.forEach(r => card.appendChild(r));
+  return card;
+}
+
+function _createSettingsRow(label, content) {
+  const row = document.createElement('div');
+  row.className = 'settings-row';
+  if (label) {
+    const lbl = document.createElement('label');
+    lbl.textContent = label;
+    row.appendChild(lbl);
+  }
+  row.appendChild(content);
+  return row;
+}
+
+function _createSelect(id, options, current, onChange) {
+  const sel = document.createElement('select');
+  sel.id = id;
+  options.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.t;
+    if (o.v === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', onChange);
+  return sel;
+}
+
+function _createNumberInput(id, val, min, max, onChange) {
+  const inp = document.createElement('input');
+  inp.type = 'number'; inp.id = id; inp.value = val; inp.min = min; inp.max = max;
+  inp.addEventListener('change', onChange);
+  return inp;
+}
+
+function _createButton(id, text, cls, onClick) {
+  const btn = document.createElement('button');
+  btn.id = id; btn.className = 'btn ' + cls + ' btn--full';
+  btn.textContent = text;
+  btn.addEventListener('click', onClick);
+  return btn;
 }
 
 function _renderFilterTags(container, items, emptyText, onRemove) {
@@ -274,15 +380,14 @@ function _loadThemeSetting() {
   if (sel) sel.value = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto';
 }
 
-function _loadAuthSetting() {
-  const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED);
-  const sel = document.getElementById('select-auth-required');
-  if (sel) sel.value = stored ?? (CONFIG.AUTH_REQUIRED ? 'true' : 'false');
-}
-
 function _loadSortSetting() {
   const sel = document.getElementById('select-sort-order');
   if (sel) sel.value = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc';
+}
+
+function _loadIconSizeSetting() {
+  const inp = document.getElementById('input-icon-size');
+  if (inp) inp.value = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) || CONFIG.ICON_SIZE_DEFAULT;
 }
 
 // ── Button-Verdrahtung ────────────────────────────────────────────────────────
@@ -302,35 +407,6 @@ function _wireStaticButtons() {
   document.getElementById('settings-modal-backdrop')
     ?.addEventListener('click', (e) => { if (e.target === e.currentTarget) _closeSettingsModal(); });
 
-  document.getElementById('select-theme')
-    ?.addEventListener('change', (e) => _applyTheme(e.target.value));
-
-  document.getElementById('select-refresh-interval')
-    ?.addEventListener('change', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, e.target.value);
-      _startAutoRefresh();
-    });
-
-  document.getElementById('select-sort-order')
-    ?.addEventListener('change', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, e.target.value);
-      _renderUI();
-    });
-
-  document.getElementById('select-auth-required')
-    ?.addEventListener('change', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED, e.target.value);
-    });
-
-  document.getElementById('btn-reset-all')
-    ?.addEventListener('click', () => {
-      if (resetAllData()) {
-        _allArticles = []; _activeCategory = 'all'; _activeSource = null;
-        _closeSettingsModal();
-        _showState('loading');
-        loadAllFeeds();
-      }
-    });
 
   document.getElementById('ctx-block-source')
     ?.addEventListener('click', () => {

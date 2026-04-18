@@ -8,18 +8,22 @@
   -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!--
-    Content Security Policy — Sam:
-    Schränkt ein welche Ressourcen der Browser laden darf.
-    Schützt vor XSS-Angriffen durch injizierte Scripts.
-
-    script-src:  Nur eigene Skripte + Google Identity Services (für OAuth)
-    frame-src:   Google benötigt iframes für den OAuth-Popup-Flow
-    connect-src: Fetch-Aufrufe erlaubt zu: CORS-Proxys, Google News RSS
-    img-src:     Vorschaubilder kommen von beliebigen HTTPS-Quellen
-    style-src:   unsafe-inline nötig weil Google Sign-In Button Inline-Styles injiziert
-  -->
-  <!-- <meta http-equiv="Content-Security-Policy" content="..."> -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self';
+    frame-src   'none';
+    connect-src 'self'
+                https://api.allorigins.win
+                https://corsproxy.io
+                https://news.google.com
+                https://rss.golem.de
+                https://www.heise.de
+                https://rss.orf.at
+                https://www.derstandard.at
+                https://diepresse.com;
+    img-src     'self' data: https: https://www.google.com/s2/favicons;
+    style-src   'self' 'unsafe-inline';
+  ">
 
   <title>Discophery</title>
 
@@ -38,47 +42,7 @@
   <meta property="og:description" content="Persönlicher RSS-Feed – werbefreier News-Reader">
   <meta property="og:type"        content="website">
 
-  <!--
-    Theme-initialisierung passiert jetzt in main.ts
-  -->
 
-  <!--
-    Stylesheets: zuerst das Design-System (Custom Properties),
-    dann die Komponenten die darauf aufbauen.
-  -->
-
-  <!--
-    Google Identity Services — Einzige externe Bibliothek.
-    async: blockiert das HTML-Parsing nicht.
-    Die Bibliothek ruft window.onGoogleLibraryLoad auf wenn sie bereit ist.
-  -->
-  <script src="https://accounts.google.com/gsi/client" async></script>
-</head>
-
-<body>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       LOGIN-SCREEN
-       Wird angezeigt wenn AUTH_REQUIRED=true und kein User eingeloggt ist.
-       auth.js schaltet zwischen Login-Screen und App-Shell um.
-       ═══════════════════════════════════════════════════════════════════ -->
-  <div id="login-screen" class="login-screen" role="main" aria-label="Anmeldung" style="display:none">
-
-    <div class="login-screen__logo" aria-label="Discophery Logo">Discophery</div>
-
-    <p class="login-screen__tagline">
-      Dein persönlicher News-Feed.<br>Werbefrei. Ohne Algorithmen.
-    </p>
-
-    <!-- Rendered-Button: Google ersetzt dieses div durch den echten Button -->
-    <div
-      class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="outline"
-      data-text="signin_with"
-      data-locale="de"
-    ></div>
 
     <p class="login-screen__legal">
       Mit dem Login stimmst du der
@@ -319,88 +283,12 @@
         </button>
       </div>
 
-      <div class="settings-section">
-        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-2)">
-          <span style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase;">Blockierte Quellen</span>
-          <div id="settings-blocked-sources" aria-live="polite">
-            <span style="color: var(--color-text-tertiary);">Keine blockierten Quellen.</span>
-          </div>
-        </div>
-        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-2)">
-          <span style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase;">Blockierte Keywords</span>
-          <div id="settings-blocked-keywords" aria-live="polite">
-            <span style="color: var(--color-text-tertiary);">Keine blockierten Keywords.</span>
-          </div>
-        </div>
-      </div>
 
-      <p class="modal__section-title">Erscheinungsbild</p>
-      <div class="settings-section">
-        <div class="settings-row">
-          <label for="select-theme">Design Theme</label>
-          <select id="select-theme">
-            <option value="auto">Automatisch (System)</option>
-            <option value="light">Hell</option>
-            <option value="dark">Dunkel</option>
-          </select>
+      <div id="settings-content" class="settings-content">
+        <!-- Wird dynamisch von ui.ts befüllt (_renderSettingsContent) -->
+        <div style="text-align:center; color:var(--color-text-tertiary); padding:var(--space-8)">
+          Einstellungen werden geladen...
         </div>
-        <div class="settings-row">
-          <label for="select-sort-order">Sortierung</label>
-          <select id="select-sort-order">
-            <option value="date-desc">Neueste zuerst</option>
-            <option value="date-asc">Älteste zuerst</option>
-          </select>
-        </div>
-      </div>
-
-      <p class="modal__section-title">Erweitert</p>
-      <div class="settings-section">
-        <div class="settings-row">
-          <label for="select-refresh-interval" style="white-space:nowrap">Auto-Sync (Minuten)</label>
-          <select id="select-refresh-interval">
-            <option value="0">Manuell</option>
-            <option value="5">5 Min</option>
-            <option value="10">10 Min</option>
-            <option value="15">15 Min</option>
-            <option value="30" selected>30 Min</option>
-            <option value="60">60 Min</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <label for="select-auth-required" style="white-space:nowrap">Google-Login forcieren</label>
-          <select id="select-auth-required">
-            <option value="false">Nein (Lokal)</option>
-            <option value="true">Ja</option>
-          </select>
-        </div>
-        <div class="settings-row" style="padding: 0;">
-          <button id="btn-open-feed-manager-from-settings" class="btn btn--ghost btn--full" style="border:none; border-radius: 0; justify-content: space-between; padding: var(--space-4);" onclick="openFeedManager()">
-            Feeds verwalten
-            <span aria-hidden="true" style="color: var(--color-text-tertiary)">→</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="settings-logout-row" style="display:none">
-        <p class="modal__section-title">Account</p>
-        <div class="settings-section">
-          <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-1)">
-            <span id="settings-user-label" style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; font-weight: 600;">Angemeldet als</span>
-            <div id="settings-user-info" style="font-size: var(--font-size-base); font-weight: 500;"></div>
-          </div>
-          <div class="settings-row" style="padding: 0;">
-            <button id="btn-logout" class="btn btn--destructive btn--full" style="border:none; border-radius: 0;">Abmelden</button>
-          </div>
-        </div>
-      </div>
-
-      <!--
-        "Alles zurücksetzen" ganz unten — bewusst weit weg von anderen Buttons.
-      -->
-      <div style="margin-top: var(--space-6);">
-        <button id="btn-reset-all" class="btn btn--destructive btn--full">
-          Alle Daten & Filter zurücksetzen
-        </button>
       </div>
 
     </div><!-- /settings-modal -->
@@ -500,16 +388,7 @@
   </div><!-- /feed-manager-backdrop -->
 
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       SCRIPTS — Ladereihenfolge:
-         config.js        → CONFIG (Einstellungen, Kategorien, Storage-Keys)
-         feeds.js         → FEED_CATALOGUE (alle vordefinierten Feeds)
-         auth.js          → Google OAuth
-         filter.js        → Filterregeln & Dismiss
-       SCRIPTS
-       ═══════════════════════════════════════════════════════════════════ -->
   <script type="module" src="src/main.ts"></script>
-  <script src="https://accounts.google.com/gsi/client" async></script>
 
 </body>
 </html>

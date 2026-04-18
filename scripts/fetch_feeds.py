@@ -8,11 +8,17 @@ from urllib.error import URLError
 MAX_ARTICLES = 20
 
 def parse_feeds_js():
-    with open('feeds.js', 'r', encoding='utf-8') as f:
+    # Suche Pfad relativ zum Root (für GitHub Action) oder relativ zum Script
+    path = 'src/feeds.ts' if os.path.exists('src/feeds.ts') else '../src/feeds.ts'
+    if not os.path.exists(path):
+        print(f"Could not find {path}")
+        return []
+
+    with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Extract the JS array using regex
-    match = re.search(r'const FEED_CATALOGUE = \[(.*?)\];', content, re.DOTALL)
+    # Extract the JS array using regex (supports 'const' or 'export const')
+    match = re.search(r'(?:export\s+)?const FEED_CATALOGUE = \[(.*?)\];', content, re.DOTALL)
     if not match:
         print("Could not find FEED_CATALOGUE array in feeds.js")
         return []
