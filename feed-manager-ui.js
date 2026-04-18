@@ -167,6 +167,20 @@ function _createFeedRow(feed, isCustom) {
 
   const info = document.createElement('div');
   info.className = 'feed-row__info';
+  info.style.cursor = 'pointer';
+  info.title = 'Nur Artikel dieses Feeds anzeigen';
+
+  // Klick auf Medienname → Manager schließen + Quellen-Filter setzen
+  info.addEventListener('click', () => {
+    if (!isCustom && !isFeedActive(feed.id)) {
+      setFeedActive(feed.id, true);
+      document.dispatchEvent(new CustomEvent('discophery:feeds-changed'));
+    }
+    closeFeedManager();
+    document.dispatchEvent(new CustomEvent('discophery:source-filter-request', {
+      detail: { sourceId: feed.id, sourceName: feed.name },
+    }));
+  });
 
   const nameEl = document.createElement('div');
   nameEl.className   = 'feed-row__name';
@@ -189,14 +203,18 @@ function _createFeedRow(feed, isCustom) {
     delBtn.className   = 'feed-row__delete';
     delBtn.textContent = '×';
     delBtn.setAttribute('aria-label', `${feed.name} entfernen`);
-    delBtn.addEventListener('click', () => {
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();  // info-click nicht auslösen
       removeCustomFeed(feed.id);
       row.remove();
       document.dispatchEvent(new CustomEvent('discophery:feeds-changed'));
     });
     row.appendChild(delBtn);
   } else {
-    row.appendChild(_createToggle(feed.id));
+    const toggle = _createToggle(feed.id);
+    // Toggle-Klick soll nicht den Quellen-Filter öffnen
+    toggle.addEventListener('click', (e) => e.stopPropagation());
+    row.appendChild(toggle);
   }
 
   return row;
@@ -307,10 +325,8 @@ async function _checkFeedUrl() {
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-    const data = await resp.json();
-    if (!data?.contents) throw new Error('Leere Proxy-Antwort');
-
-    const doc   = new DOMParser().parseFromString(data.contents, 'text/xml');
+    const text  = await resp.text();
+    const doc   = new DOMParser().parseFromString(text, 'text/xml');
     const title = doc.querySelector('channel > title, feed > title')?.textContent?.trim();
 
     if (title && nameInput && !nameInput.value) nameInput.value = title;
