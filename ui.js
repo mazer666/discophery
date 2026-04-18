@@ -151,6 +151,7 @@ function _createChip(category, label) {
 
   btn.addEventListener('click', () => {
     _activeCategory = category;
+    _activeSource   = null;
     _renderUI();
 
     // Chip in den sichtbaren Bereich scrollen
