@@ -109,7 +109,9 @@ function _createCategoryGroup(cat, feeds, activeCount) {
 
   const bulkBtn = document.createElement('button');
   bulkBtn.className = 'feed-group__bulk-btn';
-  bulkBtn.textContent = (activeCount === feeds.length) ? 'Alle aus' : 'Alle an';
+  bulkBtn.innerHTML = (activeCount === feeds.length) 
+    ? '<span aria-hidden="true">☐</span> Alle aus' 
+    : '<span aria-hidden="true">☑</span> Alle an';
   bulkBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();

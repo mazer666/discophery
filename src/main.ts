@@ -1,3 +1,6 @@
+import '../style.css';
+import '../style-components.css';
+import '../style-feed-manager.css';
 import './theme.ts';
 import './config.ts';
 import './feeds.ts';
@@ -22,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.info('Keine Feeds vorhanden — öffne Feed-Manager automatisch.');
     setTimeout(() => {
       if (typeof openFeedManager === 'function') openFeedManager();
-    }, 500); // Kurze Verzögerung für sauberes Rendering
+    }, 500); 
+  } else {
+    // Wenn Feeds da sind: Laden starten!
+    if (typeof loadAllFeeds === 'function') loadAllFeeds();
   }
 });

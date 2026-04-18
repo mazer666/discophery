@@ -117,22 +117,33 @@
 }
 
 .feed-group__bulk-btn {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--color-accent);
-  background: var(--color-surface-2);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 2px var(--space-2);
+  padding: 4px 10px;
   cursor: pointer;
   margin-left: auto;
-  margin-right: var(--space-2);
+  margin-right: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .feed-group__bulk-btn:hover {
   background: var(--color-accent);
   color: #fff;
+  border-color: var(--color-accent);
+}
+
+.feed-group__bulk-btn span {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .feed-group__arrow {

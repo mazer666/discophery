@@ -13,13 +13,19 @@ let _searchQuery    = '';
 let _refreshTimer   = null;
 let _contextArticle = null;
 
-// ── Events — App-Lebenszyklus ─────────────────────────────────────────────────
+document.addEventListener('discophery:ready', () => {
+  const shell = document.getElementById('app-shell');
+  if (shell) {
+    shell.style.display = 'block';
+    shell.ariaHidden = 'false';
+  }
+  _startAutoRefresh();
+});
 
-document.addEventListener('discophery:articles', (e) => {
+document.addEventListener('discophery:articles', (e: CustomEvent) => {
   _allArticles = e.detail.articles ?? [];
   try { localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_REFRESH, Date.now().toString()); } catch {}
   _renderUI();
-  _startAutoRefresh();
 });
 
 document.addEventListener('discophery:filter-changed', () => {

@@ -187,11 +187,33 @@ button {
   z-index: 100;
 }
 
-.app-header__logo {
+.app-header__logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.app-header__logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+}
+
+.app-header__logo-text {
   font-size: var(--font-size-lg);
   font-weight: 700;
   letter-spacing: -0.02em;
-  flex-shrink: 0;
+  color: var(--color-text-primary);
+  display: none;
+}
+
+@media (min-width: 440px) {
+  .app-header__logo-text {
+    display: block;
+  }
 }
 
 .app-header__search {
