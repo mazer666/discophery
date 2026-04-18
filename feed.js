@@ -46,46 +46,43 @@
 async function loadAllFeeds() {
   const activeFeeds = getActiveFeeds();  // feed-manager.js
 
-  // Alle Feeds gleichzeitig starten — nicht sequenziell warten
-  const results = await Promise.allSettled(
-    activeFeeds.map(feed => _loadFeed(feed))
+  const accumulated = [];
+  let failCount     = 0;
+  let firstFired    = false;
+
+  // Alle Feeds gleichzeitig starten; sobald der erste antwortet → sofort rendern
+  const promises = activeFeeds.map(feed =>
+    _loadFeed(feed)
+      .then(articles => {
+        accumulated.push(...articles);
+        if (!firstFired && accumulated.length > 0) {
+          firstFired = true;
+          _dispatchArticles(accumulated);
+        }
+      })
+      .catch(err => {
+        failCount++;
+        console.warn('Feed fehlgeschlagen:', err?.message ?? err);
+      })
   );
 
-  const articles = [];
-  let failCount = 0;
-
-  for (const result of results) {
-    if (result.status === 'fulfilled') {
-      articles.push(...result.value);
-    } else {
-      failCount++;
-      // Einzelner Feed-Fehler wird geloggt, bricht aber nichts ab
-      console.warn('Feed fehlgeschlagen:', result.reason?.message ?? result.reason);
-    }
-  }
+  await Promise.allSettled(promises);
 
   if (failCount > 0) {
     console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
   }
 
-  // Duplikate entfernen (gleiche URL kann in mehreren Feeds auftauchen)
-  const unique = _deduplicateById(articles);
+  // Finales Update mit allen eingetroffenen Feeds
+  _dispatchArticles(accumulated);
+}
 
-  // Weggewischte Artikel markieren (aus localStorage via filter.js)
-  const withDismissed = unique.map(a => ({
-    ...a,
-    dismissed: isDismissed(a.id),
-  }));
-
-  // Nach Datum sortieren, neueste zuerst
+function _dispatchArticles(articles) {
+  const unique       = _deduplicateById(articles);
+  const withDismissed = unique.map(a => ({ ...a, dismissed: isDismissed(a.id) }));
   withDismissed.sort((a, b) => b.date - a.date);
-
-  // ui.js benachrichtigen
   document.dispatchEvent(
     new CustomEvent('discophery:articles', { detail: { articles: withDismissed } })
   );
-
-  return withDismissed;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

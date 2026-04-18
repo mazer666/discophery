@@ -134,6 +134,20 @@ function _renderChips() {
     const label = cat.charAt(0).toUpperCase() + cat.slice(1);
     nav.appendChild(_createChip(cat, label));
   }
+
+  // Filter-Hinweis-Leiste aktualisieren
+  const bar   = document.getElementById('filter-active-bar');
+  const label = document.getElementById('filter-active-label');
+  if (bar) {
+    const hasFilter = _activeCategory !== 'all' || _activeSource !== null;
+    bar.style.display = hasFilter ? 'flex' : 'none';
+    if (label && hasFilter) {
+      const parts = [];
+      if (_activeSource)          parts.push(_activeSource.name);
+      if (_activeCategory !== 'all') parts.push(_activeCategory.charAt(0).toUpperCase() + _activeCategory.slice(1));
+      label.textContent = 'Gefiltert: ' + parts.join(' · ');
+    }
+  }
 }
 
 /**
@@ -488,6 +502,15 @@ function _wireStaticButtons() {
   // Context-Menü-Backdrop schließt Menü
   document.getElementById('context-menu-backdrop')
     ?.addEventListener('click', _closeContextMenu);
+
+  // Filter-Hinweis-Leiste: "× Alle anzeigen"
+  document.getElementById('btn-reset-filter')
+    ?.addEventListener('click', () => {
+      _activeCategory = 'all';
+      _activeSource   = null;
+      _renderUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
   // "Alle Artikel anzeigen" im Empty-State wenn Filter aktiv
   document.getElementById('btn-clear-filter-from-empty')

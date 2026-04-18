@@ -335,8 +335,8 @@ function _renderUserAvatar(user) {
   const btn = document.getElementById('btn-user');
   if (!btn) return;
 
-  // Vorherigen Inhalt leeren
   btn.textContent = '';
+  btn.style.display = user ? '' : 'none';
 
   if (!user) return;
 
