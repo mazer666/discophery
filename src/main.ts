@@ -23,9 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeFeeds = getActiveFeeds();
   if (activeFeeds.length === 0) {
     console.info('Keine Feeds vorhanden — öffne Feed-Manager automatisch.');
+    
+    // Spinner ausblenden & Leermarkierung zeigen
+    if (typeof (window as any)._showState === 'function') {
+      (window as any)._showState('empty');
+    }
+    
     setTimeout(() => {
       if (typeof openFeedManager === 'function') openFeedManager();
-    }, 500); 
+    }, 800); 
   } else {
     // Wenn Feeds da sind: Laden starten!
     if (typeof loadAllFeeds === 'function') loadAllFeeds();
