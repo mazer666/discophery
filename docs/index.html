@@ -11,22 +11,8 @@
   -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src  'self';
-    frame-src   'none';
-    connect-src 'self'
-                https://api.allorigins.win
-                https://corsproxy.io
-                https://news.google.com
-                https://rss.golem.de
-                https://www.heise.de
-                https://rss.orf.at
-                https://www.derstandard.at
-                https://diepresse.com;
-    img-src     'self' data: https: https://www.google.com/s2/favicons;
-    style-src   'self' 'unsafe-inline';
-  ">
+  <!-- CSP wird über Server-Header gesetzt, nicht via meta-tag,
+       da Vite das bundled Script mit crossorigin injiziert -->
 
 
   <title>Discophery</title>
@@ -176,7 +162,7 @@
     <main id="app-main" class="app-main" role="main">
 
       <!-- Ladeindikator — sichtbar während feed.js arbeitet -->
-      <div id="loading-indicator" class="status-message" role="status" aria-live="polite">
+      <div id="loading-indicator" class="status-message" role="status" aria-live="polite" style="display:none">
         <div class="spinner" aria-hidden="true"></div>
         <p class="status-message__text">Feeds werden geladen …</p>
       </div>
