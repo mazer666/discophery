@@ -451,7 +451,6 @@ function _wireStaticButtons() {
 
 document.addEventListener('DOMContentLoaded', () => {
   _wireStaticButtons();
-  _showState('loading');
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 });
 

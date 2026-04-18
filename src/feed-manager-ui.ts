@@ -21,7 +21,7 @@
  *
  * @returns {void}
  */
-function openFeedManager() {
+export function openFeedManager() {
   // Einstellungs-Modal schließen falls geöffnet
   const settingsBackdrop = document.getElementById('settings-modal-backdrop');
   if (settingsBackdrop?.classList.contains('modal-backdrop--open')) {
@@ -41,7 +41,7 @@ function openFeedManager() {
  *
  * @returns {void}
  */
-function closeFeedManager() {
+export function closeFeedManager() {
   const backdrop = document.getElementById('feed-manager-backdrop');
   if (!backdrop) return;
   backdrop.classList.remove('modal-backdrop--open');
@@ -465,6 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Auto-generated global exports for Vite migration ---
 (window as any).openFeedManager = openFeedManager;
 (window as any).closeFeedManager = closeFeedManager;
+(window as any).setFeedActive = setFeedActive;
+(window as any).setCategoryActive = setCategoryActive;
 (window as any)._renderFeedManager = _renderFeedManager;
 (window as any)._createCategoryGroup = _createCategoryGroup;
 (window as any)._createCustomFeedsGroup = _createCustomFeedsGroup;

@@ -12,10 +12,9 @@ import './ui-cards.ts';
 import './ui.ts';
 
 /**
- * App-Start ohne Login.
- * Wenn keine Feeds ausgewählt sind, wird der Feed-Manager automatisch geöffnet.
+ * App-Start Initialisierung.
  */
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   // App-Shell anzeigen (über ui.ts)
   _ensureShellVisible();
 
@@ -36,4 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wenn Feeds da sind: Laden starten!
     if (typeof loadAllFeeds === 'function') loadAllFeeds();
   }
-});
+}
+
+// Robuste Initialisierung (Module scripts können nach DOMContentLoaded laufen)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
