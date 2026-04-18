@@ -188,15 +188,21 @@ document.addEventListener('discophery:source-filter-request', (e) => {
  * @returns {void}
  */
 function _showState(state) {
-  const loading = document.getElementById('loading-indicator');
-  const error   = document.getElementById('error-message');
-  const empty   = document.getElementById('empty-message');
-  const grid    = document.getElementById('card-grid');
+  const loading    = document.getElementById('loading-indicator');
+  const error      = document.getElementById('error-message');
+  const empty      = document.getElementById('empty-message');
+  const grid       = document.getElementById('card-grid');
+  const filterBtn  = document.getElementById('btn-clear-filter-from-empty');
 
-  if (loading) loading.style.display = state === 'loading' ? ''      : 'none';
-  if (error)   error.style.display   = state === 'error'   ? ''      : 'none';
-  if (empty)   empty.style.display   = state === 'empty'   ? ''      : 'none';
-  if (grid)    grid.style.display    = state === 'content'  ? ''      : 'none';
+  if (loading) loading.style.display = state === 'loading' ? '' : 'none';
+  if (error)   error.style.display   = state === 'error'   ? '' : 'none';
+  if (empty)   empty.style.display   = state === 'empty'   ? '' : 'none';
+  if (grid)    grid.style.display    = state === 'content'  ? '' : 'none';
+
+  if (filterBtn) {
+    const hasFilter = state === 'empty' && (_activeCategory !== 'all' || _activeSource !== null);
+    filterBtn.style.display = hasFilter ? '' : 'none';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -265,6 +271,7 @@ function _openSettingsModal() {
   _renderSettingsContent();
   _loadRefreshIntervalSetting();
   _loadThemeSetting();
+  _loadAuthSetting();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
   // Fokus auf Schließen-Button für Tastaturnutzer
@@ -388,6 +395,13 @@ function _loadThemeSetting() {
   if (sel) sel.value = saved ?? 'auto';
 }
 
+function _loadAuthSetting() {
+  const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED);
+  const effective = stored !== null ? stored : (CONFIG.AUTH_REQUIRED ? 'true' : 'false');
+  const sel = document.getElementById('select-auth-required');
+  if (sel) sel.value = effective;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // BUTTON-VERDRAHTUNG
 // ═══════════════════════════════════════════════════════════════════════════
@@ -474,6 +488,21 @@ function _wireStaticButtons() {
   // Context-Menü-Backdrop schließt Menü
   document.getElementById('context-menu-backdrop')
     ?.addEventListener('click', _closeContextMenu);
+
+  // "Alle Artikel anzeigen" im Empty-State wenn Filter aktiv
+  document.getElementById('btn-clear-filter-from-empty')
+    ?.addEventListener('click', () => {
+      _activeCategory = 'all';
+      _activeSource   = null;
+      _renderUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+  // Auth-Toggle in Settings
+  document.getElementById('select-auth-required')
+    ?.addEventListener('change', (e) => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED, e.target.value);
+    });
 
   // Escape-Taste schließt offene Overlays
   document.addEventListener('keydown', (e) => {

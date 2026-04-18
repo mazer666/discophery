@@ -227,6 +227,11 @@
         <div class="status-message__icon" aria-hidden="true">✅</div>
         <p class="status-message__text">Alles gelesen!</p>
         <p class="status-message__sub">Keine weiteren Artikel für diese Auswahl.</p>
+        <!-- Erscheint nur wenn Kategorie- oder Quellen-Filter aktiv ist -->
+        <button id="btn-clear-filter-from-empty" class="btn btn--ghost"
+                style="display:none; margin-top: var(--space-3)">
+          Alle Artikel anzeigen
+        </button>
       </div>
 
       <!-- Card-Grid — ui.js rendert hier die Artikel-Cards -->
@@ -365,12 +370,30 @@
         </button>
       </div>
 
-      <p class="modal__section-title">Angemeldet als</p>
+      <p class="modal__section-title">Anmeldung</p>
+      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
+        <label for="select-auth-required"
+               style="font-size:var(--font-size-sm); color:var(--color-text-secondary); white-space:nowrap">
+          Google-Login
+        </label>
+        <select id="select-auth-required"
+                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
+                       border:1px solid var(--color-border); background:var(--color-surface-2);
+                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
+          <option value="false">Deaktiviert (lokal starten)</option>
+          <option value="true">Erforderlich</option>
+        </select>
+      </div>
+      <p style="font-size:var(--font-size-xs); color:var(--color-text-tertiary); margin-top:var(--space-1)">
+        Wirkt beim nächsten Seitenaufruf.
+      </p>
+
+      <p class="modal__section-title" id="settings-user-label" style="display:none">Angemeldet als</p>
       <!-- auth.js befüllt diesen Bereich mit Name und E-Mail per textContent -->
       <div id="settings-user-info" style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">
       </div>
 
-      <div style="margin-top: var(--space-4)">
+      <div id="settings-logout-row" style="margin-top: var(--space-4); display:none">
         <button id="btn-logout" class="btn btn--ghost btn--full">Abmelden</button>
       </div>
 

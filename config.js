@@ -206,6 +206,8 @@ const CONFIG = {
     REFRESH_INTERVAL:    'discophery_refresh_interval',
     /** 'light' | 'dark' | nicht vorhanden = automatisch */
     THEME:               'discophery_theme',
+    /** 'true' | 'false' — überschreibt CONFIG.AUTH_REQUIRED wenn gesetzt */
+    AUTH_ENABLED:        'discophery_auth_enabled',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

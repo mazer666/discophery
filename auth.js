@@ -53,8 +53,12 @@ function initAuth() {
   // Datenschutz- und Nutzungslinks im Login-Screen setzen
   _setLegalLinks();
 
+  // Per localStorage überschreibbar — Wert aus Settings-Toggle hat Vorrang
+  const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED);
+  const authRequired = stored !== null ? stored === 'true' : CONFIG.AUTH_REQUIRED;
+
   // Wenn Auth deaktiviert: direkt App starten ohne Login
-  if (!CONFIG.AUTH_REQUIRED) {
+  if (!authRequired) {
     _showApp(null);
     return;
   }
@@ -394,7 +398,13 @@ function _createInitialsAvatar(name) {
  * @returns {void}
  */
 function _renderUserInfo(user) {
-  const el = document.getElementById('settings-user-info');
+  const el          = document.getElementById('settings-user-info');
+  const labelEl     = document.getElementById('settings-user-label');
+  const logoutRow   = document.getElementById('settings-logout-row');
+
+  if (labelEl)   labelEl.style.display   = user ? '' : 'none';
+  if (logoutRow) logoutRow.style.display = user ? '' : 'none';
+
   if (!el || !user) return;
 
   el.textContent = '';
