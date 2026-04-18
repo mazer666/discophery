@@ -55,10 +55,8 @@
   <meta property="og:type"        content="website">
 
   <!--
-    theme.js: synchron, kein defer — muss vor dem ersten CSS-Render laufen,
-    damit data-theme auf <html> gesetzt ist bevor Farben berechnet werden.
+    Theme-initialisierung passiert jetzt in main.ts
   -->
-  <script src="theme.js"></script>
 
   <!--
     Stylesheets: zuerst das Design-System (Custom Properties),
@@ -526,22 +524,11 @@
          feeds.js         → FEED_CATALOGUE (alle vordefinierten Feeds)
          auth.js          → Google OAuth
          filter.js        → Filterregeln & Dismiss
-         feed-manager.js  → Feed-Auswahl, getActiveFeeds(), Custom-Feeds
-         feed.js          → RSS laden via getActiveFeeds()
-         ui-cards.js      → Card-Rendering & Swipe
-         ui.js            → App-Koordinator
-       defer: parallel laden, sequenziell ausführen nach DOM-Parse.
+       SCRIPTS
        ═══════════════════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="style-feed-manager.css">
-  <script src="config.js"        defer></script>
-  <script src="feeds.js"         defer></script>
-  <script src="auth.js"          defer></script>
-  <script src="filter.js"        defer></script>
-  <script src="feed-manager.js"    defer></script>
-  <script src="feed-manager-ui.js" defer></script>
-  <script src="feed.js"            defer></script>
-  <script src="ui-cards.js"      defer></script>
-  <script src="ui.js"            defer></script>
+  <script type="module" src="/src/main.ts"></script>
+  <script src="https://accounts.google.com/gsi/client" async></script>
 
 </body>
 </html>

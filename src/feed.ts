@@ -498,3 +498,24 @@ function _deduplicateById(articles) {
 document.addEventListener('discophery:ready', () => {
   loadAllFeeds();
 });
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).loadAllFeeds = loadAllFeeds;
+(window as any)._dispatchArticles = _dispatchArticles;
+(window as any)._loadFeed = _loadFeed;
+(window as any)._fetchWithPrimaryProxy = _fetchWithPrimaryProxy;
+(window as any)._fetchWithFallbackProxy = _fetchWithFallbackProxy;
+(window as any)._fetchWithTimeout = _fetchWithTimeout;
+(window as any)._parseXml = _parseXml;
+(window as any)._parseRss = _parseRss;
+(window as any)._parseAtom = _parseAtom;
+(window as any)._normalizeRssItem = _normalizeRssItem;
+(window as any)._normalizeAtomEntry = _normalizeAtomEntry;
+(window as any)._text = _text;
+(window as any)._attr = _attr;
+(window as any)._extractImage = _extractImage;
+(window as any)._cleanText = _cleanText;
+(window as any)._resolveGoogleUrl = _resolveGoogleUrl;
+(window as any)._hashUrl = _hashUrl;
+(window as any)._parseDate = _parseDate;
+(window as any)._deduplicateById = _deduplicateById;

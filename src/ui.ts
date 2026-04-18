@@ -6,7 +6,7 @@
 
 // ── State ────────────────────────────────────────────────────────────────────
 
-let _allArticles    = [];
+export let _allArticles    = [];
 let _activeCategory = 'all';
 let _activeSource   = null;
 let _searchQuery    = '';
@@ -372,3 +372,31 @@ document.addEventListener('DOMContentLoaded', () => {
   _showState('loading');
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 });
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any)._allArticles = _allArticles;
+(window as any)._activeCategory = _activeCategory;
+(window as any)._activeSource = _activeSource;
+(window as any)._searchQuery = _searchQuery;
+(window as any)._refreshTimer = _refreshTimer;
+(window as any)._contextArticle = _contextArticle;
+(window as any)._renderUI = _renderUI;
+(window as any)._sortArticles = _sortArticles;
+(window as any)._renderChips = _renderChips;
+(window as any)._createChip = _createChip;
+(window as any)._createSourceChip = _createSourceChip;
+(window as any)._clearFilters = _clearFilters;
+(window as any)._showState = _showState;
+(window as any)._openContextMenu = _openContextMenu;
+(window as any)._closeContextMenu = _closeContextMenu;
+(window as any)._openSettingsModal = _openSettingsModal;
+(window as any)._closeSettingsModal = _closeSettingsModal;
+(window as any)._renderSettingsContent = _renderSettingsContent;
+(window as any)._renderFilterTags = _renderFilterTags;
+(window as any)._startAutoRefresh = _startAutoRefresh;
+(window as any)._loadRefreshIntervalSetting = _loadRefreshIntervalSetting;
+(window as any)._applyTheme = _applyTheme;
+(window as any)._loadThemeSetting = _loadThemeSetting;
+(window as any)._loadAuthSetting = _loadAuthSetting;
+(window as any)._loadSortSetting = _loadSortSetting;
+(window as any)._wireStaticButtons = _wireStaticButtons;

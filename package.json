@@ -1,0 +1,21 @@
+{
+  "name": "discophery",
+  "version": "1.0.0",
+  "description": "Ein werbefreier, persönlicher News-Feed als Ersatz für Google Discover.   Läuft komplett im Browser, gehostet auf GitHub Pages, Login via Google OAuth.",
+  "main": "auth.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vite": "^8.0.8"
+  }
+}

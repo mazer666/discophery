@@ -17,7 +17,7 @@
  *
  * @type {import('./config.js').FeedConfig[]}
  */
-const FEED_CATALOGUE = [
+export const FEED_CATALOGUE = [
 
   // ══════════════════════════════════════════════════════════════════════════
   // NACHRICHTEN & POLITIK — Deutsch
@@ -230,3 +230,6 @@ const FEED_CATALOGUE = [
   { id: 'gq-en',        name: 'GQ',                      url: 'https://www.gq.com/feed/rss',                                   category: 'magazine',     language: 'en', enabled: false },
 
 ];
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).FEED_CATALOGUE = FEED_CATALOGUE;

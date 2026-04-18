@@ -174,3 +174,14 @@ function _loadActiveIds() {
     return Array.isArray(parsed) ? parsed : null;
   } catch { return null; }
 }
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).getActiveFeeds = getActiveFeeds;
+(window as any).getCustomFeeds = getCustomFeeds;
+(window as any).setFeedActive = setFeedActive;
+(window as any).isFeedActive = isFeedActive;
+(window as any).addCustomFeed = addCustomFeed;
+(window as any).removeCustomFeed = removeCustomFeed;
+(window as any).isValidFeedUrl = isValidFeedUrl;
+(window as any).slugifyFeedName = slugifyFeedName;
+(window as any)._loadActiveIds = _loadActiveIds;

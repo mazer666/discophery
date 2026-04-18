@@ -433,3 +433,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Nach Feed-Änderung neu laden
   document.addEventListener('discophery:feeds-changed', () => loadAllFeeds());
 });
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).openFeedManager = openFeedManager;
+(window as any).closeFeedManager = closeFeedManager;
+(window as any)._renderFeedManager = _renderFeedManager;
+(window as any)._createCategoryGroup = _createCategoryGroup;
+(window as any)._createCustomFeedsGroup = _createCustomFeedsGroup;
+(window as any)._createFeedRow = _createFeedRow;
+(window as any)._createToggle = _createToggle;
+(window as any)._updateGroupCounter = _updateGroupCounter;
+(window as any)._filterFeeds = _filterFeeds;
+(window as any)._checkFeedUrl = _checkFeedUrl;
+(window as any)._showPreview = _showPreview;
+(window as any)._populateCategorySelect = _populateCategorySelect;
+(window as any)._handleCustomFeedSubmit = _handleCustomFeedSubmit;

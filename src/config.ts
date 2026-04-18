@@ -38,7 +38,7 @@
  * @type {Object}
  * @namespace CONFIG
  */
-const CONFIG = {
+export const CONFIG = {
 
   // ═══════════════════════════════════════════════════════════════════════════
   // GOOGLE OAUTH
@@ -290,3 +290,6 @@ const CONFIG = {
 // Kein ES-Module-Export — CONFIG ist ein globales Objekt das über ein
 // normales <script src="config.js">-Tag in index.html geladen wird.
 // Alle anderen Dateien (feed.js, auth.js etc.) setzen CONFIG voraus.
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).CONFIG = CONFIG;

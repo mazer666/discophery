@@ -497,3 +497,23 @@ function getUser() {
 // ─── Start ───────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', initAuth);
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).SESSION_KEY = SESSION_KEY;
+(window as any).currentUser = currentUser;
+(window as any).initAuth = initAuth;
+(window as any)._initGoogleSignIn = _initGoogleSignIn;
+(window as any).handleGoogleSignIn = handleGoogleSignIn;
+(window as any)._saveSession = _saveSession;
+(window as any)._loadSession = _loadSession;
+(window as any)._clearSession = _clearSession;
+(window as any).logout = logout;
+(window as any)._showApp = _showApp;
+(window as any)._showLoginScreen = _showLoginScreen;
+(window as any)._showAuthError = _showAuthError;
+(window as any)._renderUserAvatar = _renderUserAvatar;
+(window as any)._createInitialsAvatar = _createInitialsAvatar;
+(window as any)._renderUserInfo = _renderUserInfo;
+(window as any)._setLegalLinks = _setLegalLinks;
+(window as any)._parseJwt = _parseJwt;
+(window as any).getUser = getUser;

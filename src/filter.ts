@@ -409,3 +409,27 @@ function _dispatchFilterChange() {
     },
   }));
 }
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any)._state = _state;
+(window as any)._ensureLoaded = _ensureLoaded;
+(window as any).blockSource = blockSource;
+(window as any).unblockSource = unblockSource;
+(window as any).getBlockedSources = getBlockedSources;
+(window as any).isSourceBlocked = isSourceBlocked;
+(window as any).blockKeyword = blockKeyword;
+(window as any).unblockKeyword = unblockKeyword;
+(window as any).getBlockedKeywords = getBlockedKeywords;
+(window as any).dismissArticle = dismissArticle;
+(window as any).isDismissed = isDismissed;
+(window as any).undismissArticle = undismissArticle;
+(window as any).clearDismissed = clearDismissed;
+(window as any)._AD_MARKERS = _AD_MARKERS;
+(window as any)._isAdvertisement = _isAdvertisement;
+(window as any).shouldShowArticle = shouldShowArticle;
+(window as any).applyFilters = applyFilters;
+(window as any).extractKeywordFromTitle = extractKeywordFromTitle;
+(window as any).resetAllData = resetAllData;
+(window as any)._readArray = _readArray;
+(window as any)._writeArray = _writeArray;
+(window as any)._dispatchFilterChange = _dispatchFilterChange;

@@ -412,3 +412,19 @@ function _formatRelativeDate(date) {
 
   return date.toLocaleDateString('de-AT', { day: 'numeric', month: 'long' });
 }
+
+// --- Auto-generated global exports for Vite migration ---
+(window as any).SWIPE_THRESHOLD = SWIPE_THRESHOLD;
+(window as any).SWIPE_TAP_LIMIT = SWIPE_TAP_LIMIT;
+(window as any)._undoToastEl = _undoToastEl;
+(window as any)._undoTimer = _undoTimer;
+(window as any).renderCardGrid = renderCardGrid;
+(window as any)._createCard = _createCard;
+(window as any)._createImageWrap = _createImageWrap;
+(window as any)._createCardBody = _createCardBody;
+(window as any)._createActionButtons = _createActionButtons;
+(window as any)._setupSwipe = _setupSwipe;
+(window as any)._animateDismiss = _animateDismiss;
+(window as any)._showUndoToast = _showUndoToast;
+(window as any)._hideUndoToast = _hideUndoToast;
+(window as any)._formatRelativeDate = _formatRelativeDate;
