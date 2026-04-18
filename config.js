@@ -74,7 +74,7 @@ const CONFIG = {
    *
    * @type {boolean}
    */
-  AUTH_REQUIRED: true,
+  AUTH_REQUIRED: false,
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CORS-PROXY
