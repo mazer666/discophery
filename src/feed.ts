@@ -43,7 +43,7 @@
  *
  * @returns {Promise<DiscopheryArticle[]>} - Alle Artikel, neueste zuerst
  */
-async function loadAllFeeds() {
+export async function loadAllFeeds() {
   const activeFeeds = getActiveFeeds();  // feed-manager.js
   const accumulated = [];
   let failCount     = 0;
@@ -53,10 +53,16 @@ async function loadAllFeeds() {
   let preFetchedData = [];
   try {
     const res = await fetch('./data/feeds.json?r=' + Date.now());
-    if (res.ok) {
-      if (res.headers.get('content-type')?.includes('application/json')) {
-        try {
-          preFetchedData = await res.json();
+    if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+      try {
+        preFetchedData = await res.json();
+      } catch (e) {
+        console.warn('Failed to parse feeds.json', e);
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to fetch feeds.json', e);
+  }
           // Date-Strings zurück in echte Dates parsen
           preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
         } catch (e) {

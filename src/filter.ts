@@ -57,7 +57,7 @@ function _ensureLoaded() {
  * @param {string} sourceId - ID der Quelle aus config.js (z.B. "golem")
  * @returns {void}
  */
-function blockSource(sourceId) {
+export function blockSource(sourceId) {
   _ensureLoaded();
   _state.blockedSources.add(sourceId);
   _writeArray(CONFIG.STORAGE_KEYS.BLOCKED_SOURCES, [..._state.blockedSources]);
@@ -70,7 +70,7 @@ function blockSource(sourceId) {
  * @param {string} sourceId
  * @returns {void}
  */
-function unblockSource(sourceId) {
+export function unblockSource(sourceId) {
   _ensureLoaded();
   _state.blockedSources.delete(sourceId);
   _writeArray(CONFIG.STORAGE_KEYS.BLOCKED_SOURCES, [..._state.blockedSources]);
@@ -82,7 +82,7 @@ function unblockSource(sourceId) {
  *
  * @returns {string[]}
  */
-function getBlockedSources() {
+export function getBlockedSources() {
   _ensureLoaded();
   return [..._state.blockedSources];
 }
@@ -109,7 +109,7 @@ function isSourceBlocked(sourceId) {
  * @param {string} keyword - Zu blockierendes Wort oder Phrase
  * @returns {void}
  */
-function blockKeyword(keyword) {
+export function blockKeyword(keyword) {
   _ensureLoaded();
   const normalized = keyword.trim().toLowerCase();
   if (!normalized) return;
@@ -125,7 +125,7 @@ function blockKeyword(keyword) {
  * @param {string} keyword
  * @returns {void}
  */
-function unblockKeyword(keyword) {
+export function unblockKeyword(keyword) {
   _ensureLoaded();
   _state.blockedKeywords.delete(keyword.toLowerCase());
   _writeArray(CONFIG.STORAGE_KEYS.BLOCKED_KEYWORDS, [..._state.blockedKeywords]);
@@ -137,7 +137,7 @@ function unblockKeyword(keyword) {
  *
  * @returns {string[]}
  */
-function getBlockedKeywords() {
+export function getBlockedKeywords() {
   _ensureLoaded();
   return [..._state.blockedKeywords];
 }
@@ -282,7 +282,7 @@ function shouldShowArticle(article) {
  * @param {import('./feed.js').DiscopheryArticle[]} articles
  * @returns {import('./feed.js').DiscopheryArticle[]}
  */
-function applyFilters(articles) {
+export function applyFilters(articles) {
   return articles.filter(shouldShowArticle);
 }
 
@@ -296,7 +296,7 @@ function applyFilters(articles) {
  * @param {string} title
  * @returns {string} - Erstes bedeutungsvolles Wort, lowercase
  */
-function extractKeywordFromTitle(title) {
+export function extractKeywordFromTitle(title) {
   const stopWords = new Set([
     'der', 'die', 'das', 'ein', 'eine', 'einer', 'einem', 'einen',
     'und', 'oder', 'aber', 'doch', 'wie', 'was', 'wer', 'von', 'bei',
@@ -328,7 +328,7 @@ function extractKeywordFromTitle(title) {
  *
  * @returns {boolean} - true wenn zurückgesetzt, false wenn abgebrochen
  */
-function resetAllData() {
+export function resetAllData() {
   const confirmed = window.confirm(
     'Alle Filter, blockierten Quellen und weggewischten Artikel werden gelöscht.\n\nFortfahren?'
   );

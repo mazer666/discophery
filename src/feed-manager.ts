@@ -22,7 +22,7 @@
  *
  * @returns {import('./config.js').FeedConfig[]}
  */
-function getActiveFeeds() {
+export function getActiveFeeds() {
   const savedIds = _loadActiveIds();
   const custom   = getCustomFeeds();
 
@@ -39,7 +39,7 @@ function getActiveFeeds() {
  *
  * @returns {import('./config.js').FeedConfig[]}
  */
-function getCustomFeeds() {
+export function getCustomFeeds() {
   try {
     const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.CUSTOM_FEEDS);
     if (!raw) return [];
@@ -55,7 +55,7 @@ function getCustomFeeds() {
  * @param {boolean} active - true = aktivieren, false = deaktivieren
  * @returns {void}
  */
-function setFeedActive(feedId, active) {
+export function setFeedActive(feedId, active) {
   let ids = _loadActiveIds();
   if (ids === null) ids = FEED_CATALOGUE.filter(f => f.enabled).map(f => f.id);
 
@@ -77,7 +77,7 @@ function setFeedActive(feedId, active) {
  * @param {boolean} active   - true = aktivieren, false = deaktivieren
  * @returns {void}
  */
-function setCategoryActive(category, active) {
+export function setCategoryActive(category, active) {
   let ids = _loadActiveIds();
   if (ids === null) ids = [];
 
@@ -107,7 +107,7 @@ function setCategoryActive(category, active) {
  * @param {string} feedId
  * @returns {boolean}
  */
-function isFeedActive(feedId) {
+export function isFeedActive(feedId) {
   const ids = _loadActiveIds();
   if (ids === null) return FEED_CATALOGUE.find(f => f.id === feedId)?.enabled ?? false;
   return ids.includes(feedId);
@@ -119,7 +119,7 @@ function isFeedActive(feedId) {
  * @param {{ name:string, url:string, category:string, language:string }} data
  * @returns {{ success: boolean, error?: string }}
  */
-function addCustomFeed(data) {
+export function addCustomFeed(data) {
   const name     = data.name?.trim();
   const url      = data.url?.trim();
   const category = data.category || 'news';
@@ -152,7 +152,7 @@ function addCustomFeed(data) {
  * @param {string} feedId
  * @returns {void}
  */
-function removeCustomFeed(feedId) {
+export function removeCustomFeed(feedId) {
   const feeds = getCustomFeeds().filter(f => f.id !== feedId);
   try {
     localStorage.setItem(CONFIG.STORAGE_KEYS.CUSTOM_FEEDS, JSON.stringify(feeds));
@@ -171,7 +171,7 @@ function removeCustomFeed(feedId) {
  * @param {string} url
  * @returns {boolean}
  */
-function isValidFeedUrl(url) {
+export function isValidFeedUrl(url) {
   try {
     const u = new URL(url);
     return u.protocol === 'http:' || u.protocol === 'https:';

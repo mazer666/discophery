@@ -37,7 +37,7 @@ let _undoTimer   = null;
  * @param {HTMLElement}                             container - #card-grid Element
  * @returns {void}
  */
-function renderCardGrid(articles, container) {
+export function renderCardGrid(articles, container) {
   // Vorherigen Inhalt leeren ohne innerHTML (Sam)
   while (container.firstChild) container.removeChild(container.firstChild);
 

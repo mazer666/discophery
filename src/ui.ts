@@ -4,6 +4,14 @@
  * Setzt voraus: config.js, filter.js, feed.js, ui-cards.js
  */
 
+import { CONFIG } from './config';
+import { applyFilters, extractKeywordFromTitle, blockSource, blockKeyword, unblockSource, unblockKeyword, getBlockedSources, getBlockedKeywords, resetAllData } from './filter';
+import { FEED_CATALOGUE } from './feeds';
+import { loadAllFeeds } from './feed';
+import { renderCardGrid } from './ui-cards';
+import { openFeedManager } from './feed-manager-ui';
+import { getActiveFeeds } from './feed-manager';
+
 // ── State ────────────────────────────────────────────────────────────────────
 
 export let _allArticles    = [];
@@ -22,27 +30,27 @@ export function _ensureShellVisible() {
   _startAutoRefresh();
 }
 
-document.addEventListener('discophery:articles', (e: CustomEvent) => {
+document.addEventListener('discophery:articles', ((e: CustomEvent) => {
   _allArticles = e.detail.articles ?? [];
   try { localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_REFRESH, Date.now().toString()); } catch {}
   _renderUI();
-});
+}) as EventListener);
 
 document.addEventListener('discophery:filter-changed', () => {
   _renderUI();
   _renderSettingsContent();
 });
 
-document.addEventListener('discophery:context-menu-request', (e) => {
+document.addEventListener('discophery:context-menu-request', ((e: CustomEvent) => {
   _openContextMenu(e.detail.article);
-});
+}) as EventListener);
 
-document.addEventListener('discophery:source-filter-request', (e) => {
+document.addEventListener('discophery:source-filter-request', ((e: CustomEvent) => {
   _activeSource   = { id: e.detail.sourceId, name: e.detail.sourceName };
   _activeCategory = 'all';
   _renderUI();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+}) as EventListener);
 
 // ── Haupt-Render ──────────────────────────────────────────────────────────────
 
@@ -144,18 +152,23 @@ function _clearFilters() {
 
 // ── Zustands-Management ───────────────────────────────────────────────────────
 
-function _showState(state) {
-  const ids = ['loading-indicator', 'error-message', 'empty-message', 'card-grid'];
-  const map = { loading: 0, error: 1, empty: 2, content: 3 };
-  ids.forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = i === map[state] ? '' : 'none';
-  });
+export function _showState(state: 'loading' | 'error' | 'empty' | 'content') {
+  const loading = document.getElementById('loading-indicator');
+  const error   = document.getElementById('error-message');
+  const empty   = document.getElementById('empty-message');
+  const grid    = document.getElementById('card-grid');
 
-  const filterBtn = document.getElementById('btn-clear-filter-from-empty');
-  if (filterBtn) {
-    const hasFilter = state === 'empty' && (_activeCategory !== 'all' || _activeSource !== null);
-    filterBtn.style.display = hasFilter ? '' : 'none';
+  if (loading) loading.style.display = (state === 'loading' ? 'flex' : 'none');
+  if (error)   error.style.display   = (state === 'error'   ? 'flex' : 'none');
+  if (empty)   empty.style.display   = (state === 'empty'   ? 'flex' : 'none');
+  if (grid)    grid.style.display    = (state === 'content' ? 'grid' : 'none');
+
+  if (state === 'empty') {
+    const btn = document.getElementById('btn-clear-filter-from-empty');
+    if (btn) {
+      const hasFilter = _activeCategory !== 'all' || _activeSource !== null;
+      btn.style.display = hasFilter ? 'block' : 'none';
+    }
   }
 }
 
@@ -221,18 +234,18 @@ function _renderSettingsContent() {
       { v: 'auto', t: 'Automatisch' },
       { v: 'light', t: 'Hell' },
       { v: 'dark', t: 'Dunkel' }
-    ], localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto', (e) => _applyTheme(e.target.value))),
+    ], localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto', (e) => _applyTheme((e.target as HTMLSelectElement).value))),
     _createSettingsRow('Sortierung', _createSelect('select-sort-order', [
       { v: 'date-desc', t: 'Neueste zuerst' },
       { v: 'date-asc', t: 'Älteste zuerst' }
     ], localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, e.target.value);
+      localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, (e.target as HTMLSelectElement).value);
       _renderUI();
     })),
     _createSettingsRow('Icon-Größe (px)', _createNumberInput('input-icon-size',
       parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT,
       16, 48, (e) => {
-        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, e.target.value);
+        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, (e.target as HTMLInputElement).value);
         // Live Update falls der Manager offen ist? (Optional)
       }))
   ]));
@@ -264,7 +277,7 @@ function _renderSettingsContent() {
       { v: '30', t: '30 Min' },
       { v: '60', t: '60 Min' }
     ], localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '30', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, e.target.value);
+      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, (e.target as HTMLSelectElement).value);
       _startAutoRefresh();
     })),
     _createSettingsRow('', _createButton('btn-reset-all', 'Alle Daten zurücksetzen', 'btn--destructive', () => {
@@ -368,7 +381,7 @@ function _startAutoRefresh() {
 function _loadRefreshIntervalSetting() {
   const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL);
   const sel = document.getElementById('select-refresh-interval');
-  if (sel && saved !== null) sel.value = saved;
+  if (sel && saved !== null) (sel as HTMLSelectElement).value = saved;
 }
 
 function _applyTheme(value) {
@@ -383,17 +396,17 @@ function _applyTheme(value) {
 
 function _loadThemeSetting() {
   const sel = document.getElementById('select-theme');
-  if (sel) sel.value = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto';
+  if (sel) (sel as HTMLSelectElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto';
 }
 
 function _loadSortSetting() {
   const sel = document.getElementById('select-sort-order');
-  if (sel) sel.value = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc';
+  if (sel) (sel as HTMLSelectElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc';
 }
 
 function _loadIconSizeSetting() {
   const inp = document.getElementById('input-icon-size');
-  if (inp) inp.value = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) || CONFIG.ICON_SIZE_DEFAULT;
+  if (inp) (inp as HTMLInputElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) || String(CONFIG.ICON_SIZE_DEFAULT);
 }
 
 // ── Button-Verdrahtung ────────────────────────────────────────────────────────
@@ -404,7 +417,7 @@ function _wireStaticButtons() {
 
   document.getElementById('input-app-search')
     ?.addEventListener('input', (e) => {
-      _searchQuery = e.target.value.toLowerCase();
+      _searchQuery = (e.target as HTMLInputElement).value.toLowerCase();
       _renderUI();
     });
 
@@ -479,6 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
 (window as any)._loadRefreshIntervalSetting = _loadRefreshIntervalSetting;
 (window as any)._applyTheme = _applyTheme;
 (window as any)._loadThemeSetting = _loadThemeSetting;
-(window as any)._loadAuthSetting = _loadAuthSetting;
+
 (window as any)._loadSortSetting = _loadSortSetting;
 (window as any)._wireStaticButtons = _wireStaticButtons;
