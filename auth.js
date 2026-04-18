@@ -199,11 +199,6 @@ function _loadSession() {
   }
 }
 
-/**
- * Löscht die Session und setzt den State zurück.
- *
- * @returns {void}
- */
 function _clearSession() {
   try {
     sessionStorage.removeItem(SESSION_KEY);

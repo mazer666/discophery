@@ -208,6 +208,8 @@ const CONFIG = {
     THEME:               'discophery_theme',
     /** 'true' | 'false' — überschreibt CONFIG.AUTH_REQUIRED wenn gesetzt */
     AUTH_ENABLED:        'discophery_auth_enabled',
+    /** 'date-desc' | 'date-asc' — Sortierreihenfolge der Artikel */
+    SORT_ORDER:          'discophery_sort_order',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
