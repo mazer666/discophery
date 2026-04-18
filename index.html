@@ -19,23 +19,7 @@
     img-src:     Vorschaubilder kommen von beliebigen HTTPS-Quellen
     style-src:   unsafe-inline nötig weil Google Sign-In Button Inline-Styles injiziert
   -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src  'self' https://accounts.google.com/gsi/client;
-    frame-src   https://accounts.google.com;
-    connect-src 'self'
-                https://accounts.google.com
-                https://api.allorigins.win
-                https://corsproxy.io
-                https://news.google.com
-                https://rss.golem.de
-                https://www.heise.de
-                https://rss.orf.at
-                https://www.derstandard.at
-                https://diepresse.com;
-    img-src     'self' data: https:;
-    style-src   'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
-  ">
+  <!-- <meta http-equiv="Content-Security-Policy" content="..."> -->
 
   <title>Discophery</title>
 
@@ -62,8 +46,6 @@
     Stylesheets: zuerst das Design-System (Custom Properties),
     dann die Komponenten die darauf aufbauen.
   -->
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style-components.css">
 
   <!--
     Google Identity Services — Einzige externe Bibliothek.
@@ -526,8 +508,7 @@
          filter.js        → Filterregeln & Dismiss
        SCRIPTS
        ═══════════════════════════════════════════════════════════════════ -->
-  <link rel="stylesheet" href="style-feed-manager.css">
-  <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="src/main.ts"></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
 
 </body>

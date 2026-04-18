@@ -54,9 +54,17 @@ async function loadAllFeeds() {
   try {
     const res = await fetch('./data/feeds.json?r=' + Date.now());
     if (res.ok) {
-      preFetchedData = await res.json();
-      // Date-Strings zurück in echte Dates parsen
-      preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
+      if (res.headers.get('content-type')?.includes('application/json')) {
+        try {
+          preFetchedData = await res.json();
+          // Date-Strings zurück in echte Dates parsen
+          preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
+        } catch (e) {
+          console.warn('feeds.json konnte nicht geladen werden (evtl HTML Fallback)', e);
+        }
+      } else {
+        console.warn('feeds.json has wrong content-type (likely Vite fallback)');
+      }
     }
   } catch (err) {
     console.info('Pre-fetch feeds.json nicht ladbar, falle zurück auf Proxy-Modus.', err);
