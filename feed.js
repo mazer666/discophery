@@ -45,34 +45,61 @@
  */
 async function loadAllFeeds() {
   const activeFeeds = getActiveFeeds();  // feed-manager.js
-
   const accumulated = [];
   let failCount     = 0;
   let firstFired    = false;
 
-  // Alle Feeds gleichzeitig starten; sobald der erste antwortet → sofort rendern
-  const promises = activeFeeds.map(feed =>
-    _loadFeed(feed)
-      .then(articles => {
-        accumulated.push(...articles);
-        if (!firstFired && accumulated.length > 0) {
-          firstFired = true;
-          _dispatchArticles(accumulated);
-        }
-      })
-      .catch(err => {
-        failCount++;
-        console.warn('Feed fehlgeschlagen:', err?.message ?? err);
-      })
-  );
-
-  await Promise.allSettled(promises);
-
-  if (failCount > 0) {
-    console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
+  // 1. Static pre-fetched JSON laden (extrem schnell, kein CORS)
+  let preFetchedData = [];
+  try {
+    const res = await fetch('./data/feeds.json?r=' + Date.now());
+    if (res.ok) {
+      preFetchedData = await res.json();
+      // Date-Strings zurück in echte Dates parsen
+      preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
+    }
+  } catch (err) {
+    console.info('Pre-fetch feeds.json nicht ladbar, falle zurück auf Proxy-Modus.', err);
   }
 
-  // Finales Update mit allen eingetroffenen Feeds
+  // 2. Herausfinden welche Feeds wir nicht im JSON haben (z.B. Custom Feeds)
+  const activeFeedIds = new Set(activeFeeds.map(f => f.id));
+  const availableIdsInJSON = new Set(preFetchedData.map(a => a.sourceId));
+  
+  // Alle Artikel die im JSON waren übernehmen
+  const preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
+  if (preFetchedArticles.length > 0) {
+    accumulated.push(...preFetchedArticles);
+    firstFired = true;
+    _dispatchArticles(accumulated);
+  }
+
+  // 3. Fehlende Feeds via Proxy laden
+  const missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
+
+  if (missingFeeds.length > 0) {
+    const promises = missingFeeds.map(feed =>
+      _loadFeed(feed)
+        .then(articles => {
+          accumulated.push(...articles);
+          if (!firstFired && accumulated.length > 0) {
+            firstFired = true;
+            _dispatchArticles(accumulated);
+          }
+        })
+        .catch(err => {
+          failCount++;
+          console.warn('Feed fehlgeschlagen:', err?.message ?? err);
+        })
+    );
+
+    await Promise.allSettled(promises);
+    if (failCount > 0) {
+      console.info(`${failCount} von ${missingFeeds.length} Fallback-Feeds konnten nicht geladen werden.`);
+    }
+  }
+
+  // Finales Update
   _dispatchArticles(accumulated);
 }
 

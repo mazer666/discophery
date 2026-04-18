@@ -123,6 +123,11 @@
 
       <span class="app-header__logo">Discophery</span>
 
+      <div class="app-header__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="input-app-search" placeholder="Artikel suchen..." aria-label="Artikel durchsuchen">
+      </div>
+
       <div class="app-header__actions">
 
         <!-- Feed-Manager-Button -->
@@ -334,106 +339,89 @@
         </button>
       </div>
 
-      <p class="modal__section-title">Blockierte Quellen</p>
-      <!-- ui.js rendert hier Tags per createElement — kein innerHTML -->
-      <div id="settings-blocked-sources" aria-live="polite">
-        <!-- Platzhalter-Text wenn Liste leer -->
-        <span style="color: var(--color-text-tertiary); font-size: var(--font-size-sm)">
-          Keine blockierten Quellen.
-        </span>
-      </div>
-
-      <p class="modal__section-title">Blockierte Keywords</p>
-      <div id="settings-blocked-keywords" aria-live="polite">
-        <span style="color: var(--color-text-tertiary); font-size: var(--font-size-sm)">
-          Keine blockierten Keywords.
-        </span>
+      <div class="settings-section">
+        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-2)">
+          <span style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase;">Blockierte Quellen</span>
+          <div id="settings-blocked-sources" aria-live="polite">
+            <span style="color: var(--color-text-tertiary);">Keine blockierten Quellen.</span>
+          </div>
+        </div>
+        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-2)">
+          <span style="font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase;">Blockierte Keywords</span>
+          <div id="settings-blocked-keywords" aria-live="polite">
+            <span style="color: var(--color-text-tertiary);">Keine blockierten Keywords.</span>
+          </div>
+        </div>
       </div>
 
       <p class="modal__section-title">Erscheinungsbild</p>
-      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
-        <select id="select-theme"
-                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
-                       border:1px solid var(--color-border); background:var(--color-surface-2);
-                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
-          <option value="auto">Automatisch (System)</option>
-          <option value="light">Hell</option>
-          <option value="dark">Dunkel</option>
-        </select>
+      <div class="settings-section">
+        <div class="settings-row">
+          <label for="select-theme">Design Theme</label>
+          <select id="select-theme">
+            <option value="auto">Automatisch (System)</option>
+            <option value="light">Hell</option>
+            <option value="dark">Dunkel</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label for="select-sort-order">Sortierung</label>
+          <select id="select-sort-order">
+            <option value="date-desc">Neueste zuerst</option>
+            <option value="date-asc">Älteste zuerst</option>
+          </select>
+        </div>
       </div>
 
-      <p class="modal__section-title">Sortierung</p>
-      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
-        <select id="select-sort-order"
-                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
-                       border:1px solid var(--color-border); background:var(--color-surface-2);
-                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
-          <option value="date-desc">Neueste zuerst</option>
-          <option value="date-asc">Älteste zuerst</option>
-        </select>
+      <p class="modal__section-title">Erweitert</p>
+      <div class="settings-section">
+        <div class="settings-row">
+          <label for="select-refresh-interval" style="white-space:nowrap">Auto-Sync (Minuten)</label>
+          <select id="select-refresh-interval">
+            <option value="0">Manuell</option>
+            <option value="5">5 Min</option>
+            <option value="10">10 Min</option>
+            <option value="15">15 Min</option>
+            <option value="30" selected>30 Min</option>
+            <option value="60">60 Min</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label for="select-auth-required" style="white-space:nowrap">Google-Login forcieren</label>
+          <select id="select-auth-required">
+            <option value="false">Nein (Lokal)</option>
+            <option value="true">Ja</option>
+          </select>
+        </div>
+        <div class="settings-row" style="padding: 0;">
+          <button id="btn-open-feed-manager-from-settings" class="btn btn--ghost btn--full" style="border:none; border-radius: 0; justify-content: space-between; padding: var(--space-4);" onclick="openFeedManager()">
+            Feeds verwalten
+            <span aria-hidden="true" style="color: var(--color-text-tertiary)">→</span>
+          </button>
+        </div>
       </div>
 
-      <p class="modal__section-title">Auto-Sync</p>
-      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
-        <label for="select-refresh-interval"
-               style="font-size:var(--font-size-sm); color:var(--color-text-secondary); white-space:nowrap">
-          Alle
-        </label>
-        <select id="select-refresh-interval"
-                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
-                       border:1px solid var(--color-border); background:var(--color-surface-2);
-                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
-          <option value="0">Manuell (deaktiviert)</option>
-          <option value="5">5 Minuten</option>
-          <option value="10">10 Minuten</option>
-          <option value="15">15 Minuten</option>
-          <option value="30" selected>30 Minuten</option>
-          <option value="60">60 Minuten</option>
-        </select>
-      </div>
-
-      <p class="modal__section-title">Feeds</p>
-      <div style="margin-top: var(--space-2)">
-        <button id="btn-open-feed-manager-from-settings" class="btn btn--ghost btn--full"
-                onclick="openFeedManager()">
-          Feeds verwalten &amp; hinzufügen →
-        </button>
-      </div>
-
-      <p class="modal__section-title">Anmeldung</p>
-      <div style="margin-top: var(--space-2); display:flex; align-items:center; gap:var(--space-3)">
-        <label for="select-auth-required"
-               style="font-size:var(--font-size-sm); color:var(--color-text-secondary); white-space:nowrap">
-          Google-Login
-        </label>
-        <select id="select-auth-required"
-                style="flex:1; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
-                       border:1px solid var(--color-border); background:var(--color-surface-2);
-                       color:var(--color-text-primary); font-size:var(--font-size-sm)">
-          <option value="false">Deaktiviert (lokal starten)</option>
-          <option value="true">Erforderlich</option>
-        </select>
-      </div>
-      <p style="font-size:var(--font-size-xs); color:var(--color-text-tertiary); margin-top:var(--space-1)">
-        Wirkt beim nächsten Seitenaufruf.
-      </p>
-
-      <p class="modal__section-title" id="settings-user-label" style="display:none">Angemeldet als</p>
-      <!-- auth.js befüllt diesen Bereich mit Name und E-Mail per textContent -->
-      <div id="settings-user-info" style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">
-      </div>
-
-      <div id="settings-logout-row" style="margin-top: var(--space-4); display:none">
-        <button id="btn-logout" class="btn btn--ghost btn--full">Abmelden</button>
+      <div id="settings-logout-row" style="display:none">
+        <p class="modal__section-title">Account</p>
+        <div class="settings-section">
+          <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: var(--space-1)">
+            <span id="settings-user-label" style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; font-weight: 600;">Angemeldet als</span>
+            <div id="settings-user-info" style="font-size: var(--font-size-base); font-weight: 500;"></div>
+          </div>
+          <div class="settings-row" style="padding: 0;">
+            <button id="btn-logout" class="btn btn--destructive btn--full" style="border:none; border-radius: 0;">Abmelden</button>
+          </div>
+        </div>
       </div>
 
       <!--
         "Alles zurücksetzen" ganz unten — bewusst weit weg von anderen Buttons.
-        filter.js zeigt einen Bestätigungsdialog bevor Daten gelöscht werden.
       -->
-      <button id="btn-reset-all" class="btn btn--destructive btn--full">
-        Alle Daten zurücksetzen
-      </button>
+      <div style="margin-top: var(--space-6);">
+        <button id="btn-reset-all" class="btn btn--destructive btn--full">
+          Alle Daten & Filter zurücksetzen
+        </button>
+      </div>
 
     </div><!-- /settings-modal -->
   </div><!-- /settings-modal-backdrop -->

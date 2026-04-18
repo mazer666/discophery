@@ -31,11 +31,9 @@ Code muss deshalb ausführlich kommentiert sein — jede Funktion erklärt was u
 - Kein Backend nötig → kein Server, keine Kosten, keine Wartung
 - Filter/Präferenzen sind gerätespezifisch, das ist gewünscht
 
-### Warum allorigins.win als CORS-Proxy?
-- Browser blockieren direkte Anfragen an fremde Domains (CORS-Policy)
-- allorigins.win leitet die Anfrage serverseitig weiter
-- Kostenlos, keine API-Key nötig
-- Fallback: corsproxy.io (in config.js konfigurierbar)
+### Warum allorigins.win als CORS-Proxy (nur Fallback!)?
+- Früher war dies die primäre Datenquelle. Jetzt läuft eine GitHub Action alle 5 Minuten (`scripts/fetch_feeds.py`) und generiert `data/feeds.json`.
+- `allorigins.win` wird nur noch als Client-Fallback für unbekannte Custom-Feeds verwendet, die nicht zur Compile-Zeit im `feeds.js` hinterlegt waren.
 
 ### Warum Google Identity Services statt Firebase Auth?
 - Kein Firebase-Setup nötig
@@ -146,8 +144,7 @@ Alle RSS-Feeds werden in dieses einheitliche Format konvertiert:
 
 ## Bekannte Limitierungen
 
-- **CORS-Proxy:** allorigins.win ist ein öffentlicher Dienst — kann ausfallen.  
-  Fallback in config.js konfiguriert. Für Produktionsbetrieb eigenen Proxy erwägen.
+- **CORS-Proxy (nur Custom Feeds):** Fallback greift nur bei selbst hinzugefügten Feeds. Alle Standard-Feeds kommen blitzschnell via GitHub Action aus `data/feeds.json`.
 - **Bilder:** Nicht alle RSS-Feeds liefern Vorschaubilder. Fallback: Quell-Logo.
 - **Rate Limiting:** Zu viele Feeds gleichzeitig können den CORS-Proxy überlasten.  
   Feeds werden deshalb sequenziell mit 200ms Pause geladen.

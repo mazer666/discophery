@@ -9,6 +9,7 @@
 let _allArticles    = [];
 let _activeCategory = 'all';
 let _activeSource   = null;
+let _searchQuery    = '';
 let _refreshTimer   = null;
 let _contextArticle = null;
 
@@ -44,6 +45,13 @@ function _renderUI() {
     ? _allArticles
     : _allArticles.filter(a => a.category === _activeCategory);
   if (_activeSource) pool = pool.filter(a => a.sourceId === _activeSource.id);
+
+  if (_searchQuery) {
+    pool = pool.filter(a => 
+      a.title.toLowerCase().includes(_searchQuery) || 
+      a.source.toLowerCase().includes(_searchQuery)
+    );
+  }
 
   const filtered = applyFilters(pool);
   _renderChips();
@@ -282,6 +290,12 @@ function _loadSortSetting() {
 function _wireStaticButtons() {
   document.getElementById('btn-refresh')
     ?.addEventListener('click', () => { _showState('loading'); loadAllFeeds(); });
+
+  document.getElementById('input-app-search')
+    ?.addEventListener('input', (e) => {
+      _searchQuery = e.target.value.toLowerCase();
+      _renderUI();
+    });
 
   document.getElementById('btn-settings')    ?.addEventListener('click', _openSettingsModal);
   document.getElementById('btn-close-settings')?.addEventListener('click', _closeSettingsModal);
