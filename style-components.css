@@ -289,14 +289,6 @@
   pointer-events: all;
 }
 
-.modal-backdrop--open .modal {
-  transform: translateY(0);
-}
-
-.modal-backdrop--open .modal {
-  transform: translateY(0);
-}
-
 .modal {
   background: var(--color-surface);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -308,7 +300,9 @@
   transition: transform var(--transition-normal);
 }
 
-.modal-backdrop--open .modal { transform: translateY(0); }
+.modal-backdrop--open .modal {
+  transform: translateY(0);
+}
 
 .modal__header {
   display: flex;

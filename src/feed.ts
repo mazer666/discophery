@@ -56,20 +56,10 @@ export async function loadAllFeeds() {
     if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
       try {
         preFetchedData = await res.json();
+        // Date-Strings zurück in echte Dates parsen
+        preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
       } catch (e) {
-        console.warn('Failed to parse feeds.json', e);
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to fetch feeds.json', e);
-  }
-          // Date-Strings zurück in echte Dates parsen
-          preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
-        } catch (e) {
-          console.warn('feeds.json konnte nicht geladen werden (evtl HTML Fallback)', e);
-        }
-      } else {
-        console.warn('feeds.json has wrong content-type (likely Vite fallback)');
+        console.warn('feeds.json parse error:', e);
       }
     }
   } catch (err) {
