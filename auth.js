@@ -57,8 +57,9 @@ function initAuth() {
   const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_ENABLED);
   const authRequired = stored !== null ? stored === 'true' : CONFIG.AUTH_REQUIRED;
 
-  // Wenn Auth deaktiviert: direkt App starten ohne Login
+  // Wenn Auth deaktiviert: direkt App starten, Google One-Tap unterdrücken
   if (!authRequired) {
+    if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
     _showApp(null);
     return;
   }
