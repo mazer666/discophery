@@ -1,0 +1,22 @@
+{
+  "name": "Discophery",
+  "short_name": "Discophery",
+  "description": "Persönlicher RSS-Feed – werbefreier News-Reader ähnlich Google Discover",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#0071e3",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "entertainment", "lifestyle"],
+  "screenshots": []
+}
