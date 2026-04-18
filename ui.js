@@ -25,6 +25,9 @@ let _allArticles = [];
 /** Aktuell gewählte Kategorie ('all' oder ein Kategorie-Key aus config.js) */
 let _activeCategory = 'all';
 
+/** Aktuell gewählte Quellenfilterung ({ id, name }) oder null für alle Quellen */
+let _activeSource = null;
+
 /** Timer-ID für Auto-Refresh (clearInterval beim manuellen Refresh) */
 let _refreshTimer = null;
 
@@ -77,11 +80,11 @@ document.addEventListener('discophery:context-menu-request', (e) => {
  * @returns {void}
  */
 function _renderUI() {
-  const filtered = applyFilters(
-    _activeCategory === 'all'
-      ? _allArticles
-      : _allArticles.filter(a => a.category === _activeCategory)
-  );
+  let pool = _activeCategory === 'all'
+    ? _allArticles
+    : _allArticles.filter(a => a.category === _activeCategory);
+  if (_activeSource) pool = pool.filter(a => a.sourceId === _activeSource.id);
+  const filtered = applyFilters(pool);
 
   _renderChips();
 
@@ -122,6 +125,8 @@ function _renderChips() {
 
   while (nav.firstChild) nav.removeChild(nav.firstChild);
 
+  if (_activeSource) nav.appendChild(_createSourceChip(_activeSource));
+
   // "Alle"-Chip immer zuerst
   nav.appendChild(_createChip('all', 'Alle'));
 
@@ -154,6 +159,22 @@ function _createChip(category, label) {
 
   return btn;
 }
+
+function _createSourceChip(source) {
+  const btn = document.createElement('button');
+  btn.className = 'chip chip--active chip--source';
+  btn.setAttribute('aria-label', `Quellfilter "${source.name}" aufheben`);
+  btn.textContent = source.name + ' ×';
+  btn.addEventListener('click', () => { _activeSource = null; _renderUI(); });
+  return btn;
+}
+
+document.addEventListener('discophery:source-filter-request', (e) => {
+  _activeSource   = { id: e.detail.sourceId, name: e.detail.sourceName };
+  _activeCategory = 'all';
+  _renderUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ZUSTANDS-MANAGEMENT (Laden / Fehler / Leer / Inhalt)
@@ -413,6 +434,7 @@ function _wireStaticButtons() {
       if (resetAllData()) {  // filter.js — zeigt confirm()-Dialog
         _allArticles    = [];
         _activeCategory = 'all';
+        _activeSource   = null;
         _closeSettingsModal();
         _showState('loading');
         loadAllFeeds();  // feed.js

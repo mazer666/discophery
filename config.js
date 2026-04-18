@@ -93,7 +93,7 @@ const CONFIG = {
    *
    * @type {string}
    */
-  PROXY_PRIMARY: 'https://api.allorigins.win/get?url=',
+  PROXY_PRIMARY: 'https://api.allorigins.win/raw?url=',
 
   /**
    * Fallback-Proxy falls der primäre Proxy nicht antwortet.

@@ -122,30 +122,14 @@ async function _loadFeed(feed) {
 // PROXY-REQUESTS
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Lädt eine URL über den primären CORS-Proxy (allorigins.win).
- * Antwortformat: { contents: "<rss>...</rss>", status: { ... } }
- *
- * @param {string} url - Zu ladende Feed-URL
- * @returns {Promise<string>} - Roher XML-Text
- */
+/** Lädt URL via primären Proxy (allorigins /raw); erkennt Encoding aus XML-Deklaration. */
 async function _fetchWithPrimaryProxy(url) {
-  const proxyUrl = CONFIG.PROXY_PRIMARY + encodeURIComponent(url);
-
-  const response = await _fetchWithTimeout(proxyUrl, CONFIG.FETCH_TIMEOUT_MS);
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} vom primären Proxy`);
-  }
-
-  const data = await response.json();
-
-  // allorigins.win liefert den Inhalt unter data.contents
-  if (!data?.contents) {
-    throw new Error('Primärer Proxy: leere Antwort (kein contents-Feld)');
-  }
-
-  return _fixMojibake(data.contents);
+  const resp = await _fetchWithTimeout(CONFIG.PROXY_PRIMARY + encodeURIComponent(url), CONFIG.FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status} vom primären Proxy`);
+  const buf     = await resp.arrayBuffer();
+  const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
+  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
+  return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
 /** Lädt URL via Fallback-Proxy; erkennt Encoding aus XML-Deklaration. */
@@ -156,12 +140,6 @@ async function _fetchWithFallbackProxy(url) {
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
   const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
-}
-
-/** Repariert Mojibake (UTF-8-als-Latin-1) wenn allorigins ISO-8859-1-Feeds falsch liest. */
-function _fixMojibake(s) {
-  try { return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(s,c=>c.charCodeAt(0))); }
-  catch { return s; }
 }
 
 /**

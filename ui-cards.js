@@ -134,9 +134,15 @@ function _createCardBody(article) {
   const meta   = document.createElement('div');
   meta.className = 'card__meta';
 
-  const source = document.createElement('span');
+  const source = document.createElement('button');
   source.className   = 'card__source';
   source.textContent = article.source;
+  source.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.dispatchEvent(new CustomEvent('discophery:source-filter-request', {
+      detail: { sourceId: article.sourceId, sourceName: article.source },
+    }));
+  });
 
   const sep  = document.createElement('span');
   sep.textContent    = '·';
