@@ -11,29 +11,27 @@ import './feed.ts';
 import './ui-cards.ts';
 import './ui.ts';
 
+import { _ensureShellVisible, _showState } from './ui.ts';
+import { openFeedManager } from './feed-manager-ui.ts';
+import { getActiveFeeds } from './feed-manager.ts';
+import { loadAllFeeds } from './feed.ts';
+
 /**
  * App-Start Initialisierung.
+ * Keine Feeds → Feed-Manager öffnen.
+ * Feeds vorhanden → Laden starten.
  */
 function init() {
-  // App-Shell anzeigen (über ui.ts)
   _ensureShellVisible();
 
-  // Auto-Open Feed Manager wenn keine Quellen gewählt sind
   const activeFeeds = getActiveFeeds();
   if (activeFeeds.length === 0) {
     console.info('Keine Feeds vorhanden — öffne Feed-Manager automatisch.');
-    
-    // Spinner ausblenden & Leermarkierung zeigen
-    if (typeof (window as any)._showState === 'function') {
-      (window as any)._showState('empty');
-    }
-    
-    setTimeout(() => {
-      if (typeof openFeedManager === 'function') openFeedManager();
-    }, 800); 
+    _showState('empty');
+    setTimeout(() => openFeedManager(), 600);
   } else {
-    // Wenn Feeds da sind: Laden starten!
-    if (typeof loadAllFeeds === 'function') loadAllFeeds();
+    _showState('loading');
+    loadAllFeeds();
   }
 }
 
