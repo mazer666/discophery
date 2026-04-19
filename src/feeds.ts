@@ -40,7 +40,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'bbc-news',     name: 'BBC News',             url: 'https://feeds.bbci.co.uk/news/rss.xml',                          category: 'politik',      language: 'en', enabled: false },
   { id: 'guardian',     name: 'The Guardian',         url: 'https://www.theguardian.com/world/rss',                          category: 'politik',      language: 'en', enabled: false },
-  { id: 'reuters',      name: 'Reuters',              url: 'https://feeds.reuters.com/reuters/topNews',                      category: 'politik',      language: 'en', enabled: false },
+  { id: 'reuters',      name: 'Reuters',              url: 'https://feeds.reuters.com/reuters/worldNews',                    category: 'politik',      language: 'en', enabled: false },
   { id: 'aljazeera',    name: 'Al Jazeera',           url: 'https://www.aljazeera.com/xml/rss/all.xml',                      category: 'politik',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -118,7 +118,7 @@ export const FEED_CATALOGUE = [
   { id: 'gamepro',      name: 'GamePro',               url: 'https://www.gamepro.de/feed.cfm',                                category: 'gaming',       language: 'de', enabled: false },
   { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss_feed/alle_news.xml',    category: 'gaming',       language: 'de', enabled: false },
   { id: 'polygon',      name: 'Polygon',               url: 'https://www.polygon.com/rss/index.xml',                          category: 'gaming',       language: 'en', enabled: false },
-  { id: 'ign',          name: 'IGN',                   url: 'https://feeds.feedburner.com/ign/all',                           category: 'gaming',       language: 'en', enabled: false },
+  { id: 'ign',          name: 'IGN',                   url: 'https://feeds.ign.com/ign/all',                                  category: 'gaming',       language: 'en', enabled: false },
   { id: 'eurogamer',    name: 'Eurogamer',             url: 'https://www.eurogamer.net/?format=rss',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'rps',          name: 'Rock Paper Shotgun',    url: 'https://www.rockpapershotgun.com/feed',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'kotaku',       name: 'Kotaku',                url: 'https://kotaku.com/rss',                                         category: 'gaming',       language: 'en', enabled: false },
@@ -183,7 +183,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'auto-ms',      name: 'Auto Motor Sport',      url: 'https://www.auto-motor-und-sport.de/feed/',                     category: 'auto',         language: 'de', enabled: false },
   { id: 'autobild',     name: 'Auto Bild',             url: 'https://www.autobild.de/rss/24hours.rss',                       category: 'auto',         language: 'de', enabled: false },
-  { id: 'caranddriver', name: 'Car and Driver',        url: 'https://www.caranddriver.com/rss/all.xml/',                     category: 'auto',         language: 'en', enabled: false },
+  { id: 'caranddriver', name: 'Car and Driver',        url: 'https://www.caranddriver.com/rss/all.xml',                      category: 'auto',         language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // UMWELT & KLIMA
@@ -205,7 +205,7 @@ export const FEED_CATALOGUE = [
   { id: 'elle-de',      name: 'Elle Deutschland',      url: 'https://www.elle.com/de/feed/',                                  category: 'fashion',      language: 'de', enabled: false },
   { id: 'vogue-en',     name: 'Vogue (EN)',             url: 'https://www.vogue.com/feed/rss',                                 category: 'fashion',      language: 'en', enabled: false },
   { id: 'wwd',          name: 'WWD (Women\'s Wear Daily)', url: 'https://wwd.com/feed/',                                      category: 'fashion',      language: 'en', enabled: false },
-  { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/.rss',                                   category: 'fashion',      language: 'en', enabled: false },
+  { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/feed',                                   category: 'fashion',      language: 'en', enabled: false },
   { id: 'business-of-fashion', name: 'Business of Fashion', url: 'https://www.businessoffashion.com/feed',                   category: 'fashion',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
