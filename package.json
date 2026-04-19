@@ -7,9 +7,18 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "news",
+    "rss",
+    "feed",
+    "reader",
+    "privacy",
+    "ad-free"
+  ],
+  "author": "mazer666",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
   "devDependencies": {
     "typescript": "^6.0.3",
     "vite": "^8.0.8"
