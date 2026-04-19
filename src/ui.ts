@@ -21,6 +21,8 @@ let _previewArticles = [];
 let _searchQuery    = '';
 let _refreshTimer   = null;
 let _contextArticle = null;
+let _shuffledArticles = null;
+let _lastShuffledId = null; // Um zu erkennen ob wir neu mischen müssen
 
 export function _ensureShellVisible() {
   const shell = document.getElementById('app-shell');
@@ -97,10 +99,52 @@ function _renderUI() {
 function _sortArticles(articles) {
   const order = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc';
   const copy  = [...articles];
-  copy.sort(order === 'date-asc'
-    ? (a, b) => a.date - b.date
-    : (a, b) => b.date - a.date);
+
+  if (order === 'random') {
+    // Wenn sich die Artikel geändert haben oder noch nie gemischt wurde: neu mischen
+    // Wir nutzen eine einfache Heuristik: Summe der IDs oder einfach Länge + ID des ersten
+    const currentId = articles.length > 0 ? (articles.length + articles[0].id) : 0;
+    if (_shuffledArticles === null || _lastShuffledId !== currentId) {
+      _shuffledArticles = _shuffleArray([...articles]);
+      _lastShuffledId = currentId;
+    }
+    return _shuffledArticles;
+  }
+
+  // Für andere Sortierungen löschen wir den Cache
+  _shuffledArticles = null;
+
+  copy.sort((a, b) => {
+    switch (order) {
+      case 'date-asc':
+        return a.date - b.date;
+      case 'category-asc':
+        if (a.category < b.category) return -1;
+        if (a.category > b.category) return 1;
+        return b.date - a.date; // Sekundär: Neueste zuerst
+      case 'category-desc':
+        if (a.category < b.category) return 1;
+        if (a.category > b.category) return -1;
+        return b.date - a.date; // Sekundär: Neueste zuerst
+      case 'date-desc':
+      default:
+        return b.date - a.date;
+    }
+  });
+
   return copy;
+}
+
+/**
+ * Fisher-Yates Shuffle Algorithmus
+ */
+function _shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 // ── Filter-Chips ──────────────────────────────────────────────────────────────
@@ -257,8 +301,11 @@ function _renderSettingsContent() {
       { v: 'dark', t: 'Dunkel' }
     ], localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto', (e) => _applyTheme((e.target as HTMLSelectElement).value))),
     _createSettingsRow('Sortierung', _createSelect('select-sort-order', [
-      { v: 'date-desc', t: 'Neueste zuerst' },
-      { v: 'date-asc', t: 'Älteste zuerst' }
+      { v: 'date-desc', t: 'Datum (Neueste zuerst)' },
+      { v: 'date-asc', t: 'Datum (Älteste zuerst)' },
+      { v: 'category-asc', t: 'Themengebiet (A-Z)' },
+      { v: 'category-desc', t: 'Themengebiet (Z-A)' },
+      { v: 'random', t: 'Zufällig (Mix)' }
     ], localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc', (e) => {
       localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, (e.target as HTMLSelectElement).value);
       _renderUI();
@@ -277,22 +324,20 @@ function _renderSettingsContent() {
 
   container.appendChild(_createSettingsCard('Inhalt & Filter', iconFilters, [
     _createFeedsNavRow(),
+    _createSettingsRow('Sync-Intervall', _createSyncIntervalPicker()),
+    _createSettingsRow('Paywall-Filter', _createToggle('toggle-hide-paywall', 'Paywall-Artikel ausblenden', 
+      localStorage.getItem(CONFIG.STORAGE_KEYS.HIDE_PAYWALL) === 'true', 
+      (e) => {
+        const val = (e.target as HTMLInputElement).checked;
+        localStorage.setItem(CONFIG.STORAGE_KEYS.HIDE_PAYWALL, String(val));
+        _renderUI();
+      })),
     _createSettingsRow('Blockierte Quellen', blockedSourcesContainer),
     _createSettingsRow('Blockierte Keywords', blockedKeywordsContainer)
   ]));
 
   // 3. Karte: SYSTEM
   container.appendChild(_createSettingsCard('System', iconSystem, [
-    _createSettingsRow('Sync-Intervall', _createSelect('select-refresh-interval', [
-      { v: '0', t: 'Manuell' },
-      { v: '5', t: '5 Min' },
-      { v: '10', t: '10 Min' },
-      { v: '30', t: '30 Min' },
-      { v: '60', t: '60 Min' }
-    ], localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '30', (e) => {
-      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, (e.target as HTMLSelectElement).value);
-      _startAutoRefresh();
-    })),
     _createSettingsRow('', _createButton('btn-reset-all', 'Alle Daten zurücksetzen', 'btn--destructive', () => {
       if (confirm('Möchtest du wirklich alle lokalen Daten (Feeds, Filter, Einstellungen) zurücksetzen?')) {
         if (resetAllData()) {
@@ -378,12 +423,64 @@ function _createIconSizePicker() {
   return wrap;
 }
 
+function _createSyncIntervalPicker() {
+  const intervals = [
+    { v: 0, t: 'Manuell' },
+    { v: 5, t: '5m' },
+    { v: 10, t: '10m' },
+    { v: 30, t: '30m' },
+    { v: 60, t: '60m' }
+  ];
+  const current = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '', 10) 
+    ?? CONFIG.REFRESH_INTERVAL_MINUTES;
+    
+  const wrap = document.createElement('div');
+  wrap.className = 'icon-size-picker'; // Wir nutzen das gleiche Styling
+  for (const interval of intervals) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn--ghost icon-size-picker__btn' + (current === interval.v ? ' icon-size-picker__btn--active' : '');
+    btn.textContent = interval.t;
+    btn.addEventListener('click', () => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL, String(interval.v));
+      wrap.querySelectorAll('.icon-size-picker__btn').forEach(b => b.classList.remove('icon-size-picker__btn--active'));
+      btn.classList.add('icon-size-picker__btn--active');
+      _startAutoRefresh();
+    });
+    wrap.appendChild(btn);
+  }
+  return wrap;
+}
+
 function _createButton(id, text, cls, onClick) {
   const btn = document.createElement('button');
   btn.id = id; btn.className = 'btn ' + cls;
   btn.textContent = text;
   btn.addEventListener('click', onClick);
   return btn;
+}
+
+function _createToggle(id, label, isChecked, onChange) {
+  const wrap = document.createElement('label');
+  wrap.className = 'toggle-switch';
+  
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.id = id;
+  input.checked = isChecked;
+  input.addEventListener('change', onChange);
+  
+  const slider = document.createElement('span');
+  slider.className = 'toggle-switch__slider';
+  
+  const text = document.createElement('span');
+  text.className = 'toggle-switch__text';
+  text.textContent = label;
+  
+  wrap.appendChild(input);
+  wrap.appendChild(slider);
+  wrap.appendChild(text);
+  
+  return wrap;
 }
 
 function _renderFilterTags(container, items, emptyText, onRemove) {

@@ -264,6 +264,11 @@ function shouldShowArticle(article) {
   if (article.dismissed)                          return false;
   if (_state.blockedSources.has(article.sourceId)) return false;
   if (_isAdvertisement(article))                   return false;
+  
+  // Paywall-Check
+  if (article.isPaywall && localStorage.getItem(CONFIG.STORAGE_KEYS.HIDE_PAYWALL) === 'true') {
+    return false;
+  }
 
   // Keyword-Check: Titel in Kleinbuchstaben gegen alle blockierten Keywords
   if (_state.blockedKeywords.size > 0) {

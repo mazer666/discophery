@@ -83,7 +83,7 @@ export const CONFIG = {
    *
    * @type {number}
    */
-  REFRESH_INTERVAL_MINUTES: 30,
+  REFRESH_INTERVAL_MINUTES: 10,
 
   /**
    * Maximale Wartezeit pro einzelnem Feed-Request in Millisekunden.
@@ -183,6 +183,8 @@ export const CONFIG = {
     SORT_ORDER:          'discophery_sort_order',
     /** Zahl: Favicon-Größe in Pixeln */
     FAVICON_SIZE:        'discophery_favicon_size',
+    /** 'true' | 'false' — Paywall-Artikel ausblenden */
+    HIDE_PAYWALL:        'discophery_hide_paywall',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -29,6 +29,7 @@
  * @property {string}      category    - Kategorie aus config.js (z.B. "tech")
  * @property {Date}        date        - Veröffentlichungsdatum
  * @property {boolean}     dismissed   - true = vom User weggewischt
+ * @property {boolean}     isPaywall   - true = Artikel hinter Bezahlschranke (G+, Plus, etc.)
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -310,6 +311,7 @@ function _normalizeRssItem(item, feed) {
     category:    feed.category,
     date:        _parseDate(_text(item, 'pubDate') || _text(item, 'dc\\:date')),
     dismissed:   false,
+    isPaywall:   _checkPaywall(_text(item, 'title') || '', rawDescription),
   };
 }
 
@@ -339,6 +341,7 @@ function _normalizeAtomEntry(entry, feed) {
     category:    feed.category,
     date:        _parseDate(_text(entry, 'updated') || _text(entry, 'published')),
     dismissed:   false,
+    isPaywall:   _checkPaywall(_text(entry, 'title') || '', rawDescription),
   };
 }
 
@@ -429,6 +432,38 @@ function _cleanText(html, maxLength) {
 
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 1) + '…';
+}
+
+/**
+ * Erkennt Paywall-Artikel anhand von Markern in Titel und Beschreibung.
+ * Deckt G+, Plus, Premium, Paywall, Abo etc. ab.
+ *
+ * @param {string} title
+ * @param {string} description
+ * @returns {boolean}
+ */
+function _checkPaywall(title: string, description: string) {
+  const t = title.toLowerCase();
+  const d = description.toLowerCase();
+  
+  // Golem G+, Zeit-Plus, etc.
+  const markers = [
+    /\[g\+\]/, /\(g\+\)/,           // Golem
+    /\[plus\]/, /\(plus\)/, 'plus:', // Allgemein
+    /\[p\+\]/, /\(p\+\)/,           // Varianten
+    'paywall', 'bezahlschranke',
+    'abonnement', 'premium-inhalt', 'premium artikel',
+    'nur für abonnenten', 'exklusiv für abonnenten'
+  ];
+
+  for (const m of markers) {
+    if (typeof m === 'string') {
+      if (t.includes(m) || d.includes(m)) return true;
+    } else {
+      if (m.test(t) || m.test(d)) return true;
+    }
+  }
+  return false;
 }
 
 /**
