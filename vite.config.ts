@@ -13,4 +13,13 @@ export default defineConfig({
       }
     }
   },
+  plugins: [
+    {
+      name: 'strip-crossorigin-from-css',
+      transformIndexHtml(html) {
+        // GitHub Pages CORS: crossorigin auf <link stylesheet> blockiert das CSS
+        return html.replace(/<link rel="stylesheet" crossorigin/g, '<link rel="stylesheet"');
+      }
+    }
+  ]
 });
