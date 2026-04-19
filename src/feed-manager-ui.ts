@@ -140,8 +140,7 @@ function _createCategoryGroup(cat, feeds, activeCount) {
   arrow.innerHTML   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
   const leftSide = document.createElement('div');
-  leftSide.style.display = 'flex';
-  leftSide.style.alignItems = 'center';
+  leftSide.className = 'feed-group__summary-left';
   leftSide.appendChild(titleEl);
   leftSide.appendChild(badge);
 
