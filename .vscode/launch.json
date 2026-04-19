@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug Discophery",
+            "url": "http://localhost:5173/discophery/",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "vite: dev",
+            "sourceMaps": true,
+            "smartStep": true,
+            "timeout": 30000
+        }
+    ]
+}
