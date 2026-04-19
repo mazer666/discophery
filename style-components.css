@@ -443,6 +443,33 @@
   border-color: var(--color-accent);
 }
 
+/* Icon-Size Picker */
+.icon-size-picker {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.icon-size-picker__btn {
+  min-height: 36px;
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.icon-size-picker__btn--active {
+  background: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+/* feed-group SVG category icon */
+.feed-group__cat-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
 /* Filter-Tags Container innerhalb einer Row */
 .filter-tags-container {
   display: flex;

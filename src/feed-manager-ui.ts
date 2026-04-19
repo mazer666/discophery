@@ -33,7 +33,7 @@ export function openFeedManager() {
   if (!backdrop) return;
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
-  document.getElementById('feed-search')?.focus();
+  if (!('ontouchstart' in window)) document.getElementById('feed-search')?.focus();
 }
 
 /**
@@ -59,8 +59,10 @@ export function closeFeedManager() {
  * @returns {void}
  */
 function _renderFeedManager() {
-  const list = document.getElementById('feed-list');
+  const list   = document.getElementById('feed-list');
+  const modal  = document.getElementById('feed-manager');
   if (!list) return;
+  const savedScroll = modal?.scrollTop ?? 0;
   while (list.firstChild) list.removeChild(list.firstChild);
 
   // Katalog nach Kategorie gruppieren
@@ -80,6 +82,7 @@ function _renderFeedManager() {
   if (custom.length > 0) list.appendChild(_createCustomFeedsGroup(custom));
 
   _populateCategorySelect();
+  if (modal && savedScroll > 0) requestAnimationFrame(() => { modal.scrollTop = savedScroll; });
 }
 
 /**
@@ -98,17 +101,38 @@ function _createCategoryGroup(cat, feeds, activeCount) {
   const summary = document.createElement('summary');
   summary.className = 'feed-group__summary';
 
-  // Kategorie-Icons
-  const categoryIcons = {
-    'news':      '📰', 'tech':      '💻', 'sport':     '⚽', 'wirtschaft': '📈', 
-    'politik':   '⚖️', 'kultur':    '🎨', 'lifestyle': '✨', 'wissen':     '🧠',
-    'regional':  '📍', 'finanzen':  '💰', 'it':        '🔨', 'gaming':    '🎮'
+  // Kategorie-Icons (SVG, inline)
+  const S = (p: string) => `<svg class="feed-group__cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const categoryIcons: Record<string, string> = {
+    'news':         S('<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/>'),
+    'politik':      S('<line x1="12" y1="22" x2="12" y2="11"/><path d="M17 22V11l-5-9-5 9v11"/><line x1="7" y1="16" x2="17" y2="16"/>'),
+    'lokal':        S('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
+    'tech':         S('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3 8 3"/><path d="M12 3v4"/>'),
+    'web':          S('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'),
+    'android':      S('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><line x1="9.5" y1="15" x2="9.5" y2="17"/><line x1="14.5" y1="15" x2="14.5" y2="17"/><line x1="7" y1="7" x2="5.5" y2="5"/><line x1="17" y1="7" x2="18.5" y2="5"/>'),
+    'mobile':       S('<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>'),
+    'gadgets':      S('<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="2" x2="9" y2="4"/><line x1="15" y1="2" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="22"/><line x1="15" y1="20" x2="15" y2="22"/>'),
+    'gaming':       S('<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="11" r="1"/><circle cx="17" cy="13" r="1"/><path d="M20 8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/>'),
+    'film':         S('<rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>'),
+    'musik':        S('<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'),
+    'design':       S('<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>'),
+    'wissenschaft': S('<path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0-4 7h14l-4-7M9 14h6"/>'),
+    'weltraum':     S('<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m3.5 5.5 3 3 2-2L5 3a5 5 0 0 0-1.5 2.5z"/><path d="m12.5 14.5-3-3-2 2 3.5 3.5a5 5 0 0 0 1.5-2.5z"/><path d="M5 3a16.38 16.38 0 0 1 16 16 5 5 0 0 1-5 5c-4-1-6-4-6-4s-3-2-4-6a5 5 0 0 1 5-5z"/>'),
+    'wirtschaft':   S('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>'),
+    'fotografie':   S('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
+    'maker':        S('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'),
+    'auto':         S('<path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2m-3 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0"/><polyline points="9 3 9 8 19 8"/>'),
+    'umwelt':       S('<path d="M2 22c1.25-1.25 2.5-2.5 3.75-3.75C9 15 10 12 10 9a7 7 0 0 1 14 0c0 5-4 9-8 13"/><path d="M18 9v.01"/><path d="M12 12c-1.5 1.5-3 3-4 5"/>'),
+    'sport':        S('<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/><path d="m8 8 4 4 4-4"/>'),
+    'fashion':      S('<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>'),
+    'lifestyle':    S('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>'),
+    'magazine':     S('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'),
   };
-  const icon = categoryIcons[cat.toLowerCase()] || '📂';
+  const catIcon = categoryIcons[cat.toLowerCase()] ?? S('<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>');
 
   const titleEl = document.createElement('span');
   titleEl.className   = 'feed-group__title';
-  titleEl.innerHTML = `<span>${icon}</span> <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>`;
+  titleEl.innerHTML = `${catIcon} <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>`;
 
   const badge = document.createElement('span');
   badge.className   = 'feed-group__count' + (activeCount > 0 ? ' feed-group__count--active' : '');
@@ -214,13 +238,13 @@ function _createFeedRow(feed, isCustom) {
   info.style.cursor = 'pointer';
   info.title = 'Nur Artikel dieses Feeds anzeigen';
 
-  // Klick auf Medienname → Manager schließen + Quellen-Filter setzen
+  // Klick auf Medienname → Manager schließen + Quellen-Filter setzen (kein Auto-Abonnieren)
   info.addEventListener('click', () => {
-    if (!isCustom && !isFeedActive(feed.id)) {
-      setFeedActive(feed.id, true);
-      document.dispatchEvent(new CustomEvent('discophery:feeds-changed'));
-    }
     closeFeedManager();
+    if (!isCustom && !isFeedActive(feed.id)) {
+      // Vorschau laden ohne Abo-Status zu ändern
+      (window as any).previewFeedSource(feed);
+    }
     document.dispatchEvent(new CustomEvent('discophery:source-filter-request', {
       detail: { sourceId: feed.id, sourceName: feed.name },
     }));

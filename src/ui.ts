@@ -17,6 +17,7 @@ import { getActiveFeeds } from './feed-manager';
 export let _allArticles    = [];
 let _activeCategory = 'all';
 let _activeSource   = null;
+let _previewArticles = [];
 let _searchQuery    = '';
 let _refreshTimer   = null;
 let _contextArticle = null;
@@ -52,13 +53,24 @@ document.addEventListener('discophery:source-filter-request', ((e: CustomEvent) 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }) as EventListener);
 
+document.addEventListener('discophery:preview-articles', ((e: CustomEvent) => {
+  _previewArticles = e.detail.articles ?? [];
+  _activeSource    = { id: e.detail.sourceId, name: e.detail.sourceName };
+  _activeCategory  = 'all';
+  _renderUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}) as EventListener);
+
 // ── Haupt-Render ──────────────────────────────────────────────────────────────
 
 function _renderUI() {
   let pool = _activeCategory === 'all'
     ? _allArticles
     : _allArticles.filter(a => a.category === _activeCategory);
-  if (_activeSource) pool = pool.filter(a => a.sourceId === _activeSource.id);
+  if (_activeSource) {
+    const fromSubscribed = pool.filter(a => a.sourceId === _activeSource.id);
+    pool = fromSubscribed.length > 0 ? fromSubscribed : _previewArticles.filter(a => a.sourceId === _activeSource.id);
+  }
 
   if (_searchQuery) {
     pool = pool.filter(a => 
@@ -126,8 +138,9 @@ function _createChip(category, label) {
   btn.textContent = label;
   btn.setAttribute('aria-pressed', category === _activeCategory ? 'true' : 'false');
   btn.addEventListener('click', () => {
-    _activeCategory = category;
-    _activeSource   = null;
+    _activeCategory  = category;
+    _activeSource    = null;
+    _previewArticles = [];
     _renderUI();
     btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
@@ -139,7 +152,7 @@ function _createSourceChip(source) {
   btn.className = 'chip chip--active chip--source';
   btn.setAttribute('aria-label', `Quellfilter "${source.name}" aufheben`);
   btn.textContent = source.name + ' ×';
-  btn.addEventListener('click', () => { _activeSource = null; _renderUI(); });
+  btn.addEventListener('click', () => { _activeSource = null; _previewArticles = []; _renderUI(); });
   return btn;
 }
 
@@ -244,11 +257,7 @@ function _renderSettingsContent() {
       localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_ORDER, (e.target as HTMLSelectElement).value);
       _renderUI();
     })),
-    _createSettingsRow('Icon-Größe (px)', _createNumberInput('input-icon-size',
-      parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT,
-      16, 48, (e) => {
-        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, (e.target as HTMLInputElement).value);
-      }))
+    _createSettingsRow('Icon-Größe', _createIconSizePicker())
   ]));
 
   // 2. Karte: INHALT
@@ -344,11 +353,23 @@ function _createSelect(id, options, current, onChange) {
   return sel;
 }
 
-function _createNumberInput(id, val, min, max, onChange) {
-  const inp = document.createElement('input');
-  inp.type = 'number'; inp.id = id; inp.value = val; inp.min = min; inp.max = max;
-  inp.addEventListener('change', onChange);
-  return inp;
+function _createIconSizePicker() {
+  const sizes = [12, 24];
+  const current = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT;
+  const wrap = document.createElement('div');
+  wrap.className = 'icon-size-picker';
+  for (const size of sizes) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn--ghost icon-size-picker__btn' + (current === size ? ' icon-size-picker__btn--active' : '');
+    btn.textContent = size + ' px';
+    btn.addEventListener('click', () => {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, String(size));
+      wrap.querySelectorAll('.icon-size-picker__btn').forEach(b => b.classList.remove('icon-size-picker__btn--active'));
+      btn.classList.add('icon-size-picker__btn--active');
+    });
+    wrap.appendChild(btn);
+  }
+  return wrap;
 }
 
 function _createButton(id, text, cls, onClick) {

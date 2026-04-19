@@ -43,6 +43,21 @@
  *
  * @returns {Promise<DiscopheryArticle[]>} - Alle Artikel, neueste zuerst
  */
+export async function previewFeedSource(feed: any) {
+  try {
+    const articles = await _loadFeed(feed);
+    const withDismissed = articles.map((a: any) => ({ ...a, dismissed: (window as any).isDismissed(a.id) }));
+    document.dispatchEvent(new CustomEvent('discophery:preview-articles', {
+      detail: { articles: withDismissed, sourceId: feed.id, sourceName: feed.name }
+    }));
+  } catch (err: any) {
+    console.warn(`Preview fehlgeschlagen für "${feed.name}":`, err?.message ?? err);
+    document.dispatchEvent(new CustomEvent('discophery:preview-articles', {
+      detail: { articles: [], sourceId: feed.id, sourceName: feed.name }
+    }));
+  }
+}
+
 export async function loadAllFeeds() {
   const activeFeeds = getActiveFeeds();  // feed-manager.js
   const accumulated = [];
@@ -109,7 +124,7 @@ export async function loadAllFeeds() {
 
 function _dispatchArticles(articles) {
   const unique       = _deduplicateById(articles);
-  const withDismissed = unique.map(a => ({ ...a, dismissed: isDismissed(a.id) }));
+  const withDismissed = unique.map(a => ({ ...a, dismissed: (window as any).isDismissed(a.id) }));
   withDismissed.sort((a, b) => b.date - a.date);
   document.dispatchEvent(
     new CustomEvent('discophery:articles', { detail: { articles: withDismissed } })
@@ -505,6 +520,7 @@ document.addEventListener('discophery:ready', () => {
 
 // --- Auto-generated global exports for Vite migration ---
 (window as any).loadAllFeeds = loadAllFeeds;
+(window as any).previewFeedSource = previewFeedSource;
 (window as any)._dispatchArticles = _dispatchArticles;
 (window as any)._loadFeed = _loadFeed;
 (window as any)._fetchWithPrimaryProxy = _fetchWithPrimaryProxy;
