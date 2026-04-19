@@ -27,6 +27,10 @@ export const FEED_CATALOGUE = [
   { id: 'diepresse',    name: 'Die Presse',           url: 'https://www.diepresse.com/rss',                                  category: 'news',         language: 'de', enabled: true  },
   { id: 'krone',        name: 'Krone.at',             url: 'https://api.krone.at/v1/rss/rssfeed-google.xml?id=2311992',       category: 'news',         language: 'de', enabled: true  },
   { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/rssd',                                     category: 'news',         language: 'de', enabled: true  },
+  { id: 'sn',           name: 'Salzburger Nachrichten', url: 'https://www.sn.at/xml/rss',                                      category: 'news',         language: 'de', enabled: false },
+  { id: 'kleine',       name: 'Kleine Zeitung',       url: 'https://www.kleinezeitung.at/rss/hp_stmk',                       category: 'news',         language: 'de', enabled: false },
+  { id: 'tt',           name: 'Tiroler Tageszeitung', url: 'https://www.tt.com/rss/news.xml',                                 category: 'news',         language: 'de', enabled: false },
+  { id: 'volat',        name: 'VOL.at (Vorarlberg)',  url: 'https://www.vol.at/rss/vorarlberg',                              category: 'news',         language: 'de', enabled: false },
   { id: 'tagesschau',   name: 'Tagesschau',           url: 'https://www.tagesschau.de/index~rss2.xml',                       category: 'politik',      language: 'de', enabled: false },
   { id: 'spiegel',      name: 'SPIEGEL Online',       url: 'https://www.spiegel.de/schlagzeilen/index.rss',                  category: 'politik',      language: 'de', enabled: false },
   { id: 'zeit',         name: 'Zeit Online',          url: 'https://newsfeed.zeit.de/index',                                 category: 'politik',      language: 'de', enabled: false },
@@ -35,6 +39,8 @@ export const FEED_CATALOGUE = [
 // { id: 'focus',        name: 'Focus Online',         url: 'https://rss.focus.de/fol/XML/rss_folnews.xml',                   category: 'news',         language: 'de', enabled: false },
   { id: 'ntv',          name: 'n-tv',                 url: 'https://www.n-tv.de/rss',                                        category: 'news',         language: 'de', enabled: false },
   { id: 'netzpolitik',  name: 'Netzpolitik.org',      url: 'https://netzpolitik.org/feed/',                                  category: 'politik',      language: 'de', enabled: false },
+  { id: 'kontrast',     name: 'Kontrast.at',          url: 'https://kontrast.at/feed/',                                      category: 'politik',      language: 'de', enabled: false },
+  { id: 'zackzack',     name: 'ZackZack',             url: 'https://zackzack.at/feed/',                                      category: 'politik',      language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // NACHRICHTEN & POLITIK — International
@@ -196,6 +202,7 @@ export const FEED_CATALOGUE = [
   { id: 'handelsblatt', name: 'Handelsblatt',          url: 'https://www.handelsblatt.com/contentexport/feed/schlagzeilen',   category: 'wirtschaft',   language: 'de', enabled: false },
   { id: 'wiwo',         name: 'WirtschaftsWoche',      url: 'https://www.wiwo.de/contentexport/feed/rss',                    category: 'wirtschaft',   language: 'de', enabled: false },
   { id: 'manager-mag',  name: 'Manager Magazin',       url: 'https://www.manager-magazin.de/schlagzeilen/index.rss',         category: 'wirtschaft',   language: 'de', enabled: false },
+  { id: 'brutkasten',   name: 'brutkasten',           url: 'https://brutkasten.com/feed/',                                   category: 'wirtschaft',   language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // FOTOGRAFIE
