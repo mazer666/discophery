@@ -23,10 +23,10 @@ export const FEED_CATALOGUE = [
   // NACHRICHTEN & POLITIK — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'orf',           name: 'ORF.at',              url: 'https://rss.orf.at/news.xml',                                    category: 'news',         language: 'de', enabled: true  },
-// { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss/all',                             category: 'news',         language: 'de', enabled: true  },
+  { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss',                                 category: 'news',         language: 'de', enabled: true  },
   { id: 'diepresse',    name: 'Die Presse',           url: 'https://www.diepresse.com/rss',                                  category: 'news',         language: 'de', enabled: true  },
-// { id: 'krone',        name: 'Krone.at',             url: 'https://www.krone.at/rss/aktuell',                               category: 'news',         language: 'de', enabled: false },
-// { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/feeds/rss.xml',                            category: 'news',         language: 'de', enabled: false },
+  { id: 'krone',        name: 'Krone.at',             url: 'https://api.krone.at/v1/rss/rssfeed-google.xml?id=2311992',       category: 'news',         language: 'de', enabled: true  },
+  { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/rssd',                                     category: 'news',         language: 'de', enabled: true  },
   { id: 'tagesschau',   name: 'Tagesschau',           url: 'https://www.tagesschau.de/index~rss2.xml',                       category: 'politik',      language: 'de', enabled: false },
   { id: 'spiegel',      name: 'SPIEGEL Online',       url: 'https://www.spiegel.de/schlagzeilen/index.rss',                  category: 'politik',      language: 'de', enabled: false },
   { id: 'zeit',         name: 'Zeit Online',          url: 'https://newsfeed.zeit.de/index',                                 category: 'politik',      language: 'de', enabled: false },
