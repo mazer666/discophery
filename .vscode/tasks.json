@@ -3,8 +3,8 @@
     "tasks": [
         {
             "label": "vite: dev",
-            "type": "npm",
-            "script": "dev",
+            "type": "shell",
+            "command": "./scripts/start-dev.sh",
             "isBackground": true,
             "problemMatcher": {
                 "owner": "custom",
