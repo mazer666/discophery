@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/discophery/', // Needed for GitHub pages
+  base: '/discophery/',
   build: {
-    outDir: 'docs', // Output to docs/ for GH Pages
+    outDir: 'docs',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/app.js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name][extname]',
+      }
+    }
   },
 });
