@@ -23,16 +23,16 @@ export const FEED_CATALOGUE = [
   // NACHRICHTEN & POLITIK — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'orf',           name: 'ORF.at',              url: 'https://rss.orf.at/news.xml',                                    category: 'news',         language: 'de', enabled: true  },
-  { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss/all',                             category: 'news',         language: 'de', enabled: true  },
+// { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss/all',                             category: 'news',         language: 'de', enabled: true  },
   { id: 'diepresse',    name: 'Die Presse',           url: 'https://www.diepresse.com/rss',                                  category: 'news',         language: 'de', enabled: true  },
-  { id: 'krone',        name: 'Krone.at',             url: 'https://www.krone.at/rss/aktuell',                               category: 'news',         language: 'de', enabled: false },
-  { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/feeds/rss.xml',                            category: 'news',         language: 'de', enabled: false },
+// { id: 'krone',        name: 'Krone.at',             url: 'https://www.krone.at/rss/aktuell',                               category: 'news',         language: 'de', enabled: false },
+// { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/feeds/rss.xml',                            category: 'news',         language: 'de', enabled: false },
   { id: 'tagesschau',   name: 'Tagesschau',           url: 'https://www.tagesschau.de/index~rss2.xml',                       category: 'politik',      language: 'de', enabled: false },
   { id: 'spiegel',      name: 'SPIEGEL Online',       url: 'https://www.spiegel.de/schlagzeilen/index.rss',                  category: 'politik',      language: 'de', enabled: false },
   { id: 'zeit',         name: 'Zeit Online',          url: 'https://newsfeed.zeit.de/index',                                 category: 'politik',      language: 'de', enabled: false },
   { id: 'sueddeutsche', name: 'Süddeutsche Zeitung',  url: 'https://rss.sueddeutsche.de/alles',                              category: 'politik',      language: 'de', enabled: false },
   { id: 'faz',          name: 'FAZ',                  url: 'https://www.faz.net/rss/aktuell/',                               category: 'politik',      language: 'de', enabled: false },
-  { id: 'focus',        name: 'Focus Online',         url: 'https://rss.focus.de/fol/XML/rss_folnews.xml',                   category: 'news',         language: 'de', enabled: false },
+// { id: 'focus',        name: 'Focus Online',         url: 'https://rss.focus.de/fol/XML/rss_folnews.xml',                   category: 'news',         language: 'de', enabled: false },
   { id: 'ntv',          name: 'n-tv',                 url: 'https://www.n-tv.de/rss',                                        category: 'news',         language: 'de', enabled: false },
   { id: 'netzpolitik',  name: 'Netzpolitik.org',      url: 'https://netzpolitik.org/feed/',                                  category: 'politik',      language: 'de', enabled: false },
 
@@ -48,21 +48,21 @@ export const FEED_CATALOGUE = [
   // LOKALNACHRICHTEN — Österreich
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'futurezone',         name: 'Futurezone.at',             url: 'https://futurezone.at/xml/rss',                                category: 'tech',         language: 'de', enabled: false },
-  { id: 'meinbezirk-nk',     name: 'Mein Bezirk Neunkirchen',   url: 'https://www.meinbezirk.at/neunkirchen/c-lokales/rss',           category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-wn',     name: 'Mein Bezirk Wr. Neustadt',  url: 'https://www.meinbezirk.at/wiener-neustadt/c-lokales/rss',       category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-wien',   name: 'Mein Bezirk Wien',          url: 'https://www.meinbezirk.at/wien/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-graz',   name: 'Mein Bezirk Graz',          url: 'https://www.meinbezirk.at/graz/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-linz',   name: 'Mein Bezirk Linz',          url: 'https://www.meinbezirk.at/linz/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-salzburg', name: 'Mein Bezirk Salzburg',    url: 'https://www.meinbezirk.at/salzburg/c-lokales/rss',              category: 'lokal',        language: 'de', enabled: false },
-  { id: 'meinbezirk-innsbruck', name: 'Mein Bezirk Innsbruck',  url: 'https://www.meinbezirk.at/innsbruck/c-lokales/rss',             category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-nk',            name: 'NÖN Neunkirchen',          url: 'https://www.noen.at/neunkirchen/feed',                          category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-wn',            name: 'NÖN Wiener Neustadt',      url: 'https://www.noen.at/wiener-neustadt/feed',                      category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-stpoelten',     name: 'NÖN St. Pölten',           url: 'https://www.noen.at/st-poelten/feed',                           category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-krems',         name: 'NÖN Krems',                url: 'https://www.noen.at/krems/feed',                                category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-tulln',         name: 'NÖN Tulln',                url: 'https://www.noen.at/tulln/feed',                                category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-klosterneuburg', name: 'NÖN Klosterneuburg',      url: 'https://www.noen.at/klosterneuburg/feed',                       category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-moedling',      name: 'NÖN Mödling',              url: 'https://www.noen.at/moedling/feed',                             category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-baden',         name: 'NÖN Baden',                url: 'https://www.noen.at/baden/feed',                                category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-nk',     name: 'Mein Bezirk Neunkirchen',   url: 'https://www.meinbezirk.at/neunkirchen/c-lokales/rss',           category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-wn',     name: 'Mein Bezirk Wr. Neustadt',  url: 'https://www.meinbezirk.at/wiener-neustadt/c-lokales/rss',       category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-wien',   name: 'Mein Bezirk Wien',          url: 'https://www.meinbezirk.at/wien/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-graz',   name: 'Mein Bezirk Graz',          url: 'https://www.meinbezirk.at/graz/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-linz',   name: 'Mein Bezirk Linz',          url: 'https://www.meinbezirk.at/linz/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-salzburg', name: 'Mein Bezirk Salzburg',    url: 'https://www.meinbezirk.at/salzburg/c-lokales/rss',              category: 'lokal',        language: 'de', enabled: false },
+// { id: 'meinbezirk-innsbruck', name: 'Mein Bezirk Innsbruck',  url: 'https://www.meinbezirk.at/innsbruck/c-lokales/rss',             category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-nk',            name: 'NÖN Neunkirchen',          url: 'https://www.noen.at/neunkirchen/feed',                          category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-wn',            name: 'NÖN Wiener Neustadt',      url: 'https://www.noen.at/wiener-neustadt/feed',                      category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-stpoelten',     name: 'NÖN St. Pölten',           url: 'https://www.noen.at/st-poelten/feed',                           category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-krems',         name: 'NÖN Krems',                url: 'https://www.noen.at/krems/feed',                                category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-tulln',         name: 'NÖN Tulln',                url: 'https://www.noen.at/tulln/feed',                                category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-klosterneuburg', name: 'NÖN Klosterneuburg',      url: 'https://www.noen.at/klosterneuburg/feed',                       category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-moedling',      name: 'NÖN Mödling',              url: 'https://www.noen.at/moedling/feed',                             category: 'lokal',        language: 'de', enabled: false },
+// { id: 'noen-baden',         name: 'NÖN Baden',                url: 'https://www.noen.at/baden/feed',                                category: 'lokal',        language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // TECHNOLOGIE — Deutsch
@@ -72,7 +72,7 @@ export const FEED_CATALOGUE = [
   { id: 't3n',          name: 't3n',                  url: 'https://t3n.de/rss.xml',                                         category: 'tech',         language: 'de', enabled: false },
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://winfuture.de/news.rss',                                  category: 'tech',         language: 'de', enabled: false },
   { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://www.netzwelt.de/news/index.rss',                         category: 'tech',         language: 'de', enabled: false },
-  { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/rss_news.xml',                           category: 'tech',         language: 'de', enabled: false },
+// { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/rss_news.xml',                           category: 'tech',         language: 'de', enabled: false },
   { id: 'computerbild', name: 'Computerbild',         url: 'https://www.computerbild.de/rss/feed_rss_aktuell.xml',           category: 'tech',         language: 'de', enabled: false },
   { id: 'mixed-de',     name: 'Mixed.de (VR/AR)',     url: 'https://mixed.de/feed/',                                         category: 'tech',         language: 'de', enabled: false },
 
@@ -80,11 +80,11 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — International
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'geeks-are-sexy', name: 'Geeks Are Sexy',     url: 'https://www.geeksaresexy.net/feed',                              category: 'tech',         language: 'en', enabled: true  },
-  { id: 'ars-technica', name: 'Ars Technica',         url: 'https://feeds.arstechnica.com/arstechnica/index',                category: 'tech',         language: 'en', enabled: false },
+// { id: 'ars-technica', name: 'Ars Technica',         url: 'https://feeds.arstechnica.com/arstechnica/index',                category: 'tech',         language: 'en', enabled: false },
   { id: 'verge',        name: 'The Verge',            url: 'https://www.theverge.com/rss/index.xml',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'wired',        name: 'Wired',                url: 'https://www.wired.com/feed/rss',                                 category: 'tech',         language: 'en', enabled: false },
   { id: 'techcrunch',   name: 'TechCrunch',           url: 'https://techcrunch.com/feed/',                                   category: 'tech',         language: 'en', enabled: false },
-  { id: 'engadget',     name: 'Engadget',             url: 'https://www.engadget.com/rss.xml',                               category: 'tech',         language: 'en', enabled: false },
+// { id: 'engadget',     name: 'Engadget',             url: 'https://www.engadget.com/rss.xml',                               category: 'tech',         language: 'en', enabled: false },
   { id: 'ieee-spectrum', name: 'IEEE Spectrum',       url: 'https://spectrum.ieee.org/feeds/feed.rss',                       category: 'tech',         language: 'en', enabled: false },
   { id: 'mit-tech',     name: 'MIT Technology Review',url: 'https://www.technologyreview.com/feed/',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'tomshardware', name: "Tom's Hardware",       url: 'https://www.tomshardware.com/feeds/all',                         category: 'tech',         language: 'en', enabled: false },
@@ -103,7 +103,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // ANDROID & MOBILE
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'android-central', name: 'Android Central',  url: 'https://www.androidcentral.com/rss.xml',                         category: 'android',      language: 'en', enabled: true  },
+// { id: 'android-central', name: 'Android Central',  url: 'https://www.androidcentral.com/rss.xml',                         category: 'android',      language: 'en', enabled: true  },
   { id: 'mobi-blog',    name: 'mobi-blog.org',        url: 'https://www.mobi-blog.org/feed',                                 category: 'mobile',       language: 'de', enabled: true  },
   { id: 'android-police', name: 'Android Police',    url: 'https://www.androidpolice.com/feed/',                             category: 'android',      language: 'en', enabled: false },
   { id: '9to5google',   name: '9to5Google',           url: 'https://9to5google.com/feed/',                                   category: 'android',      language: 'en', enabled: false },
@@ -121,9 +121,9 @@ export const FEED_CATALOGUE = [
   { id: 'gamepro',      name: 'GamePro',               url: 'https://www.gamepro.de/feed.cfm',                                category: 'gaming',       language: 'de', enabled: false },
   { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss/-/index.html',          category: 'gaming',       language: 'de', enabled: false },
   { id: 'pcgames',      name: 'PC Games',              url: 'https://www.pcgames.de/rss/feed/rss2.0/',                        category: 'gaming',       language: 'de', enabled: false },
-  { id: 'computerbase', name: 'Computerbase',          url: 'https://www.computerbase.de/rss/news.xml',                       category: 'gadgets',      language: 'de', enabled: false },
-  { id: 'hardwareluxx', name: 'Hardwareluxx',          url: 'https://www.hardwareluxx.de/index.php?option=com_syndication&view=feed&format=rss', category: 'gadgets', language: 'de', enabled: false },
-  { id: 'notebookcheck', name: 'Notebookcheck (DE)',   url: 'https://www.notebookcheck.com/rss-feed-de.169.0.html',           category: 'gadgets',      language: 'de', enabled: false },
+// { id: 'computerbase', name: 'Computerbase',          url: 'https://www.computerbase.de/rss/news.xml',                       category: 'gadgets',      language: 'de', enabled: false },
+// { id: 'hardwareluxx', name: 'Hardwareluxx',          url: 'https://www.hardwareluxx.de/index.php?option=com_syndication&view=feed&format=rss', category: 'gadgets', language: 'de', enabled: false },
+// { id: 'notebookcheck', name: 'Notebookcheck (DE)',   url: 'https://www.notebookcheck.com/rss-feed-de.169.0.html',           category: 'gadgets',      language: 'de', enabled: false },
   { id: 'bgg',          name: 'BoardGameGeek News',    url: 'https://boardgamegeek.com/rss/boardgamenews',                    category: 'gaming',       language: 'en', enabled: false },
   { id: 'polygon',      name: 'Polygon',               url: 'https://www.polygon.com/rss/index.xml',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'ign',          name: 'IGN',                  url: 'https://www.ign.com/rss/v2/articles/feed', category: 'gaming',       language: 'en', enabled: false },
@@ -136,7 +136,7 @@ export const FEED_CATALOGUE = [
   // FILM & SERIEN
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'filmstarts',   name: 'Filmstarts',            url: 'https://www.filmstarts.de/nachrichten/rss.xml',                  category: 'film',         language: 'de', enabled: false },
-  { id: 'serienjunkies', name: 'Serienjunkies.de',    url: 'https://www.serienjunkies.de/rss/news.xml',                      category: 'film',         language: 'de', enabled: false },
+// { id: 'serienjunkies', name: 'Serienjunkies.de',    url: 'https://www.serienjunkies.de/rss/news.xml',                      category: 'film',         language: 'de', enabled: false },
   { id: 'slashfilm',    name: '/Film',                 url: 'https://www.slashfilm.com/feed/',                                category: 'film',         language: 'en', enabled: false },
   { id: 'screenrant',   name: 'Screen Rant',           url: 'https://screenrant.com/feed/',                                   category: 'film',         language: 'en', enabled: false },
   { id: 'variety',      name: 'Variety',               url: 'https://variety.com/feed/',                                      category: 'film',         language: 'en', enabled: false },
@@ -215,18 +215,18 @@ export const FEED_CATALOGUE = [
   // FASHION & MODE
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'vogue-de',     name: 'Vogue Deutschland',     url: 'https://www.vogue.de/feed/rss',                                  category: 'fashion',      language: 'de', enabled: false },
-  { id: 'elle-de',      name: 'Elle Deutschland',      url: 'https://www.elle.com/de/feed/',                                  category: 'fashion',      language: 'de', enabled: false },
+// { id: 'elle-de',      name: 'Elle Deutschland',      url: 'https://www.elle.com/de/feed/',                                  category: 'fashion',      language: 'de', enabled: false },
   { id: 'vogue-en',     name: 'Vogue (EN)',             url: 'https://www.vogue.com/feed/rss',                                 category: 'fashion',      language: 'en', enabled: false },
   { id: 'wwd',          name: 'WWD (Women\'s Wear Daily)', url: 'https://wwd.com/feed/',                                      category: 'fashion',      language: 'en', enabled: false },
-  { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/feed',                                   category: 'fashion',      language: 'en', enabled: false },
+// { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/feed',                                   category: 'fashion',      language: 'en', enabled: false },
   { id: 'business-of-fashion', name: 'Business of Fashion', url: 'https://www.businessoffashion.com/feed',                   category: 'fashion',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // LIFESTYLE
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'brigitte',     name: 'Brigitte',               url: 'https://www.brigitte.de/feed/rss/',                              category: 'lifestyle',    language: 'de', enabled: false },
-  { id: 'stern-leben',  name: 'Stern Leben',            url: 'https://www.stern.de/lifestyle/rss.xml',                         category: 'lifestyle',    language: 'de', enabled: false },
-  { id: 'instyle-de',   name: 'InStyle Deutschland',   url: 'https://www.instyle.de/feed/rss/',                               category: 'lifestyle',    language: 'de', enabled: false },
+// { id: 'brigitte',     name: 'Brigitte',               url: 'https://www.brigitte.de/feed/rss/',                              category: 'lifestyle',    language: 'de', enabled: false },
+// { id: 'stern-leben',  name: 'Stern Leben',            url: 'https://www.stern.de/lifestyle/rss.xml',                         category: 'lifestyle',    language: 'de', enabled: false },
+// { id: 'instyle-de',   name: 'InStyle Deutschland',   url: 'https://www.instyle.de/feed/rss/',                               category: 'lifestyle',    language: 'de', enabled: false },
   { id: 'lifehacker',   name: 'Lifehacker',             url: 'https://lifehacker.com/feed/rss',                                category: 'lifestyle',    language: 'en', enabled: false },
   { id: 'refinery29',   name: 'Refinery29',             url: 'https://www.refinery29.com/rss.xml',                             category: 'lifestyle',    language: 'en', enabled: false },
   { id: 'apartmenttherapy', name: 'Apartment Therapy', url: 'https://www.apartmenttherapy.com/main.rss',                      category: 'lifestyle',    language: 'en', enabled: false },
@@ -234,7 +234,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // MAGAZINE & KULTUR
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'zeit-magazin', name: 'ZEIT Magazin',           url: 'https://www.zeit.de/zeit-magazin/index.xml',                    category: 'magazine',     language: 'de', enabled: false },
+// { id: 'zeit-magazin', name: 'ZEIT Magazin',           url: 'https://www.zeit.de/zeit-magazin/index.xml',                    category: 'magazine',     language: 'de', enabled: false },
   { id: 'spiegel-kul',  name: 'Spiegel Kultur',         url: 'https://www.spiegel.de/kultur/index.rss',                       category: 'magazine',     language: 'de', enabled: false },
   { id: 'sz-mag',       name: 'SZ Magazin',             url: 'https://www.sz-magazin.de/rss',                                 category: 'magazine',     language: 'de', enabled: false },
   { id: 'newyorker',    name: 'The New Yorker',          url: 'https://www.newyorker.com/feed/everything',                     category: 'magazine',     language: 'en', enabled: false },

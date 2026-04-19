@@ -17,35 +17,37 @@ def parse_feeds_js():
     with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Extract the JS array using regex (supports 'const' or 'export const')
+    # Extract the JS array using regex
     match = re.search(r'(?:export\s+)?const FEED_CATALOGUE = \[(.*?)\];', content, re.DOTALL)
     if not match:
-        print("Could not find FEED_CATALOGUE array in feeds.js")
+        print("Could not find FEED_CATALOGUE array in feeds.ts")
         return []
 
     entries_text = match.group(1)
     # Find all objects { ... }
     blocks = re.findall(r'\{[^{}]*\}', entries_text)
+    print(f"Found {len(blocks)} potential feed blocks in feeds.ts")
     
     feeds = []
     for b in blocks:
         try:
-            # basic clean up properties
-            props = dict(re.findall(r"(\w+)\s*:\s*(?:'([^']*)'|\"([^\"]*)\"|(true|false))", b))
-            
             feed_dict = {}
-            for k, match1, match2, match_bool in re.findall(r"(\w+)\s*:\s*(?:'([^']*)'|\"([^\"]*)\"|(true|false))", b):
+            # Match keys and values. Handles 'key', "key", key, and 'value', "value", true, false, numerals
+            pairs = re.findall(r"(\w+)\s*:\s*(?:'([^']*)'|\"([^\"]*)\"|(\w+))", b)
+            for k, match1, match2, match_raw in pairs:
                 if match1:
                     feed_dict[k] = match1
                 elif match2:
                     feed_dict[k] = match2
-                elif match_bool:
-                    feed_dict[k] = match_bool == 'true'
+                elif match_raw:
+                    if match_raw.lower() == 'true': feed_dict[k] = True
+                    elif match_raw.lower() == 'false': feed_dict[k] = False
+                    else: feed_dict[k] = match_raw
 
             if 'id' in feed_dict and 'url' in feed_dict:
                 feeds.append(feed_dict)
         except Exception as e:
-            pass
+            print(f"  Error parsing block: {e}")
             
     return feeds
 
@@ -78,12 +80,14 @@ def parse_xml(xml_string, feed):
         print(f"  XML Error for {feed['name']}: {e}")
         return []
 
-    namespace = ""
-    # Atom vs RSS handling
-    if root.tag.endswith('feed'):
+    # Atom vs RSS/RDF handling
+    tag = root.tag.lower()
+    
+    if 'feed' in tag:
         # Atom
         ns = {'atom': 'http://www.w3.org/2005/Atom'}
-        for entry in root.findall('.//atom:entry', ns) or root.findall('.//entry'):
+        entries = root.findall('.//atom:entry', ns) or root.findall('.//entry')
+        for entry in entries[:MAX_ARTICLES]:
             link = entry.find('atom:link[@rel="alternate"]', ns)
             if link is None: link = entry.find('atom:link', ns)
             if link is None: link = entry.find('link')
@@ -105,7 +109,7 @@ def parse_xml(xml_string, feed):
                     "id": hash_url(url),
                     "title": title.strip(),
                     "url": url,
-                    "image": None, # Complex to parse without robust XML namespace management
+                    "image": None,
                     "description": remove_html_tags(desc),
                     "source": feed['name'],
                     "sourceId": feed['id'],
@@ -114,21 +118,29 @@ def parse_xml(xml_string, feed):
                     "dismissed": False
                 })
     else:
-        # RSS
-        for item in root.findall('.//item')[:MAX_ARTICLES]:
-            url = item.findtext('link') or item.findtext('guid')
+        # RSS / RDF
+        # Try to find items regardless of namespace
+        items = root.findall('.//{*}item') or root.findall('.//item')
+        for item in items[:MAX_ARTICLES]:
+            url = item.findtext('link') or item.findtext('{*}link') or item.findtext('guid') or item.findtext('{*}guid')
+            if not url and 'rdf:about' in item.attrib:
+                url = item.attrib['rdf:about']
+            
             if url:
-                desc = item.findtext('description', default='')
+                title = item.findtext('title') or item.findtext('{*}title') or '(kein Titel)'
+                desc = item.findtext('description') or item.findtext('{*}description') or ''
+                date = item.findtext('pubDate') or item.findtext('{*}pubDate') or item.findtext('{*}date') or ""
+                
                 articles.append({
                     "id": hash_url(url),
-                    "title": item.findtext('title', default='(kein Titel)').strip(),
+                    "title": title.strip(),
                     "url": url,
                     "image": None,
                     "description": remove_html_tags(desc),
                     "source": feed['name'],
                     "sourceId": feed['id'],
                     "category": feed.get('category', 'news'),
-                    "date": item.findtext('pubDate') or "",
+                    "date": date,
                     "dismissed": False
                 })
     

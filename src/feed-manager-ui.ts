@@ -241,6 +241,11 @@ function _createFeedRow(feed, isCustom) {
   // Klick auf Medienname → Manager schließen + Quellen-Filter setzen (kein Auto-Abonnieren)
   info.addEventListener('click', () => {
     closeFeedManager();
+    // Sofort Ladezustand anzeigen (User-Wunsch: Automatisierung)
+    if (typeof (window as any)._showState === 'function') {
+      (window as any)._showState('loading');
+    }
+
     if (!isCustom && !isFeedActive(feed.id)) {
       // Vorschau laden ohne Abo-Status zu ändern
       (window as any).previewFeedSource(feed);

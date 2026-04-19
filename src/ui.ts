@@ -82,7 +82,8 @@ function _renderUI() {
   const filtered = applyFilters(pool);
   _renderChips();
 
-  if (_allArticles.length === 0) return;
+  // Erlaubt das Rendern auch wenn _allArticles leer ist (z.B. Preview-Modus)
+  if (_allArticles.length === 0 && _previewArticles.length === 0) return;
 
   const grid = document.getElementById('card-grid');
   if (!grid) return;
@@ -112,10 +113,16 @@ function _renderChips() {
   const categories = [...new Set(visibleArticles.map(a => a.category))].sort();
 
   while (nav.firstChild) nav.removeChild(nav.firstChild);
-  if (_activeSource) nav.appendChild(_createSourceChip(_activeSource));
-  nav.appendChild(_createChip('all', 'Alle'));
-  for (const cat of categories) {
-    nav.appendChild(_createChip(cat, cat.charAt(0).toUpperCase() + cat.slice(1)));
+  
+  if (_activeSource) {
+    // Falls eine Quelle aktiv ist, zeigen wir NUR den Quell-Chip (Wunsch: "nur Name der Quelle")
+    nav.appendChild(_createSourceChip(_activeSource));
+  } else {
+    // Sonst Normalansicht mit Kategorien
+    nav.appendChild(_createChip('all', 'Alle'));
+    for (const cat of categories) {
+      nav.appendChild(_createChip(cat, cat.charAt(0).toUpperCase() + cat.slice(1)));
+    }
   }
 
   const bar   = document.getElementById('filter-active-bar');
@@ -123,12 +130,11 @@ function _renderChips() {
   if (bar) {
     const hasFilter = _activeCategory !== 'all' || _activeSource !== null;
     bar.style.display = hasFilter ? 'flex' : 'none';
-    if (label && hasFilter) {
-      const parts = [];
-      if (_activeSource)             parts.push(_activeSource.name);
-      if (_activeCategory !== 'all') parts.push(_activeCategory.charAt(0).toUpperCase() + _activeCategory.slice(1));
-      label.textContent = 'Gefiltert: ' + parts.join(' · ');
-    }
+      if (_activeSource) {
+        label.textContent = _activeSource.name;
+      } else if (_activeCategory !== 'all') {
+        label.textContent = _activeCategory.charAt(0).toUpperCase() + _activeCategory.slice(1);
+      }
   }
 }
 
