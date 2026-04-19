@@ -10,6 +10,9 @@
  * Setzt voraus: config.js, feeds.js (FEED_CATALOGUE)
  */
 
+import { CONFIG } from './config';
+import { FEED_CATALOGUE } from './feeds';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ÖFFENTLICHE API — wird von feed.js und feed-manager-ui.js verwendet
 // ═══════════════════════════════════════════════════════════════════════════

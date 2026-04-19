@@ -5,8 +5,10 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 ## [Unreleased] - April 2026
 
 ### Architektur-Update
+- **Vite Migration:** Projekt auf Vite umgestellt für besseres Development-Erlebnis und optimiertes Production-Building.
+- **TypeScript Migration:** Gesamter Quellcode auf TypeScript umgestellt (`src/`).
 - **GitHub Action Pre-Fetcher:** Es wurde ein serverseitiges Script (`scripts/fetch_feeds.py`) plus GitHub Action (`.github/workflows/fetch.yml`) hinzugefügt. Die Action stündlich/minütlich alle konfigurierten Feeds und legt sie unter `data/feeds.json` als Cache ab.
-- **Client-Optimierung:** `feed.js` lädt nun primär das vorkompilierte `feeds.json`. Nur benutzerdefinierte oder fehlende Feeds triggern noch den langsamen allorigins / corsproxy Fallback. 
+- **Client-Optimierung:** `feed.ts` lädt nun primär das vorkompilierte `feeds.json`. Nur benutzerdefinierte oder fehlende Feeds triggern noch den langsamen allorigins / corsproxy Fallback. 
 
 ### UI & UX
 - **Card-basiertes Settings-Modal:** Die Einstellungsseite wurde komplett auf ein modernes Glassmorphism-Design mit Karten umgestellt. Toggles und Auswahllisten sind nun viel prominenter.

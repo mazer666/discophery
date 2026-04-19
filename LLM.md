@@ -1,162 +1,55 @@
 # LLM Context — Discophery
 
-Diese Datei gibt KI-Assistenten (Claude, GitHub Copilot, etc.) den nötigen Kontext  
-um sinnvolle Hilfe bei diesem Projekt leisten zu können.
+Diese Datei bietet KI-Assistenten (Claude, ChatGPT, Copilot) den nötigen Kontext, um fundierte Hilfe bei der Entwicklung dieses Projekts zu leisten.
 
 ---
 
-## Was ist dieses Projekt?
-
-Eine Single-Page-App (SPA) die RSS-Feeds aggregiert und als Card-Feed darstellt.  
-Kein Framework, kein Build-Tool — reines HTML, CSS und JavaScript (ES6+).  
-Gehostet auf GitHub Pages. Auth via Google OAuth (Google Identity Services).
-
-**Zielgruppe des Entwicklers:** Technik-interessierter Nicht-Programmierer.  
-Code muss deshalb ausführlich kommentiert sein — jede Funktion erklärt was und warum.
+## 🎯 Projekt-Ziel
+Ein persönlicher, werbefreier News-Feed als Single-Page-App (SPA). Fokus auf Schnelligkeit, Datenschutz und einfache Erweiterbarkeit.
 
 ---
 
-## Architektur-Entscheidungen
+## 🏗 Architektur & Tech-Stack
 
-### Warum kein Framework (React, Vue, etc.)?
-- Kein Build-Schritt nötig → direktes Deployment auf GitHub Pages
-- Jede Zeile Code ist ohne Toolchain lesbar und verstehbar
-- Für diesen Use-Case ausreichend
+### Core
+- **Vite & TypeScript**: Das Projekt nutzt Vite als Build-Tool und TypeScript für Typsicherheit.
+- **Kein UI-Framework**: Es wird bewusst kein React, Vue oder Angular genutzt, um die App leichtgewichtig zu halten. Die UI-Manipulation erfolgt direkt über das DOM.
+- **PWA**: Ein Service Worker verwaltet das Caching der Assets und sorgt für Offline-Fähigkeit.
 
-### Warum kein TypeScript?
-- Würde einen Compile-Schritt erfordern
-- JSDoc-Kommentare liefern ausreichend Typsicherheit für diesen Umfang
+### Datenfluss
+1. **Initialisierung**: `main.ts` lädt, `auth.ts` prüft den Login-Status.
+2. **Datenabruf**: `feed.ts` lädt primär die vorkompilierte `data/feeds.json` (wird stündlich per GitHub Action aktualisiert).
+3. **Fallback**: Falls `feeds.json` nicht verfügbar ist oder ein individueller Feed geladen wird, erfolgt der Abruf über einen CORS-Proxy (`allorigins.win`).
+4. **Verarbeitung**: RSS/Atom-XML wird mit dem nativen `DOMParser` geparst und normalisiert.
+5. **Filterung**: `filter.ts` wendet Keyword- und Source-Filter auf die Artikel an.
+6. **Rendering**: `ui-cards.ts` generiert die HTML-Cards und fügt sie in den DOM ein.
 
-### Warum localStorage statt Datenbank?
-- Kein Backend nötig → kein Server, keine Kosten, keine Wartung
-- Filter/Präferenzen sind gerätespezifisch, das ist gewünscht
-
-### Warum allorigins.win als CORS-Proxy (nur Fallback!)?
-- Früher war dies die primäre Datenquelle. Jetzt läuft eine GitHub Action alle 5 Minuten (`scripts/fetch_feeds.py`) und generiert `data/feeds.json`.
-- `allorigins.win` wird nur noch als Client-Fallback für unbekannte Custom-Feeds verwendet, die nicht zur Compile-Zeit im `feeds.js` hinterlegt waren.
-
-### Warum Google Identity Services statt Firebase Auth?
-- Kein Firebase-Setup nötig
-- Läuft komplett client-seitig
-- Eine einzige Script-Zeile reicht für den Login
+### Speicher
+- **localStorage**: Alle Benutzereinstellungen (aktive Feeds, ausgeblendete Artikel, Filter) werden lokal gespeichert. Es gibt kein Datenbank-Backend.
 
 ---
 
-## Dateistruktur und Verantwortlichkeiten
-
-```
-index.html    — HTML-Skeleton, lädt alle Scripts und Styles
-config.js     — Einzige Datei die der User anfassen muss (Feeds, Einstellungen)
-auth.js       — Google OAuth: Login, Logout, User-State prüfen
-feed.js       — RSS-Feeds via CORS-Proxy laden, XML parsen, normalisieren
-filter.js     — Filterregeln lesen/schreiben (localStorage), auf Artikel anwenden
-ui.js         — DOM manipulieren: Cards rendern, Swipe-Gesten, Chips, Modal
-style.css     — CSS Custom Properties für Light/Dark Mode, Card-Layout, Animationen
-```
-
-**Wichtige Regel:** Jede Datei bleibt unter 500 Zeilen.  
-Wenn eine Datei zu groß wird, eine neue mit klarer Verantwortlichkeit aufteilen.
+## 📁 Dateistruktur (src/)
+- `config.ts`: Zentrale Konfiguration und Typ-Definitionen.
+- `feed.ts`: Logik zum Laden und Parsen von RSS-Feeds.
+- `feeds.ts`: Der statische Katalog der verfügbaren Feeds.
+- `ui.ts`: Globales UI-Handling (Modals, Toggles, Suche).
+- `ui-cards.ts`: Spezialisiert auf das Rendern der Nachrichten-Karten.
+- `feed-manager.ts`: Logik zur Verwaltung der abonnierten Feeds.
+- `filter.ts`: Filterregeln und Paywall-Erkennung.
 
 ---
 
-## Datenfluss
-
-```
-1. Seite lädt
-   └─> auth.js prüft ob User eingeloggt ist
-       ├─> Nicht eingeloggt: Login-Screen zeigen
-       └─> Eingeloggt: feed.js starten
-
-2. feed.js läuft
-   └─> Für jeden Feed in config.js:
-       ├─> URL durch CORS-Proxy schicken
-       ├─> XML-Antwort parsen
-       └─> Artikel normalisieren zu einheitlichem Objekt:
-           { id, title, url, image, source, date, category }
-
-3. filter.js läuft
-   └─> Für jeden Artikel:
-       ├─> Geblockte Keywords prüfen (→ Artikel ausblenden)
-       ├─> Geblockte Quellen prüfen (→ Artikel ausblenden)
-       └─> Artikel-Score berechnen (für spätere Sortierung)
-
-4. ui.js rendert
-   └─> Artikel als Cards in den DOM schreiben
-       ├─> Swipe-Listener auf jede Card
-       └─> Filter-Button auf jeder Card
-```
+## 📜 Coding-Regeln
+1. **Kommentare auf Deutsch**: Erklärungen für den Anwender (User-Stories) auf Deutsch, rein technische Implementierungsdetails in Englisch.
+2. **Kein innerHTML**: Aus Sicherheitsgründen (XSS) immer `textContent` oder DOM-Element-Erzeugung nutzen.
+3. **Explizite Typisierung**: Da wir TypeScript nutzen, sollten Interfaces und Types konsequent verwendet werden.
+4. **Fehlertoleranz**: Feed-Ladevorgänge müssen isoliert sein (`Promise.allSettled`), damit ein defekter Feed nicht die gesamte App blockiert.
+5. **Performance**: DOM-Manipulationen sollten so gering wie möglich gehalten werden (z.B. DocumentFragment nutzen).
 
 ---
 
-## Datenformat — Normalisierter Artikel
-
-Alle RSS-Feeds werden in dieses einheitliche Format konvertiert:
-
-```js
-{
-  id: String,          // Hash aus URL (eindeutige ID)
-  title: String,       // Artikeltitel
-  url: String,         // Original-URL des Artikels
-  image: String|null,  // URL des Vorschaubilds (oder null)
-  description: String, // Kurzbeschreibung (max. 200 Zeichen, kein HTML)
-  source: String,      // Anzeigename der Quelle (aus config.js)
-  sourceId: String,    // ID der Quelle (aus config.js)
-  category: String,    // Kategorie (aus config.js)
-  date: Date,          // Veröffentlichungsdatum
-  dismissed: Boolean,  // Wurde weggewischt? (localStorage)
-}
-```
-
----
-
-## localStorage Struktur
-
-```js
-// Geblockte Quellen (Array von Source-IDs)
-'discophery_blocked_sources': '["golem","android-central"]'
-
-// Geblockte Keywords (Array von Strings)
-'discophery_blocked_keywords': '["werbung","angebot","sponsored"]'
-
-// Weggewischte Artikel (Array von Artikel-IDs, max. 500 Einträge)
-'discophery_dismissed': '["abc123","def456"]'
-
-// User-Einstellungen
-'discophery_settings': '{"autoRefresh": true, "refreshInterval": 30}'
-
-// Letzter Refresh-Zeitpunkt (Unix Timestamp)
-'discophery_last_refresh': '1712345678'
-```
-
----
-
-## Coding-Regeln für dieses Projekt
-
-1. **Kommentare auf Deutsch** für UI-nahe Erklärungen, auf Englisch für technische Details
-2. **JSDoc für alle Funktionen** — Parameter und Rückgabewert immer dokumentieren
-3. **Keine globalen Variablen** — alles in Modulen oder klar benannten Objekten
-4. **Fehlerbehandlung** — jeder fetch()-Aufruf hat einen try/catch
-5. **Kein innerHTML mit User-Daten** — immer textContent oder DOM-Methoden nutzen (XSS-Schutz)
-6. **Max. 500 Zeilen pro Datei** — lieber eine neue Datei aufmachen
-7. **Keine externen Bibliotheken** außer Google Identity Services
-
----
-
-## Bekannte Limitierungen
-
-- **CORS-Proxy (nur Custom Feeds):** Fallback greift nur bei selbst hinzugefügten Feeds. Alle Standard-Feeds kommen blitzschnell via GitHub Action aus `data/feeds.json`.
-- **Bilder:** Nicht alle RSS-Feeds liefern Vorschaubilder. Fallback: Quell-Logo.
-- **Rate Limiting:** Zu viele Feeds gleichzeitig können den CORS-Proxy überlasten.  
-  Feeds werden deshalb sequenziell mit 200ms Pause geladen.
-- **Google RSS:** Google News RSS-Feeds haben manchmal Google-Redirect-URLs.  
-  feed.js enthält eine Funktion zum Auflösen dieser URLs.
-
----
-
-## Erweiterungsideen (noch nicht implementiert)
-
-- Service Worker für Offline-Unterstützung
-- Web Share API für "Teilen"-Button auf Mobile
-- Keyboard-Shortcuts für Desktop
-- Export/Import der Filter-Einstellungen als JSON
-- Mehrere Profile (z.B. "Arbeit" und "Freizeit")
+## 🛠 Bekannte Besonderheiten
+- **Paywall-Labeling**: Die App erkennt Paywall-Marker (z.B. (g+), [plus]) im Titel/Text und markiert diese Artikel visuell.
+- **Google News URLs**: Google-News-RSS-Links werden serverseitig aufgelöst, um direkte Klicks zu ermöglichen.
+- **CORS-Hürde**: Ohne Proxy können RSS-Feeds nicht direkt im Browser geladen werden.

@@ -17,6 +17,9 @@
  * textContent oder getAttribute gelesen.
  */
 
+import { CONFIG } from './config';
+import { getActiveFeeds } from './feed-manager';
+
 /**
  * @typedef {Object} DiscopheryArticle
  * @property {string}      id          - Hash aus der Artikel-URL (eindeutig)
@@ -450,7 +453,7 @@ function _checkPaywall(title: string, description: string) {
   const d = description.toLowerCase();
   
   // Golem G+, Zeit-Plus, FAZ+, etc.
-  const markers = [
+  const markers: (string | RegExp)[] = [
     '(g+)', '[g+]', 'g+',           // Golem (ohne \b da + kein WortZeichen ist)
     '[plus]', '(plus)', 'plus:', 'plus-artikel', // Allgemein
     '(p+)', '[p+]', 'p+',            // Varianten
