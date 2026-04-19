@@ -224,12 +224,17 @@ function _closeSettingsModal() {
 }
 
 function _renderSettingsContent() {
-  const container = document.getElementById('settings-content'); // Wir brauchen einen Wrapper im HTML
+  const container = document.getElementById('settings-content');
   if (!container) return;
   container.innerHTML = '';
 
+  // Icons
+  const iconDisplay = `<svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+  const iconFilters = `<svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`;
+  const iconSystem  = `<svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
+
   // 1. Karte: ANZEIGE
-  container.appendChild(_createSettingsCard('Anzeige', [
+  container.appendChild(_createSettingsCard('Anzeige', iconDisplay, [
     _createSettingsRow('Theme', _createSelect('select-theme', [
       { v: 'auto', t: 'Automatisch' },
       { v: 'light', t: 'Hell' },
@@ -246,7 +251,6 @@ function _renderSettingsContent() {
       parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) ?? '', 10) || CONFIG.ICON_SIZE_DEFAULT,
       16, 48, (e) => {
         localStorage.setItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE, (e.target as HTMLInputElement).value);
-        // Live Update falls der Manager offen ist? (Optional)
       }))
   ]));
 
@@ -259,17 +263,17 @@ function _renderSettingsContent() {
   blockedKeywordsContainer.className = 'filter-tags-container';
   _renderFilterTags(blockedKeywordsContainer, getBlockedKeywords(), 'Keine blockierten Keywords.', (kw) => unblockKeyword(kw));
 
-  container.appendChild(_createSettingsCard('Filter & Quellen', [
+  container.appendChild(_createSettingsCard('Inhalt & Filter', iconFilters, [
     _createSettingsRow('', _createButton('btn-open-feed-manager-from-settings', 'Feeds verwalten →', 'btn--ghost', () => {
       _closeSettingsModal();
-      openFeedManager();
+      setTimeout(openFeedManager, 300); // Weicher Übergang
     })),
     _createSettingsRow('Blockierte Quellen', blockedSourcesContainer),
     _createSettingsRow('Blockierte Keywords', blockedKeywordsContainer)
   ]));
 
   // 3. Karte: SYSTEM
-  container.appendChild(_createSettingsCard('System', [
+  container.appendChild(_createSettingsCard('System', iconSystem, [
     _createSettingsRow('Sync-Intervall', _createSelect('select-refresh-interval', [
       { v: '0', t: 'Manuell' },
       { v: '5', t: '5 Min' },
@@ -281,8 +285,10 @@ function _renderSettingsContent() {
       _startAutoRefresh();
     })),
     _createSettingsRow('', _createButton('btn-reset-all', 'Alle Daten zurücksetzen', 'btn--destructive', () => {
-      if (resetAllData()) {
-        _allArticles = []; _closeSettingsModal(); _showState('loading'); loadAllFeeds();
+      if (confirm('Möchtest du wirklich alle lokalen Daten (Feeds, Filter, Einstellungen) zurücksetzen?')) {
+        if (resetAllData()) {
+          _allArticles = []; _closeSettingsModal(); _showState('loading'); loadAllFeeds();
+        }
       }
     }))
   ]));
@@ -290,13 +296,15 @@ function _renderSettingsContent() {
 
 // ── Hilfsfunktionen für Card-UI ────────────────────────────────────────────────
 
-function _createSettingsCard(title, rows) {
+function _createSettingsCard(title, iconSvg, rows) {
   const card = document.createElement('div');
   card.className = 'settings-card';
+
   const h3 = document.createElement('h3');
   h3.className = 'settings-card__title';
-  h3.textContent = title;
+  h3.innerHTML = `${iconSvg} <span>${title}</span>`;
   card.appendChild(h3);
+
   rows.forEach(r => card.appendChild(r));
   return card;
 }
@@ -335,7 +343,7 @@ function _createNumberInput(id, val, min, max, onChange) {
 
 function _createButton(id, text, cls, onClick) {
   const btn = document.createElement('button');
-  btn.id = id; btn.className = 'btn ' + cls + ' btn--full';
+  btn.id = id; btn.className = 'btn ' + cls;
   btn.textContent = text;
   btn.addEventListener('click', onClick);
   return btn;

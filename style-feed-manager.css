@@ -81,11 +81,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-3) 0;
+  padding: var(--space-4) var(--space-2);
   cursor: pointer;
   list-style: none;
   user-select: none;
   -webkit-user-select: none;
+  transition: background-color var(--transition-fast);
+  border-radius: var(--radius-md);
+}
+
+.feed-group__summary:hover {
+  background-color: var(--color-surface-2);
 }
 
 /* WebKit versteckt den nativen Pfeil anders */
@@ -93,57 +99,51 @@
 
 .feed-group__title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-weight: 700;
+  color: var(--color-text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .feed-group__count {
-  background: var(--color-surface-2);
+  background: var(--color-bg);
   color: var(--color-text-tertiary);
   border-radius: 999px;
-  padding: 1px var(--space-2);
+  padding: 2px var(--space-3);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 700;
+  margin-left: var(--space-2);
 }
 
 .feed-group__count--active {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.feed-group__bulk-btn {
+  background: none;
+  border: none;
+  padding: var(--space-2);
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.feed-group__bulk-btn:hover {
   background: var(--color-accent-light);
   color: var(--color-accent);
 }
 
-.feed-group__bulk-btn {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-accent);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  cursor: pointer;
-  margin-left: auto;
-  margin-right: var(--space-3);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  transition: all var(--transition-fast);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.feed-group__bulk-btn:hover {
-  background: var(--color-accent);
-  color: #fff;
-  border-color: var(--color-accent);
-}
-
-.feed-group__bulk-btn span {
-  font-size: 14px;
-  line-height: 1;
+.feed-group__bulk-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .feed-group__arrow {

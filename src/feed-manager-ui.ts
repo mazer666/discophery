@@ -98,9 +98,17 @@ function _createCategoryGroup(cat, feeds, activeCount) {
   const summary = document.createElement('summary');
   summary.className = 'feed-group__summary';
 
+  // Kategorie-Icons
+  const categoryIcons = {
+    'news':      '📰', 'tech':      '💻', 'sport':     '⚽', 'wirtschaft': '📈', 
+    'politik':   '⚖️', 'kultur':    '🎨', 'lifestyle': '✨', 'wissen':     '🧠',
+    'regional':  '📍', 'finanzen':  '💰', 'it':        '🔨', 'gaming':    '🎮'
+  };
+  const icon = categoryIcons[cat.toLowerCase()] || '📂';
+
   const titleEl = document.createElement('span');
   titleEl.className   = 'feed-group__title';
-  titleEl.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+  titleEl.innerHTML = `<span>${icon}</span> <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>`;
 
   const badge = document.createElement('span');
   badge.className   = 'feed-group__count' + (activeCount > 0 ? ' feed-group__count--active' : '');
@@ -109,9 +117,15 @@ function _createCategoryGroup(cat, feeds, activeCount) {
 
   const bulkBtn = document.createElement('button');
   bulkBtn.className = 'feed-group__bulk-btn';
-  bulkBtn.innerHTML = (activeCount === feeds.length) 
-    ? '<span aria-hidden="true">☐</span> Alle aus' 
-    : '<span aria-hidden="true">☑</span> Alle an';
+  bulkBtn.title = (activeCount === feeds.length) ? 'Alle deaktivieren' : 'Alle aktivieren';
+  
+  // Icons für Bulk-Aktionen
+  const iconCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+  const iconPlus  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></svg>`;
+  
+  bulkBtn.innerHTML = (activeCount === feeds.length) ? iconCheck : iconPlus;
+  if (activeCount === feeds.length) bulkBtn.style.color = 'var(--color-success)';
+
   bulkBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -123,11 +137,15 @@ function _createCategoryGroup(cat, feeds, activeCount) {
 
   const arrow = document.createElement('span');
   arrow.className   = 'feed-group__arrow';
-  arrow.textContent = '▾';
-  arrow.ariaHidden  = 'true';
+  arrow.innerHTML   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
-  summary.appendChild(titleEl);
-  summary.appendChild(badge);
+  const leftSide = document.createElement('div');
+  leftSide.style.display = 'flex';
+  leftSide.style.alignItems = 'center';
+  leftSide.appendChild(titleEl);
+  leftSide.appendChild(badge);
+
+  summary.appendChild(leftSide);
   summary.appendChild(bulkBtn);
   summary.appendChild(arrow);
   details.appendChild(summary);
@@ -152,12 +170,11 @@ function _createCustomFeedsGroup(customFeeds) {
 
   const title = document.createElement('span');
   title.className   = 'feed-group__title';
-  title.textContent = 'Eigene Feeds';
+  title.innerHTML = `<span>⭐</span> <span>Eigene Feeds</span>`;
 
   const arrow = document.createElement('span');
   arrow.className   = 'feed-group__arrow';
-  arrow.textContent = '▾';
-  arrow.ariaHidden  = 'true';
+  arrow.innerHTML   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
   summary.appendChild(title);
   summary.appendChild(arrow);

@@ -36,11 +36,6 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       APP-SHELL
-       Wird erst sichtbar wenn der User eingeloggt ist (oder AUTH_REQUIRED=false).
-       Startet versteckt — auth.js setzt aria-hidden="false" nach dem Login.
-       ═══════════════════════════════════════════════════════════════════ -->
   <div id="app-shell">
 
     <!-- ── Header ─────────────────────────────────────────────────── -->
@@ -113,16 +108,6 @@
           </svg>
         </button>
 
-        <!-- User-Avatar (wird von auth.js befüllt) -->
-        <button
-          id="btn-user"
-          class="icon-button"
-          aria-label="Benutzer-Menü"
-          title="Angemeldet als …"
-          style="padding:0; overflow:hidden;"
-        >
-          <!-- auth.js fügt hier ein <img> oder Initialen-Span ein -->
-        </button>
 
       </div>
     </header><!-- /app-header -->
