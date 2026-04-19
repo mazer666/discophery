@@ -446,13 +446,13 @@ function _checkPaywall(title: string, description: string) {
   const t = title.toLowerCase();
   const d = description.toLowerCase();
   
-  // Golem G+, Zeit-Plus, etc.
+  // Golem G+, Zeit-Plus, FAZ+, etc.
   const markers = [
-    /\[g\+\]/, /\(g\+\)/,           // Golem
-    /\[plus\]/, /\(plus\)/, 'plus:', // Allgemein
-    /\[p\+\]/, /\(p\+\)/,           // Varianten
+    /\bg\+\b/, /\(g\+\)/, /\[g\+\]/, // Golem
+    /\[plus\]/, /\(plus\)/, /\bplus:/, 'plus-artikel', // Allgemein
+    /\(p\+\)/, /\[p\+\]/,             // Varianten
     'paywall', 'bezahlschranke',
-    'abonnement', 'premium-inhalt', 'premium artikel',
+    'abonnement', 'premium-inhalt', 'premium artikel', 'premium plus',
     'nur für abonnenten', 'exklusiv für abonnenten'
   ];
 

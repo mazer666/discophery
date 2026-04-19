@@ -115,7 +115,8 @@ def parse_xml(xml_string, feed):
                     "sourceId": feed['id'],
                     "category": feed.get('category', 'news'),
                     "date": date,
-                    "dismissed": False
+                    "dismissed": False,
+                    "isPaywall": check_paywall(title, desc)
                 })
     else:
         # RSS / RDF
@@ -141,11 +142,27 @@ def parse_xml(xml_string, feed):
                     "sourceId": feed['id'],
                     "category": feed.get('category', 'news'),
                     "date": date,
-                    "dismissed": False
+                    "dismissed": False,
+                    "isPaywall": check_paywall(title, desc)
                 })
     
     return articles[:MAX_ARTICLES]
 
+
+def check_paywall(title, description):
+    t = title.lower()
+    d = description.lower()
+    markers = [
+        r'\(g\+\)', r'\[g\+\]', r'\bg\+\b',
+        r'\[plus\]', r'\(plus\)', r'\bplus:',
+        r'\[p\+\]', r'\(p\+\)',
+        'paywall', 'bezahlschranke', 'abonnement', 'premium',
+        'nur für abonnenten', 'exklusiv für abonnenten'
+    ]
+    for m in markers:
+        if re.search(m, t) or re.search(m, d):
+            return True
+    return False
 
 def main():
     print("Parsing feeds.js...")
@@ -161,7 +178,19 @@ def main():
         try:
             req = urllib.request.Request(feed['url'], headers=headers)
             with urllib.request.urlopen(req, timeout=10) as response:
-                xml_data = response.read().decode('utf-8', errors='ignore')
+                content = response.read()
+                # Try to detect encoding from XML header
+                charset = 'utf-8'
+                preview = content[:200].decode('ascii', errors='ignore')
+                match = re.search(r'encoding=["\']([^"\']+)["\']', preview, re.I)
+                if match:
+                    charset = match.group(1)
+                
+                try:
+                    xml_data = content.decode(charset, errors='replace')
+                except:
+                    xml_data = content.decode('utf-8', errors='ignore')
+
                 articles = parse_xml(xml_data, feed)
                 all_articles.extend(articles)
                 print(f"  -> Found {len(articles)}")
