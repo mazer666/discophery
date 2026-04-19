@@ -72,8 +72,11 @@ export async function loadAllFeeds() {
     if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
       try {
         preFetchedData = await res.json();
-        // Date-Strings zurück in echte Dates parsen
-        preFetchedData.forEach(a => { if(a.date) a.date = new Date(a.date); });
+        // Date-Strings zurück in echte Dates parsen + Paywall-Erkennung nachziehen
+        preFetchedData.forEach(a => { 
+          if(a.date) a.date = new Date(a.date);
+          a.isPaywall = _checkPaywall(a.title || '', a.description || '');
+        });
       } catch (e) {
         console.warn('feeds.json parse error:', e);
       }
@@ -448,9 +451,9 @@ function _checkPaywall(title: string, description: string) {
   
   // Golem G+, Zeit-Plus, FAZ+, etc.
   const markers = [
-    /\bg\+\b/, /\(g\+\)/, /\[g\+\]/, // Golem
-    /\[plus\]/, /\(plus\)/, /\bplus:/, 'plus-artikel', // Allgemein
-    /\(p\+\)/, /\[p\+\]/,             // Varianten
+    '(g+)', '[g+]', 'g+',           // Golem (ohne \b da + kein WortZeichen ist)
+    '[plus]', '(plus)', 'plus:', 'plus-artikel', // Allgemein
+    '(p+)', '[p+]', 'p+',            // Varianten
     'paywall', 'bezahlschranke',
     'abonnement', 'premium-inhalt', 'premium artikel', 'premium plus',
     'nur für abonnenten', 'exklusiv für abonnenten'
