@@ -23,8 +23,9 @@ export const FEED_CATALOGUE = [
   // NACHRICHTEN & POLITIK — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'orf',           name: 'ORF.at',              url: 'https://rss.orf.at/news.xml',                                    category: 'news',         language: 'de', enabled: true  },
-  { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss',                                 category: 'news',         language: 'de', enabled: true  },
-  { id: 'diepresse',    name: 'Die Presse',           url: 'https://diepresse.com/rss/alle',                                 category: 'news',         language: 'de', enabled: true  },
+  { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss/all',                             category: 'news',         language: 'de', enabled: true  },
+  { id: 'diepresse',    name: 'Die Presse',           url: 'https://www.diepresse.com/rss',                                  category: 'news',         language: 'de', enabled: true  },
+  { id: 'krone',        name: 'Krone.at',             url: 'https://www.krone.at/rss/aktuell',                               category: 'news',         language: 'de', enabled: false },
   { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/feeds/rss.xml',                            category: 'news',         language: 'de', enabled: false },
   { id: 'tagesschau',   name: 'Tagesschau',           url: 'https://www.tagesschau.de/index~rss2.xml',                       category: 'politik',      language: 'de', enabled: false },
   { id: 'spiegel',      name: 'SPIEGEL Online',       url: 'https://www.spiegel.de/schlagzeilen/index.rss',                  category: 'politik',      language: 'de', enabled: false },
@@ -40,13 +41,13 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'bbc-news',     name: 'BBC News',             url: 'https://feeds.bbci.co.uk/news/rss.xml',                          category: 'politik',      language: 'en', enabled: false },
   { id: 'guardian',     name: 'The Guardian',         url: 'https://www.theguardian.com/world/rss',                          category: 'politik',      language: 'en', enabled: false },
-  { id: 'reuters',      name: 'Reuters',              url: 'https://feeds.reuters.com/reuters/worldNews',                    category: 'politik',      language: 'en', enabled: false },
+  { id: 'reuters',      name: 'Reuters',              url: 'https://news.google.com/rss/search?q=site:reuters.com+world&hl=en-US&gl=US&ceid=US:en', category: 'politik', language: 'en', enabled: false },
   { id: 'aljazeera',    name: 'Al Jazeera',           url: 'https://www.aljazeera.com/xml/rss/all.xml',                      category: 'politik',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // LOKALNACHRICHTEN — Österreich
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'futurezone',         name: 'Futurezone.at',             url: 'https://futurezone.at/feed',                                   category: 'tech',         language: 'de', enabled: false },
+  { id: 'futurezone',         name: 'Futurezone.at',             url: 'https://futurezone.at/xml/rss',                                category: 'tech',         language: 'de', enabled: false },
   { id: 'meinbezirk-nk',     name: 'Mein Bezirk Neunkirchen',   url: 'https://www.meinbezirk.at/neunkirchen/c-lokales/rss',           category: 'lokal',        language: 'de', enabled: false },
   { id: 'meinbezirk-wn',     name: 'Mein Bezirk Wr. Neustadt',  url: 'https://www.meinbezirk.at/wiener-neustadt/c-lokales/rss',       category: 'lokal',        language: 'de', enabled: false },
   { id: 'meinbezirk-wien',   name: 'Mein Bezirk Wien',          url: 'https://www.meinbezirk.at/wien/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
@@ -67,11 +68,13 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'golem',        name: 'Golem.de',             url: 'https://rss.golem.de/rss.php?feed=RSS2.0',                       category: 'tech',         language: 'de', enabled: true  },
-  { id: 'heise',        name: 'Heise Online',         url: 'https://www.heise.de/rss/heise-atom.xml',                        category: 'tech',         language: 'de', enabled: true  },
+  { id: 'heise',        name: 'Heise Online',         url: 'https://www.heise.de/news-extern/feeds/heise-atom.xml',          category: 'tech',         language: 'de', enabled: true  },
   { id: 't3n',          name: 't3n',                  url: 'https://t3n.de/rss.xml',                                         category: 'tech',         language: 'de', enabled: false },
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://winfuture.de/news.rss',                                  category: 'tech',         language: 'de', enabled: false },
   { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://www.netzwelt.de/news/index.rss',                         category: 'tech',         language: 'de', enabled: false },
-  { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/rss_topnews.xml',                        category: 'tech',         language: 'de', enabled: false },
+  { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/rss_news.xml',                           category: 'tech',         language: 'de', enabled: false },
+  { id: 'computerbild', name: 'Computerbild',         url: 'https://www.computerbild.de/rss/feed_rss_aktuell.xml',           category: 'tech',         language: 'de', enabled: false },
+  { id: 'mixed-de',     name: 'Mixed.de (VR/AR)',     url: 'https://mixed.de/feed/',                                         category: 'tech',         language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // TECHNOLOGIE — International
@@ -114,11 +117,16 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // GAMING & GEEK
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'gamestar',     name: 'GameStar',              url: 'https://www.gamestar.de/feed.cfm',                               category: 'gaming',       language: 'de', enabled: false },
+  { id: 'gamestar',     name: 'GameStar',              url: 'https://www.gamestar.de/rss/rss.xml',                            category: 'gaming',       language: 'de', enabled: false },
   { id: 'gamepro',      name: 'GamePro',               url: 'https://www.gamepro.de/feed.cfm',                                category: 'gaming',       language: 'de', enabled: false },
-  { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss_feed/alle_news.xml',    category: 'gaming',       language: 'de', enabled: false },
+  { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss/-/index.html',          category: 'gaming',       language: 'de', enabled: false },
+  { id: 'pcgames',      name: 'PC Games',              url: 'https://www.pcgames.de/rss/feed/rss2.0/',                        category: 'gaming',       language: 'de', enabled: false },
+  { id: 'computerbase', name: 'Computerbase',          url: 'https://www.computerbase.de/rss/news.xml',                       category: 'gadgets',      language: 'de', enabled: false },
+  { id: 'hardwareluxx', name: 'Hardwareluxx',          url: 'https://www.hardwareluxx.de/index.php?option=com_syndication&view=feed&format=rss', category: 'gadgets', language: 'de', enabled: false },
+  { id: 'notebookcheck', name: 'Notebookcheck (DE)',   url: 'https://www.notebookcheck.com/rss-feed-de.169.0.html',           category: 'gadgets',      language: 'de', enabled: false },
+  { id: 'bgg',          name: 'BoardGameGeek News',    url: 'https://boardgamegeek.com/rss/boardgamenews',                    category: 'gaming',       language: 'en', enabled: false },
   { id: 'polygon',      name: 'Polygon',               url: 'https://www.polygon.com/rss/index.xml',                          category: 'gaming',       language: 'en', enabled: false },
-  { id: 'ign',          name: 'IGN',                   url: 'https://feeds.ign.com/ign/all',                                  category: 'gaming',       language: 'en', enabled: false },
+  { id: 'ign',          name: 'IGN',                  url: 'https://www.ign.com/rss/v2/articles/feed', category: 'gaming',       language: 'en', enabled: false },
   { id: 'eurogamer',    name: 'Eurogamer',             url: 'https://www.eurogamer.net/?format=rss',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'rps',          name: 'Rock Paper Shotgun',    url: 'https://www.rockpapershotgun.com/feed',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'kotaku',       name: 'Kotaku',                url: 'https://kotaku.com/rss',                                         category: 'gaming',       language: 'en', enabled: false },
@@ -128,6 +136,7 @@ export const FEED_CATALOGUE = [
   // FILM & SERIEN
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'filmstarts',   name: 'Filmstarts',            url: 'https://www.filmstarts.de/nachrichten/rss.xml',                  category: 'film',         language: 'de', enabled: false },
+  { id: 'serienjunkies', name: 'Serienjunkies.de',    url: 'https://www.serienjunkies.de/rss/news.xml',                      category: 'film',         language: 'de', enabled: false },
   { id: 'slashfilm',    name: '/Film',                 url: 'https://www.slashfilm.com/feed/',                                category: 'film',         language: 'en', enabled: false },
   { id: 'screenrant',   name: 'Screen Rant',           url: 'https://screenrant.com/feed/',                                   category: 'film',         language: 'en', enabled: false },
   { id: 'variety',      name: 'Variety',               url: 'https://variety.com/feed/',                                      category: 'film',         language: 'en', enabled: false },
@@ -197,6 +206,10 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'kicker',       name: 'Kicker',                url: 'https://www.kicker.de/news/rss/',                                category: 'sport',        language: 'de', enabled: false },
   { id: 'sport1',       name: 'Sport1',                url: 'https://www.sport1.de/news.rss',                                 category: 'sport',        language: 'de', enabled: false },
+  { id: 'runnersworld-de', name: "Runner's World (DE)", url: 'https://www.runnersworld.de/feed/',                             category: 'sport',        language: 'de', enabled: false },
+  { id: 'fitforfun',    name: 'Fit For Fun',           url: 'https://www.fitforfun.de/feed',                                  category: 'sport',        language: 'de', enabled: false },
+  { id: 'achim-achilles', name: 'Achim Achilles Blog', url: 'https://achim-achilles.de/feed/',                                category: 'sport',        language: 'de', enabled: false },
+  { id: 'lauftipps',    name: 'Lauftipps.ch',          url: 'https://lauftipps.ch/feed/',                                     category: 'sport',        language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // FASHION & MODE
