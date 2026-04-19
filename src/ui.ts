@@ -207,9 +207,6 @@ function _openSettingsModal() {
   const backdrop = document.getElementById('settings-modal-backdrop');
   if (!backdrop) return;
   _renderSettingsContent();
-  _loadRefreshIntervalSetting();
-  _loadSortSetting();
-  _loadIconSizeSetting();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
   document.getElementById('btn-close-settings')?.focus();
@@ -264,10 +261,7 @@ function _renderSettingsContent() {
   _renderFilterTags(blockedKeywordsContainer, getBlockedKeywords(), 'Keine blockierten Keywords.', (kw) => unblockKeyword(kw));
 
   container.appendChild(_createSettingsCard('Inhalt & Filter', iconFilters, [
-    _createSettingsRow('', _createButton('btn-open-feed-manager-from-settings', 'Feeds verwalten →', 'btn--ghost', () => {
-      _closeSettingsModal();
-      setTimeout(openFeedManager, 300); // Weicher Übergang
-    })),
+    _createFeedsNavRow(),
     _createSettingsRow('Blockierte Quellen', blockedSourcesContainer),
     _createSettingsRow('Blockierte Keywords', blockedKeywordsContainer)
   ]));
@@ -295,6 +289,22 @@ function _renderSettingsContent() {
 }
 
 // ── Hilfsfunktionen für Card-UI ────────────────────────────────────────────────
+
+function _createFeedsNavRow() {
+  const btn = document.createElement('button');
+  btn.id = 'btn-open-feed-manager-from-settings';
+  btn.className = 'settings-feeds-btn';
+  btn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+    <span>Feeds verwalten</span>
+    <svg class="settings-feeds-btn__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  `;
+  btn.addEventListener('click', () => {
+    _closeSettingsModal();
+    setTimeout(openFeedManager, 300);
+  });
+  return btn;
+}
 
 function _createSettingsCard(title, iconSvg, rows) {
   const card = document.createElement('div');
@@ -386,12 +396,6 @@ function _startAutoRefresh() {
   _refreshTimer = setInterval(() => loadAllFeeds(), mins * 60_000);
 }
 
-function _loadRefreshIntervalSetting() {
-  const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL);
-  const sel = document.getElementById('select-refresh-interval');
-  if (sel && saved !== null) (sel as HTMLSelectElement).value = saved;
-}
-
 function _applyTheme(value) {
   if (value === 'light' || value === 'dark') {
     document.documentElement.dataset.theme = value;
@@ -400,21 +404,6 @@ function _applyTheme(value) {
     delete document.documentElement.dataset.theme;
     localStorage.removeItem(CONFIG.STORAGE_KEYS.THEME);
   }
-}
-
-function _loadThemeSetting() {
-  const sel = document.getElementById('select-theme');
-  if (sel) (sel as HTMLSelectElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) ?? 'auto';
-}
-
-function _loadSortSetting() {
-  const sel = document.getElementById('select-sort-order');
-  if (sel) (sel as HTMLSelectElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_ORDER) ?? 'date-desc';
-}
-
-function _loadIconSizeSetting() {
-  const inp = document.getElementById('input-icon-size');
-  if (inp) (inp as HTMLInputElement).value = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVICON_SIZE) || String(CONFIG.ICON_SIZE_DEFAULT);
 }
 
 // ── Button-Verdrahtung ────────────────────────────────────────────────────────
@@ -497,9 +486,5 @@ document.addEventListener('DOMContentLoaded', () => {
 (window as any)._renderFilterTags = _renderFilterTags;
 (window as any)._ensureShellVisible = _ensureShellVisible;
 (window as any)._startAutoRefresh = _startAutoRefresh;
-(window as any)._loadRefreshIntervalSetting = _loadRefreshIntervalSetting;
 (window as any)._applyTheme = _applyTheme;
-(window as any)._loadThemeSetting = _loadThemeSetting;
-
-(window as any)._loadSortSetting = _loadSortSetting;
 (window as any)._wireStaticButtons = _wireStaticButtons;

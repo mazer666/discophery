@@ -36,8 +36,8 @@
 
   /* Trennlinien & Schatten */
   --color-border:    #d1d1d6;
-  --color-shadow:    rgba(0, 0, 0, 0.08);
-  --color-shadow-md: rgba(0, 0, 0, 0.14);
+  --color-shadow:    rgba(0, 0, 0, 0.06);
+  --color-shadow-md: rgba(0, 0, 0, 0.12);
 
   /* Semantische Farben */
   --color-error:   #ff3b30;
@@ -67,9 +67,9 @@
   --space-8: 2rem;
 
   /* Radien */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
 
   /* Übergänge */
   --transition-fast:   150ms ease;
@@ -207,13 +207,6 @@ button {
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
-  display: none;
-}
-
-@media (min-width: 440px) {
-  .app-header__logo-text {
-    display: block;
-  }
 }
 
 .app-header__search {
