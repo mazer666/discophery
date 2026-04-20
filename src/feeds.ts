@@ -105,7 +105,7 @@ export const FEED_CATALOGUE = [
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://static.winfuture.de/feeds/WinFuture-News-rss2.0.xml',                                  category: 'tech',         language: 'de', enabled: false },
   { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://news.google.com/rss/publications/CAAqJQgKIh9DQklTRVFnTWFnMEtDMjVsZEhwM1pXeDBsZUtkS0FBUAE?hl=de&gl=DE&ceid=DE:de', category: 'tech',         language: 'de', enabled: false },
   { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/chip_komplett.xml',                      category: 'tech',         language: 'de', enabled: false },
-  { id: 'computerbild', name: 'Computerbild',         url: 'https://www.computerbild.de/rss/feed_rss_aktuell.xml',           category: 'tech',         language: 'de', enabled: false },
+  { id: 'computerbild', name: 'Computerbild',         url: 'https://www.computerbild.de/rss/35011529.xml',           category: 'tech',         language: 'de', enabled: false },
   { id: 'mixed-de',     name: 'Mixed.de (VR/AR)',     url: 'https://mixed.de/feed/',                                         category: 'tech',         language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
