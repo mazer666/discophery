@@ -188,7 +188,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // DESIGN & KREATIVES
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'likecool',     name: 'likecool.com',          url: 'https://www.likecool.com/rss.xml',                               category: 'design',       language: 'en', enabled: true  },
+// { id: 'likecool',     name: 'likecool.com',          url: 'https://www.likecool.com/rss.xml',                               category: 'design',       language: 'en', enabled: true  },
   { id: 'codrops',      name: 'Codrops',               url: 'https://tympanus.net/codrops/feed/',                             category: 'design',       language: 'en', enabled: false },
   { id: 'abduzeedo',    name: 'Abduzeedo',             url: 'https://abduzeedo.com/feed',                                     category: 'design',       language: 'en', enabled: false },
 
