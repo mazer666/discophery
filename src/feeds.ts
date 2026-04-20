@@ -166,7 +166,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // FILM & SERIEN
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'filmstarts',   name: 'Filmstarts',            url: 'https://www.filmstarts.de/nachrichten/rss.xml',                  category: 'film',         language: 'de', enabled: false },
+  { id: 'filmstarts',   name: 'Filmstarts',            url: 'https://www.filmstarts.de/rss/nachrichten.xml',                  category: 'film',         language: 'de', enabled: false },
 // { id: 'serienjunkies', name: 'Serienjunkies.de',    url: 'https://www.serienjunkies.de/rss/news.xml',                      category: 'film',         language: 'de', enabled: false },
   { id: 'slashfilm',    name: '/Film',                 url: 'https://www.slashfilm.com/feed/',                                category: 'film',         language: 'en', enabled: false },
   { id: 'screenrant',   name: 'Screen Rant',           url: 'https://screenrant.com/feed/',                                   category: 'film',         language: 'en', enabled: false },
