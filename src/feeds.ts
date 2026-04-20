@@ -112,7 +112,7 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — International
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'geeks-are-sexy', name: 'Geeks Are Sexy',     url: 'https://www.geeksaresexy.net/feed',                              category: 'tech',         language: 'en', enabled: true  },
-// { id: 'ars-technica', name: 'Ars Technica',         url: 'https://feeds.arstechnica.com/arstechnica/index',                category: 'tech',         language: 'en', enabled: false },
+  { id: 'ars-technica', name: 'Ars Technica',         url: 'https://feeds.arstechnica.com/arstechnica/index',                category: 'tech',         language: 'en', enabled: false },
   { id: 'verge',        name: 'The Verge',            url: 'https://www.theverge.com/rss/index.xml',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'wired',        name: 'Wired',                url: 'https://www.wired.com/feed/rss',                                 category: 'tech',         language: 'en', enabled: false },
   { id: 'techcrunch',   name: 'TechCrunch',           url: 'https://techcrunch.com/feed/',                                   category: 'tech',         language: 'en', enabled: false },
