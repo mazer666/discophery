@@ -25,18 +25,18 @@ export const FEED_CATALOGUE = [
   { id: 'orf',           name: 'ORF.at',              url: 'https://rss.orf.at/news.xml',                                    category: 'news',         language: 'de', enabled: true  },
   { id: 'derstandard',  name: 'Der Standard',         url: 'https://www.derstandard.at/rss',                                 category: 'news',         language: 'de', enabled: true  },
   { id: 'diepresse',    name: 'Die Presse',           url: 'https://www.diepresse.com/rss',                                  category: 'news',         language: 'de', enabled: true  },
-  { id: 'krone',        name: 'Krone.at',             url: 'https://api.krone.at/v1/rss/rssfeed-google.xml?id=2311992',       category: 'news',         language: 'de', enabled: true  },
+  { id: 'krone',        name: 'Krone.at',             url: 'https://api.krone.at/v1/rss/rssfeed-google.xml',                 category: 'news',         language: 'de', enabled: true  },
   { id: 'kurier',       name: 'Kurier.at',            url: 'https://kurier.at/xml/rssd',                                     category: 'news',         language: 'de', enabled: true  },
-  { id: 'sn',           name: 'Salzburger Nachrichten', url: 'https://www.sn.at/xml/rss',                                      category: 'news',         language: 'de', enabled: false },
+//{ id: 'sn',           name: 'Salzburger Nachrichten', url: 'https://www.sn.at/xml/rss',                                    category: 'news',         language: 'de', enabled: false },
   { id: 'kleine',       name: 'Kleine Zeitung',       url: 'https://www.kleinezeitung.at/rss/hp_stmk',                       category: 'news',         language: 'de', enabled: false },
-  { id: 'tt',           name: 'Tiroler Tageszeitung', url: 'https://www.tt.com/rss/news.xml',                                 category: 'news',         language: 'de', enabled: false },
-  { id: 'volat',        name: 'VOL.at (Vorarlberg)',  url: 'https://www.vol.at/rss/vorarlberg',                              category: 'news',         language: 'de', enabled: false },
+  { id: 'tt',           name: 'Tiroler Tageszeitung', url: 'https://www.tt.com/rss/news.xml',                                category: 'news',         language: 'de', enabled: false },
+  { id: 'volat',        name: 'VOL.at (Vorarlberg)',  url: 'https://www.vol.at/rss/',                                        category: 'news',         language: 'de', enabled: false },
   { id: 'tagesschau',   name: 'Tagesschau',           url: 'https://www.tagesschau.de/index~rss2.xml',                       category: 'politik',      language: 'de', enabled: false },
   { id: 'spiegel',      name: 'SPIEGEL Online',       url: 'https://www.spiegel.de/schlagzeilen/index.rss',                  category: 'politik',      language: 'de', enabled: false },
   { id: 'zeit',         name: 'Zeit Online',          url: 'https://newsfeed.zeit.de/index',                                 category: 'politik',      language: 'de', enabled: false },
   { id: 'sueddeutsche', name: 'Süddeutsche Zeitung',  url: 'https://rss.sueddeutsche.de/alles',                              category: 'politik',      language: 'de', enabled: false },
   { id: 'faz',          name: 'FAZ',                  url: 'https://www.faz.net/rss/aktuell/',                               category: 'politik',      language: 'de', enabled: false },
-// { id: 'focus',        name: 'Focus Online',         url: 'https://rss.focus.de/fol/XML/rss_folnews.xml',                   category: 'news',         language: 'de', enabled: false },
+  { id: 'focus',        name: 'Focus Online',         url: 'https://www.focus.de/rss',                                       category: 'news',         language: 'de', enabled: false },
   { id: 'ntv',          name: 'n-tv',                 url: 'https://www.n-tv.de/rss',                                        category: 'news',         language: 'de', enabled: false },
   { id: 'netzpolitik',  name: 'Netzpolitik.org',      url: 'https://netzpolitik.org/feed/',                                  category: 'politik',      language: 'de', enabled: false },
   { id: 'kontrast',     name: 'Kontrast.at',          url: 'https://kontrast.at/feed/',                                      category: 'politik',      language: 'de', enabled: false },
@@ -218,8 +218,8 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // AUTOMOBIL
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'auto-ms',      name: 'Auto Motor Sport',      url: 'https://www.auto-motor-und-sport.de/feed/',                     category: 'auto',         language: 'de', enabled: false },
-  { id: 'autobild',     name: 'Auto Bild',             url: 'https://www.autobild.de/rss/24hours.rss',                       category: 'auto',         language: 'de', enabled: false },
+  { id: 'auto-ms',      name: 'Auto Motor Sport',      url: 'https://www.auto-motor-und-sport.de/rss/alle/',                     category: 'auto',         language: 'de', enabled: false },
+  { id: 'autobild',     name: 'Auto Bild',             url: 'https://www.autobild.de/rss/22590661.xml',                       category: 'auto',         language: 'de', enabled: false },
   { id: 'caranddriver', name: 'Car and Driver',        url: 'https://www.caranddriver.com/rss/all.xml',                      category: 'auto',         language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
