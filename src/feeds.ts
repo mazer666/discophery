@@ -154,7 +154,7 @@ export const FEED_CATALOGUE = [
   { id: 'pcgames',      name: 'PC Games',              url: 'https://www.pcgames.de/rss/feed/rss2.0/',                        category: 'gaming',       language: 'de', enabled: false },
   { id: 'computerbase', name: 'Computerbase',          url: 'https://www.computerbase.de/rss/news.xml',                       category: 'gadgets',      language: 'de', enabled: false },
   { id: 'hardwareluxx', name: 'Hardwareluxx',          url: 'https://www.hardwareluxx.de/hwl.feed',                            category: 'gadgets',      language: 'de', enabled: false },
-// { id: 'notebookcheck', name: 'Notebookcheck (DE)',   url: 'https://www.notebookcheck.com/rss-feed-de.169.0.html',           category: 'gadgets',      language: 'de', enabled: false },
+  { id: 'notebookcheck', name: 'Notebookcheck (DE)',   url: 'https://www.notebookcheck.com/RSS-Feed-Alle-Artikel.89848.0.html', category: 'gadgets',    language: 'de', enabled: false },
   { id: 'bgg',          name: 'BoardGameGeek News',    url: 'https://boardgamegeek.com/rss/boardgamenews',                    category: 'gaming',       language: 'en', enabled: false },
   { id: 'polygon',      name: 'Polygon',               url: 'https://www.polygon.com/rss/index.xml',                          category: 'gaming',       language: 'en', enabled: false },
   { id: 'ign',          name: 'IGN',                  url: 'https://www.ign.com/rss/v2/articles/feed', category: 'gaming',       language: 'en', enabled: false },
