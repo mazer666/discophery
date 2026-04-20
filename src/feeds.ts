@@ -178,6 +178,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'amazona',      name: 'amazona.de',            url: 'https://www.amazona.de/feed',                                    category: 'musik',        language: 'de', enabled: true  },
   { id: 'bonedo',       name: 'Bonedo',                url: 'https://www.bonedo.de/feed/',                                    category: 'musik',        language: 'de', enabled: true  },
+  { id: 'gearnews',     name: 'Gearnews',              url: 'https://www.gearnews.de/feed/',                                   category: 'musik',        language: 'de', enabled: true  },
   { id: 'musikreviews', name: 'musikreviews.de',       url: 'http://musikreviews.de/feeds/reviews/',                            category: 'musik',        language: 'de', enabled: true  },
   { id: 'pitchfork',    name: 'Pitchfork',             url: 'https://pitchfork.com/rss/news/',                                category: 'musik',        language: 'en', enabled: false },
 // { id: 'ra',           name: 'Resident Advisor',      url: 'https://www.residentadvisor.net/xml/news.xml',                   category: 'musik',        language: 'en', enabled: false },
