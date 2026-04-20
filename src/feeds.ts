@@ -116,7 +116,7 @@ export const FEED_CATALOGUE = [
   { id: 'verge',        name: 'The Verge',            url: 'https://www.theverge.com/rss/index.xml',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'wired',        name: 'Wired',                url: 'https://www.wired.com/feed/rss',                                 category: 'tech',         language: 'en', enabled: false },
   { id: 'techcrunch',   name: 'TechCrunch',           url: 'https://techcrunch.com/feed/',                                   category: 'tech',         language: 'en', enabled: false },
-// { id: 'engadget',     name: 'Engadget',             url: 'https://www.engadget.com/rss.xml',                               category: 'tech',         language: 'en', enabled: false },
+  { id: 'engadget',     name: 'Engadget',             url: 'https://www.engadget.com/rss.xml',                               category: 'tech',         language: 'en', enabled: false },
   { id: 'ieee-spectrum', name: 'IEEE Spectrum',       url: 'https://spectrum.ieee.org/feeds/feed.rss',                       category: 'tech',         language: 'en', enabled: false },
   { id: 'mit-tech',     name: 'MIT Technology Review',url: 'https://www.technologyreview.com/feed/',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'tomshardware', name: "Tom's Hardware",       url: 'https://www.tomshardware.com/feeds/all',                         category: 'tech',         language: 'en', enabled: false },
