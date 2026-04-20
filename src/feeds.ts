@@ -195,7 +195,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // WISSENSCHAFT & WELTRAUM
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'spektrum',     name: 'Spektrum.de',           url: 'https://www.spektrum.de/rss/news/',                              category: 'wissenschaft', language: 'de', enabled: false },
+  { id: 'spektrum',     name: 'Spektrum.de',           url: 'https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406',                              category: 'wissenschaft', language: 'de', enabled: false },
   { id: 'scinexx',      name: 'Scinexx',               url: 'https://www.scinexx.de/feed/',                                   category: 'wissenschaft', language: 'de', enabled: false },
   { id: 'nasa',         name: 'NASA Breaking News',    url: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',                 category: 'weltraum',     language: 'en', enabled: false },
   { id: 'space-com',    name: 'Space.com',             url: 'https://www.space.com/feeds/all',                                category: 'weltraum',     language: 'en', enabled: false },
