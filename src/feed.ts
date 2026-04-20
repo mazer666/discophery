@@ -385,7 +385,8 @@ function _normalizeAtomEntry(entry, feed) {
     category:    feed.category,
     date:        _parseDate(_text(entry, 'updated') || _text(entry, 'published')),
     dismissed:   false,
-    isPaywall:   _checkPaywall(_text(entry, 'title') || '', rawDescription),
+    isPaywall:   _checkPaywall(_text(entry, 'title') || '', rawDescription) ||
+                 _hasPaywallCategory(entry),
   };
 }
 
@@ -486,6 +487,15 @@ function _cleanText(html, maxLength) {
  * @param {string} description
  * @returns {boolean}
  */
+function _hasPaywallCategory(entry: Element): boolean {
+  const categories = Array.from(entry.querySelectorAll('category'));
+  const PAYWALL_TERMS = ['heise+', 'paid', 'premium', 'subscriber-only'];
+  return categories.some(c => {
+    const term = (c.getAttribute('term') || c.textContent || '').toLowerCase();
+    return PAYWALL_TERMS.some(p => term.includes(p));
+  });
+}
+
 function _checkPaywall(title: string, description: string) {
   const t = title.toLowerCase();
   const d = description.toLowerCase();
@@ -493,6 +503,7 @@ function _checkPaywall(title: string, description: string) {
   // Golem G+, Zeit-Plus, FAZ+, etc.
   const markers: (string | RegExp)[] = [
     '(g+)', '[g+]', 'g+',           // Golem (ohne \b da + kein WortZeichen ist)
+    'heise+',                        // Heise+
     '[plus]', '(plus)', 'plus:', 'plus-artikel', // Allgemein
     '(p+)', '[p+]', 'p+',            // Varianten
     'paywall', 'bezahlschranke',

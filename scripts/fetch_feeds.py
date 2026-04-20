@@ -148,7 +148,7 @@ def parse_xml(xml_string, feed):
                     "category": feed.get('category', 'news'),
                     "date": date,
                     "dismissed": False,
-                    "isPaywall": check_paywall(title, desc)
+                    "isPaywall": check_paywall(title, desc) or has_paywall_category(entry)
                 })
     else:
         # RSS / RDF
@@ -181,11 +181,20 @@ def parse_xml(xml_string, feed):
     return articles[:MAX_ARTICLES]
 
 
+def has_paywall_category(entry):
+    PAYWALL_TERMS = ['heise+', 'paid', 'premium', 'subscriber-only']
+    for cat in entry.iter():
+        term = (cat.get('term') or cat.text or '').lower()
+        if any(p in term for p in PAYWALL_TERMS):
+            return True
+    return False
+
 def check_paywall(title, description):
     t = title.lower()
     d = description.lower()
     markers = [
         r'\(g\+\)', r'\[g\+\]', r'\bg\+\b',
+        r'heise\+',
         r'\[plus\]', r'\(plus\)', r'\bplus:',
         r'\[p\+\]', r'\(p\+\)',
         'paywall', 'bezahlschranke', 'abonnement', 'premium',
