@@ -223,7 +223,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // AUTOMOBIL
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'auto-ms',      name: 'Auto Motor Sport',      url: 'https://www.auto-motor-und-sport.de/feed/',                     category: 'auto',         language: 'de', enabled: false },
+  { id: 'auto-ms',      name: 'Auto Motor Sport',      url: 'https://www.auto-motor-und-sport.de/rss/alle/',                 category: 'auto',         language: 'de', enabled: false },
   { id: 'autobild',     name: 'Auto Bild',             url: 'https://www.autobild.de/rss/24hours.rss',                       category: 'auto',         language: 'de', enabled: false },
   { id: 'caranddriver', name: 'Car and Driver',        url: 'https://www.caranddriver.com/rss/all.xml',                      category: 'auto',         language: 'en', enabled: false },
 
