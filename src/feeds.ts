@@ -249,7 +249,7 @@ export const FEED_CATALOGUE = [
   // FASHION & MODE
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'vogue-de',     name: 'Vogue Deutschland',     url: 'https://www.vogue.de/feed/rss',                                  category: 'fashion',      language: 'de', enabled: false },
-// { id: 'elle-de',      name: 'Elle Deutschland',      url: 'https://www.elle.com/de/feed/',                                  category: 'fashion',      language: 'de', enabled: false },
+  { id: 'elle',          name: 'Elle',                  url: 'https://www.elle.com/rss/all.xml',                               category: 'fashion',      language: 'en', enabled: false },
   { id: 'vogue-en',     name: 'Vogue (EN)',             url: 'https://www.vogue.com/feed/rss',                                 category: 'fashion',      language: 'en', enabled: false },
   { id: 'wwd',          name: 'WWD (Women\'s Wear Daily)', url: 'https://wwd.com/feed/',                                      category: 'fashion',      language: 'en', enabled: false },
 // { id: 'fashionista',  name: 'Fashionista',            url: 'https://fashionista.com/feed',                                   category: 'fashion',      language: 'en', enabled: false },
