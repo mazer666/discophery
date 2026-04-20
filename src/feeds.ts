@@ -206,7 +206,7 @@ export const FEED_CATALOGUE = [
   // WIRTSCHAFT
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'handelsblatt', name: 'Handelsblatt',          url: 'https://www.handelsblatt.com/contentexport/feed/schlagzeilen',   category: 'wirtschaft',   language: 'de', enabled: false },
-  { id: 'wiwo',         name: 'WirtschaftsWoche',      url: 'https://www.wiwo.de/contentexport/feed/rss',                    category: 'wirtschaft',   language: 'de', enabled: false },
+  { id: 'wiwo',         name: 'WirtschaftsWoche',      url: 'https://feeds.cms.wiwo.de/rss/schlagzeilen',                    category: 'wirtschaft',   language: 'de', enabled: false },
   { id: 'manager-mag',  name: 'Manager Magazin',       url: 'https://www.manager-magazin.de/schlagzeilen/index.rss',         category: 'wirtschaft',   language: 'de', enabled: false },
   { id: 'brutkasten',   name: 'brutkasten',           url: 'https://brutkasten.com/feed/',                                   category: 'wirtschaft',   language: 'de', enabled: false },
 
