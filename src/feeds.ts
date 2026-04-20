@@ -231,7 +231,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // UMWELT & KLIMA
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'klimareporter', name: 'Klimareporter',        url: 'https://klimareporter.de/feed',                                  category: 'umwelt',       language: 'de', enabled: false },
+  { id: 'klimareporter', name: 'Klimareporter',        url: 'https://klimareporter.de/?format=feed&type=rss',                                  category: 'umwelt',       language: 'de', enabled: false },
   { id: 'utopia',       name: 'Utopia.de',             url: 'https://utopia.de/feed/',                                        category: 'umwelt',       language: 'de', enabled: false },
   { id: 'treehugger',   name: 'Treehugger',            url: 'https://www.treehugger.com/feeds/all/',                          category: 'umwelt',       language: 'en', enabled: false },
 
