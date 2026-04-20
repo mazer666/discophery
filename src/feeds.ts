@@ -136,7 +136,6 @@ export const FEED_CATALOGUE = [
   // ANDROID & MOBILE
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'android-central', name: 'Android Central',  url: 'https://www.androidcentral.com/rss.xml',                          category: 'android',      language: 'en', enabled: true  },
-  { id: 'mobi-blog',    name: 'mobi-blog.org',        url: 'https://www.mobi-blog.org/feed',                                 category: 'mobile',       language: 'de', enabled: true  },
   { id: 'android-police', name: 'Android Police',    url: 'https://www.androidpolice.com/feed/',                             category: 'android',      language: 'en', enabled: false },
   { id: '9to5google',   name: '9to5Google',           url: 'https://9to5google.com/feed/',                                   category: 'android',      language: 'en', enabled: false },
   { id: 'xda',          name: 'XDA Developers',       url: 'https://www.xda-developers.com/feed/',                           category: 'android',      language: 'en', enabled: false },
