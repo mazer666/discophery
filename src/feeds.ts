@@ -259,7 +259,7 @@ export const FEED_CATALOGUE = [
   // LIFESTYLE
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'brigitte',      name: 'Brigitte',               url: 'https://www.brigitte.de/feed.rss',                               category: 'lifestyle',    language: 'de', enabled: false },
-// { id: 'stern-leben',  name: 'Stern Leben',            url: 'https://www.stern.de/lifestyle/rss.xml',                         category: 'lifestyle',    language: 'de', enabled: false },
+  { id: 'stern-leben',   name: 'Stern Lifestyle',        url: 'https://www.stern.de/feed/standard/lifestyle/',                  category: 'lifestyle',    language: 'de', enabled: false },
 // { id: 'instyle-de',   name: 'InStyle Deutschland',   url: 'https://www.instyle.de/feed/rss/',                               category: 'lifestyle',    language: 'de', enabled: false },
   { id: 'lifehacker',   name: 'Lifehacker',             url: 'https://lifehacker.com/feed/rss',                                category: 'lifestyle',    language: 'en', enabled: false },
   { id: 'refinery29',   name: 'Refinery29',             url: 'https://www.refinery29.com/rss.xml',                             category: 'lifestyle',    language: 'en', enabled: false },
