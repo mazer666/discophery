@@ -148,7 +148,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // GAMING & GEEK
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'gamestar',     name: 'GameStar',              url: 'https://www.gamestar.de/rss/rss.xml',                            category: 'gaming',       language: 'de', enabled: false },
+  { id: 'gamestar',     name: 'GameStar',              url: 'https://www.gamestar.de/news/rss/news.rss',                            category: 'gaming',       language: 'de', enabled: false },
   { id: 'gamepro',      name: 'GamePro',               url: 'https://www.gamepro.de/feed.cfm',                                category: 'gaming',       language: 'de', enabled: false },
   { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss/-/index.html',          category: 'gaming',       language: 'de', enabled: false },
   { id: 'pcgames',      name: 'PC Games',              url: 'https://www.pcgames.de/rss/feed/rss2.0/',                        category: 'gaming',       language: 'de', enabled: false },
