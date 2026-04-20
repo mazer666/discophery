@@ -253,7 +253,7 @@ export const FEED_CATALOGUE = [
   { id: 'vogue-en',     name: 'Vogue (EN)',             url: 'https://www.vogue.com/feed/rss',                                 category: 'fashion',      language: 'en', enabled: false },
   { id: 'wwd',          name: 'WWD (Women\'s Wear Daily)', url: 'https://wwd.com/feed/',                                      category: 'fashion',      language: 'en', enabled: false },
   { id: 'fashionista',   name: 'Fashionista',            url: 'https://fashionista.com/.rss/feed/28e21eb8-20ac-4617-a448-e845081591ca.xml', category: 'fashion', language: 'en', enabled: false },
-  { id: 'business-of-fashion', name: 'Business of Fashion', url: 'https://www.businessoffashion.com/feed',                   category: 'fashion',      language: 'en', enabled: false },
+  { id: 'business-of-fashion', name: 'Business of Fashion', url: 'https://www.businessoffashion.com/arc/outboundfeeds/rss/?outputType=xml',                   category: 'fashion',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // LIFESTYLE
