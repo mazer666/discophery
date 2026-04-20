@@ -252,6 +252,9 @@ function _parseXml(xmlText, feed) {
   if (root === 'feed') {
     return _parseAtom(doc, feed);
   }
+  if (root === 'urlset') {
+    return _parseGoogleNewsSitemap(doc, feed);
+  }
 
   console.warn(`Unbekanntes Feed-Format für "${feed.name}": <${root}>`);
   return [];
@@ -285,6 +288,41 @@ function _parseAtom(doc, feed) {
     .slice(0, CONFIG.MAX_ARTICLES_PER_FEED)
     .map(entry => _normalizeAtomEntry(entry, feed))
     .filter(Boolean);
+}
+
+/**
+ * Parst Google News Sitemap Feeds (root: <urlset>).
+ * Krone.at und andere Verlage liefern für Google News dieses Format statt RSS.
+ */
+function _parseGoogleNewsSitemap(doc, feed) {
+  const urls = Array.from(doc.querySelectorAll('url'));
+  return urls
+    .slice(0, CONFIG.MAX_ARTICLES_PER_FEED)
+    .map(urlEl => _normalizeGoogleNewsSitemapEntry(urlEl, feed))
+    .filter(Boolean);
+}
+
+function _normalizeGoogleNewsSitemapEntry(urlEl, feed) {
+  const articleUrl = _text(urlEl, 'loc');
+  if (!articleUrl) return null;
+
+  const title = _text(urlEl, 'news\\:title') || '(kein Titel)';
+  const date  = _text(urlEl, 'news\\:publication_date');
+  const image = _text(urlEl, 'image\\:loc');
+
+  return {
+    id:          _hashUrl(articleUrl),
+    title,
+    url:         articleUrl,
+    image,
+    description: '',
+    source:      feed.name,
+    sourceId:    feed.id,
+    category:    feed.category,
+    date:        _parseDate(date),
+    dismissed:   false,
+    isPaywall:   _checkPaywall(title, ''),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -570,6 +608,7 @@ document.addEventListener('discophery:ready', () => {
 (window as any)._parseXml = _parseXml;
 (window as any)._parseRss = _parseRss;
 (window as any)._parseAtom = _parseAtom;
+(window as any)._parseGoogleNewsSitemap = _parseGoogleNewsSitemap;
 (window as any)._normalizeRssItem = _normalizeRssItem;
 (window as any)._normalizeAtomEntry = _normalizeAtomEntry;
 (window as any)._text = _text;
