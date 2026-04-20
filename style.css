@@ -367,7 +367,7 @@ button {
   .filter-chips {
     padding: var(--space-4) var(--space-6);
     max-width: 1440px;
-    margin: 0 auto;
+    margin: var(--header-height) auto 0;
   }
 
   .app-main {
