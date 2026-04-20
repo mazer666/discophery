@@ -95,6 +95,14 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'golem',        name: 'Golem.de',             url: 'https://rss.golem.de/rss.php?feed=RSS2.0',                       category: 'tech',         language: 'de', enabled: true  },
+  { id: 'apfelpage',    name: 'Apfelpage',             url: 'https://www.apfelpage.de/feed/',                                 category: 'tech',         language: 'de', enabled: false },
+  { id: 'apfellike',    name: 'Apfellike',             url: 'https://feeds.feedburner.com/apfellike',                         category: 'tech',         language: 'de', enabled: false },
+  { id: 'macgadget',    name: 'MacGadget',             url: 'https://www.macgadget.de/rss.xml',                               category: 'tech',         language: 'de', enabled: false },
+  { id: 'ccc',          name: 'CCC Updates',           url: 'https://www.ccc.de/de/rss/updates.xml',                          category: 'tech',         language: 'de', enabled: false },
+  { id: 'touchportal',  name: 'TouchPortal.de',        url: 'https://touchportal.de/feed/',                                   category: 'tech',         language: 'de', enabled: false },
+  { id: 'informatik-verstehen', name: 'Informatik Verstehen', url: 'https://feeds.feedburner.com/informatik-verstehen',       category: 'tech',         language: 'de', enabled: false },
+  { id: 'digital-business', name: 'Digital Business Trends', url: 'https://digital-business-trends.de/feed/',                category: 'wirtschaft',   language: 'de', enabled: false },
+  { id: 'brands-consulting', name: 'Brands Consulting', url: 'https://brands-consulting.eu/feed/',                           category: 'wirtschaft',   language: 'de', enabled: false },
   { id: 'heise',        name: 'Heise Online',         url: 'https://www.heise.de/rss/heise-atom.xml',                        category: 'tech',         language: 'de', enabled: true  },
   { id: 'heise-ct',    name: 'c\'t Magazin',         url: 'https://www.heise.de/ct/feed.xml',                               category: 'tech',         language: 'de', enabled: false },
   { id: 'heise-make',  name: 'Make: Hardware Hacks', url: 'https://www.heise.de/make/rss/hardware-hacks-atom.xml',          category: 'maker',        language: 'de', enabled: false },
@@ -144,11 +152,14 @@ export const FEED_CATALOGUE = [
   // GADGETS & HARDWARE
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'geeky-gadgets', name: 'Geeky Gadgets',       url: 'https://www.geeky-gadgets.com/feed',                             category: 'gadgets',      language: 'en', enabled: true  },
+  { id: 'ilovegadgets', name: 'iLoveGadgets',         url: 'https://www.ilovegadgets.de/feed/',                               category: 'gadgets',      language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // GAMING & GEEK
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'gamestar',     name: 'GameStar',              url: 'https://www.gamestar.de/news/rss/news.rss',                            category: 'gaming',       language: 'de', enabled: false },
+  { id: 'spiegel-games', name: 'Spiegel Games',       url: 'https://www.spiegel.de/netzwelt/games/index.rss',                category: 'gaming',       language: 'de', enabled: false },
+  { id: 'gaminggadgets', name: 'GamingGadgets.io',    url: 'https://gaminggadgets.io/feed',                                  category: 'gaming',       language: 'de', enabled: false },
   { id: 'gamepro',      name: 'GamePro',               url: 'https://www.gamepro.de/feed.cfm',                                category: 'gaming',       language: 'de', enabled: false },
   { id: '4players',     name: '4Players',              url: 'https://www.4players.de/4players.php/rss/-/index.html',          category: 'gaming',       language: 'de', enabled: false },
   { id: 'pcgames',      name: 'PC Games',              url: 'https://www.pcgames.de/rss/feed/rss2.0/',                        category: 'gaming',       language: 'de', enabled: false },
@@ -167,6 +178,10 @@ export const FEED_CATALOGUE = [
   // FILM & SERIEN
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'filmstarts',   name: 'Filmstarts',            url: 'https://www.filmstarts.de/rss/nachrichten.xml',                  category: 'film',         language: 'de', enabled: false },
+  { id: 'filmfix',      name: 'Filmfix',               url: 'https://filmfix.de/feed/',                                       category: 'film',         language: 'de', enabled: false },
+  { id: 'kinofans',     name: 'Kinofans',              url: 'https://kinofans.com/category/news/feed/',                       category: 'film',         language: 'de', enabled: false },
+  { id: 'kino-zeit',    name: 'Kino-Zeit',             url: 'https://feeds.feedburner.com/kino-zeit/oNnQ',                    category: 'film',         language: 'de', enabled: false },
+  { id: 'moviepilot',   name: 'Moviepilot',            url: 'https://www.moviepilot.de/rss/moviepilot-standard',              category: 'film',         language: 'de', enabled: false },
   { id: 'serienjunkies', name: 'Serienjunkies.de',    url: 'https://www.serienjunkies.de/rss/news.xml',                      category: 'film',         language: 'de', enabled: false },
   { id: 'slashfilm',    name: '/Film',                 url: 'https://www.slashfilm.com/feed/',                                category: 'film',         language: 'en', enabled: false },
   { id: 'screenrant',   name: 'Screen Rant',           url: 'https://screenrant.com/feed/',                                   category: 'film',         language: 'en', enabled: false },
@@ -177,6 +192,8 @@ export const FEED_CATALOGUE = [
   // MUSIK
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'amazona',      name: 'amazona.de',            url: 'https://www.amazona.de/feed',                                    category: 'musik',        language: 'de', enabled: true  },
+  { id: 'hifi-today',   name: 'HiFi Today',            url: 'https://www.hifi-today.de/news/feed',                            category: 'musik',        language: 'de', enabled: false },
+  { id: 'spiegel-musik', name: 'Spiegel Musik',        url: 'https://www.spiegel.de/kultur/musik/index.rss',                  category: 'musik',        language: 'de', enabled: false },
   { id: 'bonedo',       name: 'Bonedo',                url: 'https://www.bonedo.de/feed/',                                    category: 'musik',        language: 'de', enabled: true  },
   { id: 'gearnews',     name: 'Gearnews',              url: 'https://www.gearnews.de/feed/',                                   category: 'musik',        language: 'de', enabled: true  },
   { id: 'musikreviews', name: 'musikreviews.de',       url: 'http://musikreviews.de/feeds/reviews/',                            category: 'musik',        language: 'de', enabled: true  },
@@ -238,12 +255,28 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // SPORT
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'kicker',       name: 'Kicker',                url: 'https://newsfeed.kicker.de/news/aktuell',                                category: 'sport',        language: 'de', enabled: false },
+  { id: 'kicker',         name: 'Kicker',                url: 'https://newsfeed.kicker.de/news/aktuell',                              category: 'sport',        language: 'de', enabled: false },
+  { id: 'sports-insider', name: 'Sports Insider',        url: 'https://www.sports-insider.de/feed/',                                  category: 'sport',        language: 'de', enabled: false },
+  { id: 'sport-news',     name: 'Sport-News.ws',         url: 'https://sport-news.ws/index.php/feed/',                                category: 'sport',        language: 'de', enabled: false },
 // { id: 'sport1',       name: 'Sport1',                url: 'https://www.sport1.de/news.rss',                                 category: 'sport',        language: 'de', enabled: false },
   { id: 'runnersworld-de', name: "Runner's World (DE)", url: 'https://www.runnersworld.de/rss/news/',                             category: 'sport',        language: 'de', enabled: false },
   { id: 'fitforfun',    name: 'Fit For Fun',           url: 'https://www.fitforfun.de/rss',                                  category: 'sport',        language: 'de', enabled: false },
   { id: 'achim-achilles', name: 'Achim Achilles Blog', url: 'https://www.achilles-running.de/feed/',                                category: 'sport',        language: 'de', enabled: false },
   { id: 'lauftipps',    name: 'Lauftipps.ch',          url: 'https://lauftipps.ch/feed/',                                     category: 'sport',        language: 'de', enabled: false },
+  { id: 'fahrrad-wandern', name: 'Fahrrad & Wandern',  url: 'https://blog.fahrrad-wandern.de/feed/',                                category: 'sport',        language: 'de', enabled: false },
+  { id: 'yogastern',    name: 'Yogastern',             url: 'https://yogastern.de/feed/',                                           category: 'lifestyle',    language: 'de', enabled: false },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // REISE & URLAUB
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'spiegel-reise',    name: 'Spiegel Reise',         url: 'https://www.spiegel.de/reise/fernweh/index.rss',                   category: 'reise',        language: 'de', enabled: false },
+  { id: 'sonnenklar',       name: 'Sonnenklar.TV Blog',    url: 'https://www.sonnenklar.tv/blog/feed/',                              category: 'reise',        language: 'de', enabled: false },
+  { id: 'news-reisen',      name: 'News.de Reisen',        url: 'https://www.news.de/rss/364371208/reisen-und-leben/',               category: 'reise',        language: 'de', enabled: false },
+  { id: 'goasia',           name: 'Go Asia',               url: 'https://goasia.de/feed/',                                           category: 'reise',        language: 'de', enabled: false },
+  { id: 'fahrradreisen',    name: 'Fahrrad- & Wanderreisen', url: 'https://www.fahrradreisen-wanderreisen.de/rss/news.asp?cat=982A438A-EB7E-472A-90CF-16F99286AC46', category: 'reise', language: 'de', enabled: false },
+  { id: 'wanderreisen',     name: 'Wanderreisen',          url: 'https://www.wanderreisen-fahrradreisen.de/rss/news.asp?cat=DB101F42-3D4C-4008-A003-CB56293ED088', category: 'reise', language: 'de', enabled: false },
+  { id: 'wander-wellness',  name: 'Wander & Wellness',     url: 'https://feeds.feedburner.com/Wander-WellnessMotorradhotelAmReschenpass', category: 'reise',   language: 'de', enabled: false },
+  { id: 'kreuzfahrtpiraten', name: 'Kreuzfahrtpiraten',   url: 'https://www.kreuzfahrtpiraten.de/feed/',                            category: 'reise',        language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // FASHION & MODE
@@ -260,6 +293,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'brigitte',      name: 'Brigitte',               url: 'https://www.brigitte.de/feed.rss',                               category: 'lifestyle',    language: 'de', enabled: false },
   { id: 'stern-leben',   name: 'Stern Lifestyle',        url: 'https://www.stern.de/feed/standard/lifestyle/',                  category: 'lifestyle',    language: 'de', enabled: false },
+  { id: 'frauentipps',   name: 'Frauentipps.at',         url: 'https://www.frauentipps.at/feed',                                category: 'lifestyle',    language: 'de', enabled: false },
 // { id: 'instyle-de',   name: 'InStyle Deutschland',   url: 'https://www.instyle.de/feed/rss/',                               category: 'lifestyle',    language: 'de', enabled: false },
   { id: 'lifehacker',   name: 'Lifehacker',             url: 'https://lifehacker.com/feed/rss',                                category: 'lifestyle',    language: 'en', enabled: false },
   { id: 'refinery29',   name: 'Refinery29',             url: 'https://www.refinery29.com/rss.xml',                             category: 'lifestyle',    language: 'en', enabled: false },
@@ -269,12 +303,21 @@ export const FEED_CATALOGUE = [
   // MAGAZINE & KULTUR
   // ══════════════════════════════════════════════════════════════════════════
 // { id: 'zeit-magazin', name: 'ZEIT Magazin',           url: 'https://www.zeit.de/zeit-magazin/index.xml',                    category: 'magazine',     language: 'de', enabled: false },
-  { id: 'spiegel-kul',  name: 'Spiegel Kultur',         url: 'https://www.spiegel.de/kultur/index.rss',                       category: 'magazine',     language: 'de', enabled: false },
+  { id: 'spiegel-kul',      name: 'Spiegel Kultur',         url: 'https://www.spiegel.de/kultur/index.rss',                   category: 'magazine',     language: 'de', enabled: false },
+  { id: 'spiegel-literatur', name: 'Spiegel Literatur',     url: 'https://www.spiegel.de/kultur/literatur/index.rss',          category: 'magazine',     language: 'de', enabled: false },
+  { id: 'danislesestube',   name: 'Danis Leselounge',       url: 'https://www.danislesestube.com/feed/',                       category: 'magazine',     language: 'de', enabled: false },
+  { id: 'titanic-magazin',  name: 'Titanic Magazin',        url: 'https://www.titanic-magazin.de/newsticker/rss.xml',          category: 'magazine',     language: 'de', enabled: false },
   { id: 'sz-mag',       name: 'SZ Magazin',             url: 'https://www.sz-magazin.de/rss',                                 category: 'magazine',     language: 'de', enabled: false },
   { id: 'newyorker',    name: 'The New Yorker',          url: 'https://www.newyorker.com/feed/everything',                     category: 'magazine',     language: 'en', enabled: false },
   { id: 'atlantic',     name: 'The Atlantic',            url: 'https://www.theatlantic.com/feed/all/',                         category: 'magazine',     language: 'en', enabled: false },
   { id: 'esquire-en',   name: 'Esquire',                 url: 'https://www.esquire.com/rss/all.xml/',                          category: 'magazine',     language: 'en', enabled: false },
   { id: 'gq-en',        name: 'GQ',                      url: 'https://www.gq.com/feed/rss',                                   category: 'magazine',     language: 'en', enabled: false },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // RECHT & JUSTIZ
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'recht-verstehen', name: 'Rechtswissenschaft Verstehen', url: 'https://feeds.feedburner.com/rechtswissenschaft-verstehen', category: 'recht', language: 'de', enabled: false },
+  { id: 'recht-umschau',   name: 'Recht Umschau',           url: 'https://recht-umschau.de/feed/',                                category: 'recht',        language: 'de', enabled: false },
 
 ];
 

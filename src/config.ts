@@ -231,6 +231,8 @@ export const CONFIG = {
     fashion:       { bg: '#3d1a2d', text: '#f9a8d4' },  // Rosa        — Mode & Fashion
     lifestyle:     { bg: '#2d1e1a', text: '#fdba74' },  // Pfirsich    — Lifestyle & Living
     magazine:      { bg: '#1a1e3d', text: '#93c5fd' },  // Hellindigo  — Magazine & Kultur
+    reise:         { bg: '#0d2b2b', text: '#34d399' },  // Türkis      — Reisen & Urlaub
+    recht:         { bg: '#2b1a0d', text: '#fcd34d' },  // Dunkelgelb  — Recht & Justiz
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
