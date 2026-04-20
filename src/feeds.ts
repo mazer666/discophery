@@ -95,7 +95,12 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'golem',        name: 'Golem.de',             url: 'https://rss.golem.de/rss.php?feed=RSS2.0',                       category: 'tech',         language: 'de', enabled: true  },
-  { id: 'heise',        name: 'Heise Online',         url: 'https://www.heise.de/news-extern/feeds/heise-atom.xml',          category: 'tech',         language: 'de', enabled: true  },
+  { id: 'heise',        name: 'Heise Online',         url: 'https://www.heise.de/rss/heise-atom.xml',                        category: 'tech',         language: 'de', enabled: true  },
+  { id: 'heise-ct',    name: 'c\'t Magazin',         url: 'https://www.heise.de/ct/feed.xml',                               category: 'tech',         language: 'de', enabled: false },
+  { id: 'heise-make',  name: 'Make: Hardware Hacks', url: 'https://www.heise.de/make/rss/hardware-hacks-atom.xml',          category: 'maker',        language: 'de', enabled: false },
+  { id: 'heise-foto',  name: 'Heise Foto',           url: 'https://www.heise.de/foto/feed.xml',                             category: 'fotografie',   language: 'de', enabled: false },
+  { id: 'heise-mac',   name: 'Mac & i',              url: 'https://www.heise.de/mac-and-i/feed.xml',                        category: 'tech',         language: 'de', enabled: false },
+  { id: 'heise-entertainment', name: 'Heise Entertainment', url: 'https://www.heise.de/rss/heise-Rubrik-Entertainment-atom.xml', category: 'film',    language: 'de', enabled: false },
   { id: 't3n',          name: 't3n',                  url: 'https://t3n.de/rss.xml',                                         category: 'tech',         language: 'de', enabled: false },
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://winfuture.de/news.rss',                                  category: 'tech',         language: 'de', enabled: false },
   { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://www.netzwelt.de/news/index.rss',                         category: 'tech',         language: 'de', enabled: false },
