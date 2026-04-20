@@ -205,6 +205,39 @@ def check_paywall(title, description):
             return True
     return False
 
+def fetch_url(url, headers, timeout=10):
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        content = response.read()
+    charset = 'utf-8'
+    preview = content[:200].decode('ascii', errors='ignore')
+    match = re.search(r'encoding=["\']([^"\']+)["\']', preview, re.I)
+    if match:
+        charset = match.group(1)
+    try:
+        return content.decode(charset, errors='replace')
+    except Exception:
+        return content.decode('utf-8', errors='ignore')
+
+def fetch_feed_with_fallback(feed, headers):
+    try:
+        xml_data = fetch_url(feed['url'], headers)
+        articles = parse_xml(xml_data, feed)
+        if articles or not feed.get('fallbackUrl'):
+            return articles
+        print(f"  -> 0 articles, trying fallbackUrl …")
+    except Exception as e:
+        if not feed.get('fallbackUrl'):
+            print(f"  -> Failed: {e}")
+            return []
+        print(f"  -> Failed ({e}), trying fallbackUrl …")
+    try:
+        xml_data = fetch_url(feed['fallbackUrl'], headers)
+        return parse_xml(xml_data, feed)
+    except Exception as e:
+        print(f"  -> fallbackUrl also failed: {e}")
+        return []
+
 def main():
     print("Parsing feeds.js...")
     feeds = parse_feeds_js()
@@ -216,28 +249,9 @@ def main():
 
     for feed in feeds:
         print(f"Fetching {feed['name']}...")
-        try:
-            req = urllib.request.Request(feed['url'], headers=headers)
-            with urllib.request.urlopen(req, timeout=10) as response:
-                content = response.read()
-                # Try to detect encoding from XML header
-                charset = 'utf-8'
-                preview = content[:200].decode('ascii', errors='ignore')
-                match = re.search(r'encoding=["\']([^"\']+)["\']', preview, re.I)
-                if match:
-                    charset = match.group(1)
-                
-                try:
-                    xml_data = content.decode(charset, errors='replace')
-                except:
-                    xml_data = content.decode('utf-8', errors='ignore')
-
-                articles = parse_xml(xml_data, feed)
-                all_articles.extend(articles)
-                print(f"  -> Found {len(articles)}")
-        except Exception as e:
-            print(f"  -> Failed: {e}")
-            # we swallow errors to avoid github action spam
+        articles = fetch_feed_with_fallback(feed, headers)
+        all_articles.extend(articles)
+        print(f"  -> Found {len(articles)}")
 
     # sort logic normally happens in JS
     

@@ -120,7 +120,7 @@ export const FEED_CATALOGUE = [
   { id: 'ieee-spectrum', name: 'IEEE Spectrum',       url: 'https://spectrum.ieee.org/feeds/feed.rss',                       category: 'tech',         language: 'en', enabled: false },
   { id: 'mit-tech',     name: 'MIT Technology Review',url: 'https://www.technologyreview.com/feed/',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'tomshardware', name: "Tom's Hardware",       url: 'https://www.tomshardware.com/feeds/all',                         category: 'tech',         language: 'en', enabled: false },
-  { id: 'google-news-tech', name: 'Google News: Tech',url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlBQVAB', category: 'tech', language: 'de', enabled: true },
+  { id: 'google-news-tech', name: 'Google News: Tech', url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en', fallbackUrl: 'https://news.google.com/rss/search?q=technology&hl=en-US&gl=US&ceid=US:en', category: 'tech', language: 'en', enabled: true },
 
   // ══════════════════════════════════════════════════════════════════════════
   // WEB & ENTWICKLUNG

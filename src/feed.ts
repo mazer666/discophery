@@ -150,22 +150,30 @@ function _dispatchArticles(articles) {
  * @returns {Promise<DiscopheryArticle[]>}
  */
 async function _loadFeed(feed) {
-  let xmlText;
-
   try {
-    xmlText = await _fetchWithPrimaryProxy(feed.url);
+    const items = await _fetchAndParse(feed.url, feed);
+    if (items.length > 0 || !feed.fallbackUrl) return items;
+    console.info(`"${feed.name}" lieferte 0 Artikel, versuche fallbackUrl …`);
+  } catch (err) {
+    if (!feed.fallbackUrl) throw err;
+    console.info(`"${feed.name}" fehlgeschlagen, versuche fallbackUrl …`);
+  }
+  return _fetchAndParse(feed.fallbackUrl, feed);
+}
+
+async function _fetchAndParse(url, feed) {
+  let xmlText;
+  try {
+    xmlText = await _fetchWithPrimaryProxy(url);
   } catch (primaryErr) {
-    // Primärer Proxy gescheitert — Fallback versuchen
     console.info(`Primärer Proxy fehlgeschlagen für "${feed.name}", versuche Fallback …`);
     try {
-      xmlText = await _fetchWithFallbackProxy(feed.url);
+      xmlText = await _fetchWithFallbackProxy(url);
     } catch (fallbackErr) {
       throw new Error(`Beide Proxys fehlgeschlagen für "${feed.name}": ${fallbackErr.message}`);
     }
   }
-
-  const items = _parseXml(xmlText, feed);
-  return items;
+  return _parseXml(xmlText, feed);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -613,6 +621,7 @@ document.addEventListener('discophery:ready', () => {
 (window as any).previewFeedSource = previewFeedSource;
 (window as any)._dispatchArticles = _dispatchArticles;
 (window as any)._loadFeed = _loadFeed;
+(window as any)._fetchAndParse = _fetchAndParse;
 (window as any)._fetchWithPrimaryProxy = _fetchWithPrimaryProxy;
 (window as any)._fetchWithFallbackProxy = _fetchWithFallbackProxy;
 (window as any)._fetchWithTimeout = _fetchWithTimeout;

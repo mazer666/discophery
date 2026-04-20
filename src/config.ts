@@ -14,12 +14,13 @@
 
 /**
  * @typedef {Object} FeedConfig
- * @property {string}  id       - Eindeutige ID (Kleinbuchstaben, Bindestriche erlaubt)
- * @property {string}  name     - Anzeigename wie er in der UI erscheint
- * @property {string}  url      - Vollständige RSS/Atom-Feed URL
- * @property {string}  category - Muss ein Schlüssel aus CONFIG.CATEGORIES sein
- * @property {string}  language - Sprache des Inhalts: 'de' oder 'en'
- * @property {boolean} enabled  - false = Feed wird übersprungen ohne ihn zu löschen
+ * @property {string}  id            - Eindeutige ID (Kleinbuchstaben, Bindestriche erlaubt)
+ * @property {string}  name          - Anzeigename wie er in der UI erscheint
+ * @property {string}  url           - Vollständige RSS/Atom-Feed URL
+ * @property {string}  [fallbackUrl] - Optionale Fallback-URL wenn url leer/fehlerhaft
+ * @property {string}  category      - Muss ein Schlüssel aus CONFIG.CATEGORIES sein
+ * @property {string}  language      - Sprache des Inhalts: 'de' oder 'en'
+ * @property {boolean} enabled       - false = Feed wird übersprungen ohne ihn zu löschen
  */
 
 /**
