@@ -240,7 +240,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'kicker',       name: 'Kicker',                url: 'https://newsfeed.kicker.de/news/aktuell',                                category: 'sport',        language: 'de', enabled: false },
 // { id: 'sport1',       name: 'Sport1',                url: 'https://www.sport1.de/news.rss',                                 category: 'sport',        language: 'de', enabled: false },
-  { id: 'runnersworld-de', name: "Runner's World (DE)", url: 'https://www.runnersworld.de/feed/',                             category: 'sport',        language: 'de', enabled: false },
+  { id: 'runnersworld-de', name: "Runner's World (DE)", url: 'https://www.runnersworld.de/rss/news/',                             category: 'sport',        language: 'de', enabled: false },
   { id: 'fitforfun',    name: 'Fit For Fun',           url: 'https://www.fitforfun.de/feed',                                  category: 'sport',        language: 'de', enabled: false },
   { id: 'achim-achilles', name: 'Achim Achilles Blog', url: 'https://achim-achilles.de/feed/',                                category: 'sport',        language: 'de', enabled: false },
   { id: 'lauftipps',    name: 'Lauftipps.ch',          url: 'https://lauftipps.ch/feed/',                                     category: 'sport',        language: 'de', enabled: false },
