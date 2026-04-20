@@ -26,7 +26,6 @@ Diese App aggregiert RSS-Feeds deiner Lieblingsseiten und präsentiert sie in ei
 - **Datenquelle**: Hybrid-Modell:
   - **A: Pre-fetched** — Über eine GitHub Action werden Standard-Feeds in `data/feeds.json` zwischengespeichert.
   - **B: Proxy-Fallback** — Benutzerdefinierte Feeds werden via CORS-Proxy geladen.
-- **Auth**: Google Identity Services (OAuth 2.0).
 
 ---
 
@@ -70,16 +69,6 @@ discophery/
 ├── index.html          ← HTML-Grundgerüst
 └── vite.config.ts      ← Vite Konfiguration
 ```
-
----
-
-## 🔐 Google OAuth Setup
-
-Für den Login wird eine Google Client ID benötigt:
-1. Projekt in der [Google Cloud Console](https://console.cloud.google.com) erstellen.
-2. OAuth-Client-ID (Webanwendung) anlegen.
-3. Autorisierte JavaScript-Quellen: `http://localhost:5173` und deine GitHub Pages URL.
-4. Client ID in `src/config.ts` eintragen.
 
 ---
 

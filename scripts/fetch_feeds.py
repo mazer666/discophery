@@ -80,10 +80,42 @@ def parse_xml(xml_string, feed):
         print(f"  XML Error for {feed['name']}: {e}")
         return []
 
-    # Atom vs RSS/RDF handling
+    # Atom vs RSS/RDF vs Google News Sitemap handling
     tag = root.tag.lower()
-    
-    if 'feed' in tag:
+
+    if 'urlset' in tag:
+        # Google News Sitemap format (e.g. Krone.at rssfeed-google.xml)
+        NEWS_NS  = 'http://www.google.com/schemas/sitemap-news/0.9'
+        IMAGE_NS = 'http://www.google.com/schemas/sitemap-image/1.1'
+        SITEMAP_NS = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+        url_elements = (root.findall(f'{{{SITEMAP_NS}}}url') or root.findall('url'))
+        for url_el in url_elements[:MAX_ARTICLES]:
+            loc = (url_el.findtext(f'{{{SITEMAP_NS}}}loc') or url_el.findtext('loc') or '').strip()
+            if not loc:
+                continue
+            news_el = url_el.find(f'{{{NEWS_NS}}}news')
+            title = date = ''
+            if news_el is not None:
+                title = (news_el.findtext(f'{{{NEWS_NS}}}title') or '').strip()
+                date  = (news_el.findtext(f'{{{NEWS_NS}}}publication_date') or '').strip()
+            image_el = url_el.find(f'{{{IMAGE_NS}}}image')
+            image = None
+            if image_el is not None:
+                image = image_el.findtext(f'{{{IMAGE_NS}}}loc')
+            articles.append({
+                "id": hash_url(loc),
+                "title": title or '(kein Titel)',
+                "url": loc,
+                "image": image,
+                "description": '',
+                "source": feed['name'],
+                "sourceId": feed['id'],
+                "category": feed.get('category', 'news'),
+                "date": date,
+                "dismissed": False,
+                "isPaywall": check_paywall(title, '')
+            })
+    elif 'feed' in tag:
         # Atom
         ns = {'atom': 'http://www.w3.org/2005/Atom'}
         entries = root.findall('.//atom:entry', ns) or root.findall('.//entry')
@@ -91,11 +123,11 @@ def parse_xml(xml_string, feed):
             link = entry.find('atom:link[@rel="alternate"]', ns)
             if link is None: link = entry.find('atom:link', ns)
             if link is None: link = entry.find('link')
-            
+
             url = link.attrib['href'] if link is not None else ''
             title = entry.findtext('atom:title', default='(kein Titel)', namespaces=ns)
             if not title: title = entry.findtext('title', default='(kein Titel)')
-            
+
             desc = entry.findtext('atom:summary', default='', namespaces=ns)
             if not desc: desc = entry.findtext('summary', default='')
             if not desc: desc = entry.findtext('content', default='')
