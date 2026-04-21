@@ -111,7 +111,7 @@ export const FEED_CATALOGUE = [
   { id: 'heise-entertainment', name: 'Heise Entertainment', url: 'https://www.heise.de/rss/heise-Rubrik-Entertainment-atom.xml', category: 'film',    language: 'de', enabled: false },
   { id: 't3n',          name: 't3n',                  url: 'https://t3n.de/rss.xml',                                         category: 'tech',         language: 'de', enabled: false },
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://static.winfuture.de/feeds/WinFuture-News-rss2.0.xml',                                  category: 'tech',         language: 'de', enabled: false },
-  { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://news.google.com/rss/publications/CAAqJQgKIh9DQklTRVFnTWFnMEtDMjVsZEhwM1pXeDBsZUtkS0FBUAE?hl=de&gl=DE&ceid=DE:de', category: 'tech',         language: 'de', enabled: false },
+  { id: 'netzwelt',     name: 'Netzwelt',             url: 'https://feeds.feedburner.com/netzwelt', category: 'tech',         language: 'de', enabled: false },
   { id: 'chip',         name: 'CHIP Online',          url: 'https://www.chip.de/rss/chip_komplett.xml',                      category: 'tech',         language: 'de', enabled: false },
   { id: 'computerbild', name: 'Computerbild',         url: 'https://www.computerbild.de/rss/35011529.xml',           category: 'tech',         language: 'de', enabled: false },
   { id: 'mixed-de',     name: 'Mixed.de (VR/AR)',     url: 'https://mixed.de/feed/',                                         category: 'tech',         language: 'de', enabled: false },
