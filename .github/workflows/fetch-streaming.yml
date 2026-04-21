@@ -1,6 +1,6 @@
 name: Prefetch Streaming (werstreamt.es)
 
-# Scrapet neue Flatrate-Inhalte von 7 Streaming-Anbietern via werstreamt.es.
+# Ruft neue Flatrate-Inhalte von 7 Streaming-Anbietern via RSS ab (werstreamt.es ?rss).
 # Läuft 2× täglich zu ungenauen Uhrzeiten + zufälliger Verzögerung,
 # damit der Fetch-Pattern nicht wie ein regulärer Bot aussieht.
 # Neue Streaming-Inhalte erscheinen typisch wöchentlich — 2× täglich reicht.
@@ -10,7 +10,7 @@ name: Prefetch Streaming (werstreamt.es)
 
 on:
   schedule:
-    - cron: '23 3 * * *'   # 03:23 UTC + 0–10 Min Delay = spätestens 03:33 UTC (~04:33 CET / 05:33 CEST, immer vor 06:00)
+    - cron: '23 3 * * *'   # 03:23 UTC + 0–2 Min Delay = spätestens 03:25 UTC (~04:25 CET / 05:25 CEST, immer vor 06:00)
     - cron: '43 19 * * *'  # 19:43 UTC (~21:43 CEST / 20:43 CET)
   workflow_dispatch:        # Manueller Trigger zum Testen
 
@@ -24,22 +24,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Random delay (0–10 min)
+      - name: Random delay (0–2 min)
         # Zufällige Verzögerung macht den genauen Fetch-Zeitpunkt unvorhersehbar
-        run: sleep $((RANDOM % 600))
+        run: sleep $((RANDOM % 120))
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install Playwright + Chromium
-        # --with-deps installiert Chromium und alle benötigten System-Libs
-        run: |
-          pip install playwright
-          playwright install --with-deps chromium
-
-      - name: Scrape werstreamt.es
+      - name: Fetch RSS feeds (werstreamt.es)
         run: python scripts/fetch_streaming.py
         continue-on-error: true
 
