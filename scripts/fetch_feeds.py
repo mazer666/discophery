@@ -175,7 +175,7 @@ def parse_xml(xml_string, feed):
                     "category": feed.get('category', 'news'),
                     "date": date,
                     "dismissed": False,
-                    "isPaywall": check_paywall(title, desc)
+                    "isPaywall": check_paywall(title, desc) or is_ad_item(item, feed)
                 })
     
     return articles[:MAX_ARTICLES]
@@ -187,6 +187,14 @@ def has_paywall_category(entry):
         term = (cat.get('term') or cat.text or '').lower()
         if any(p in term for p in PAYWALL_TERMS):
             return True
+    return False
+
+def is_ad_item(item, feed):
+    """Quellenspezifische Werbe-Erkennung. Macgadget kennzeichnet Werbeartikel mit category 'ticker'."""
+    if feed.get('id') == 'macgadget':
+        for cat in item.findall('category'):
+            if 'ticker' in (cat.text or '').lower():
+                return True
     return False
 
 def check_paywall(title, description):
