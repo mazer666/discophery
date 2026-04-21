@@ -73,7 +73,7 @@ function _renderFeedManager() {
   }
 
   for (const cat of Object.keys(groups).sort()) {
-    const feeds       = groups[cat];
+    const feeds       = groups[cat].sort((a, b) => a.name.localeCompare(b.name, 'de'));
     const activeCount = feeds.filter(f => isFeedActive(f.id)).length;
     list.appendChild(_createCategoryGroup(cat, feeds, activeCount));
   }
