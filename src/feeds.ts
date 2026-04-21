@@ -322,18 +322,15 @@ export const FEED_CATALOGUE = [
   { id: 'recht-umschau',   name: 'Recht Umschau',           url: 'https://recht-umschau.de/feed/',                                category: 'recht',        language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
-  // STREAMING
-  // type:'html' = kein RSS — Inhalte werden serverseitig via GitHub Action
-  // durch fetch_streaming.py gescrapt (werstreamt.es) und in
-  // data/streaming-{slug}.json gecacht. Der Browser fetcht diese URL nie direkt.
+  // STREAMING — werstreamt.es RSS (?rss-Parameter)
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'amazon-prime-new', name: 'Amazon Prime – Neu', url: 'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/', category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'netflix-new',      name: 'Netflix – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-netflix/option-flatrate/neu/',      category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'disney-plus-new',  name: 'Disney+ – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-disney-plus/option-flatrate/neu/',  category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'apple-tv-new',     name: 'Apple TV+ – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-apple-tv/option-flatrate/neu/',     category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'filmfriend-new',   name: 'Filmfriend – Neu',   url: 'https://www.werstreamt.es/filme-serien/anbieter-filmfriend/option-flatrate/neu/',   category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'magentatv-new',    name: 'MagentaTV – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-magentatv/option-flatrate/neu/',    category: 'streaming', language: 'de', enabled: false, type: 'html' },
-  { id: 'netzkino-new',     name: 'Netzkino – Neu',     url: 'https://www.werstreamt.es/filme-serien/anbieter-netzkino/option-flatrate/neu/',     category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'amazon-prime-new', name: 'Amazon Prime – Neu', url: 'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/?rss', category: 'streaming', language: 'de', enabled: false },
+  { id: 'netflix-new',      name: 'Netflix – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-netflix/option-flatrate/neu/?rss',      category: 'streaming', language: 'de', enabled: false },
+  { id: 'disney-plus-new',  name: 'Disney+ – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-disney-plus/option-flatrate/neu/?rss',  category: 'streaming', language: 'de', enabled: false },
+  { id: 'apple-tv-new',     name: 'Apple TV+ – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-apple-tv/option-flatrate/neu/?rss',     category: 'streaming', language: 'de', enabled: false },
+  { id: 'filmfriend-new',   name: 'Filmfriend – Neu',   url: 'https://www.werstreamt.es/filme-serien/anbieter-filmfriend/option-flatrate/neu/?rss',   category: 'streaming', language: 'de', enabled: false },
+  { id: 'magentatv-new',    name: 'MagentaTV – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-magentatv/option-flatrate/neu/?rss',    category: 'streaming', language: 'de', enabled: false },
+  { id: 'netzkino-new',     name: 'Netzkino – Neu',     url: 'https://www.werstreamt.es/filme-serien/anbieter-netzkino/option-flatrate/neu/?rss',     category: 'streaming', language: 'de', enabled: false },
 
 ];
 

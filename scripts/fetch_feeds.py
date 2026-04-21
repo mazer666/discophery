@@ -2,7 +2,6 @@ import json
 import urllib.request
 import re
 import os
-import glob
 import xml.etree.ElementTree as ET
 from urllib.error import URLError
 
@@ -239,20 +238,6 @@ def fetch_feed_with_fallback(feed, headers):
         print(f"  -> fallbackUrl also failed: {e}")
         return []
 
-def load_streaming_caches():
-    """Liest alle data/streaming-*.json Caches (erzeugt von fetch_streaming.py)."""
-    articles = []
-    for path in sorted(glob.glob('data/streaming-*.json')):
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            chunk = data.get('articles', [])
-            print(f"Streaming cache {os.path.basename(path)}: {len(chunk)} Artikel.")
-            articles.extend(chunk)
-        except Exception as e:
-            print(f"Streaming cache {path} lesen fehlgeschlagen: {e}")
-    return articles
-
 def main():
     print("Parsing feeds.js...")
     feeds = parse_feeds_js()
@@ -263,17 +248,10 @@ def main():
     }
 
     for feed in feeds:
-        # type:'html' feeds werden via fetch_prime.py separat gescrapt
-        if feed.get('type') == 'html':
-            print(f"Skipping {feed['name']} (type:html, handled by fetch_prime.py)")
-            continue
         print(f"Fetching {feed['name']}...")
         articles = fetch_feed_with_fallback(feed, headers)
         all_articles.extend(articles)
         print(f"  -> Found {len(articles)}")
-
-    # Gecachte Streaming-Scrapes (fetch_streaming.py) einbetten
-    all_articles.extend(load_streaming_caches())
 
     # sort logic normally happens in JS
 
