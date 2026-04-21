@@ -10,8 +10,8 @@ name: Prefetch Streaming (werstreamt.es)
 
 on:
   schedule:
-    - cron: '17 7 * * *'   # 07:17 UTC (~09:17 CEST)
-    - cron: '43 19 * * *'  # 19:43 UTC (~21:43 CEST)
+    - cron: '23 3 * * *'   # 03:23 UTC + 0–10 Min Delay = spätestens 03:33 UTC (~04:33 CET / 05:33 CEST, immer vor 06:00)
+    - cron: '43 19 * * *'  # 19:43 UTC (~21:43 CEST / 20:43 CET)
   workflow_dispatch:        # Manueller Trigger zum Testen
 
 jobs:
