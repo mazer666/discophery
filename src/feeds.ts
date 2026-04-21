@@ -321,6 +321,14 @@ export const FEED_CATALOGUE = [
   { id: 'recht-verstehen', name: 'Rechtswissenschaft Verstehen', url: 'https://feeds.feedburner.com/rechtswissenschaft-verstehen', category: 'recht', language: 'de', enabled: false },
   { id: 'recht-umschau',   name: 'Recht Umschau',           url: 'https://recht-umschau.de/feed/',                                category: 'recht',        language: 'de', enabled: false },
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // STREAMING
+  // type:'html' = kein RSS — Inhalte werden serverseitig via GitHub Action
+  // gescrapt und in data/amazon-prime-cache.json zwischengespeichert.
+  // Der Browser fetcht diese URL nie direkt.
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'amazon-prime-new', name: 'Amazon Prime – Neu', url: 'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/', category: 'streaming', language: 'de', enabled: false, type: 'html' },
+
 ];
 
 // --- Auto-generated global exports for Vite migration ---

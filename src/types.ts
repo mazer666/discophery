@@ -5,6 +5,8 @@ export interface FeedConfig {
   category: string;
   language: string;
   enabled: boolean;
+  type?: string;        // 'html' = server-side scrape, kein direkter Browser-Fetch
+  fallbackUrl?: string;
 }
 
 export interface CategoryStyle {

@@ -238,29 +238,50 @@ def fetch_feed_with_fallback(feed, headers):
         print(f"  -> fallbackUrl also failed: {e}")
         return []
 
+def load_prime_cache():
+    cache_file = 'data/amazon-prime-cache.json'
+    if not os.path.exists(cache_file):
+        return []
+    try:
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        articles = data.get('articles', [])
+        print(f"Amazon Prime cache: {len(articles)} Artikel eingebunden.")
+        return articles
+    except Exception as e:
+        print(f"Amazon Prime cache lesen fehlgeschlagen: {e}")
+        return []
+
 def main():
     print("Parsing feeds.js...")
     feeds = parse_feeds_js()
     all_articles = []
-    
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Discophery GitHub Action Prefetch)'
     }
 
     for feed in feeds:
+        # type:'html' feeds werden via fetch_prime.py separat gescrapt
+        if feed.get('type') == 'html':
+            print(f"Skipping {feed['name']} (type:html, handled by fetch_prime.py)")
+            continue
         print(f"Fetching {feed['name']}...")
         articles = fetch_feed_with_fallback(feed, headers)
         all_articles.extend(articles)
         print(f"  -> Found {len(articles)}")
 
+    # Gecachte Scrape-Ergebnisse (z.B. Amazon Prime) einbetten
+    all_articles.extend(load_prime_cache())
+
     # sort logic normally happens in JS
-    
+
     if not os.path.exists('data'):
         os.makedirs('data')
 
     with open('data/feeds.json', 'w', encoding='utf-8') as f:
         json.dump(all_articles, f, ensure_ascii=False)
-    
+
     print(f"Exported {len(all_articles)} articles to data/feeds.json.")
 
 if __name__ == '__main__':
