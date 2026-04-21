@@ -154,6 +154,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'geeky-gadgets', name: 'Geeky Gadgets',       url: 'https://www.geeky-gadgets.com/feed',                             category: 'gadgets',      language: 'en', enabled: true  },
   { id: 'ilovegadgets', name: 'iLoveGadgets',         url: 'https://www.ilovegadgets.de/feed/',                               category: 'gadgets',      language: 'de', enabled: false },
+  { id: 'gizmodo',      name: 'Gizmodo',               url: 'https://gizmodo.com/feed',                                       category: 'gadgets',      language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // GAMING & GEEK
