@@ -98,6 +98,7 @@ export const FEED_CATALOGUE = [
   { id: 'apfelpage',    name: 'Apfelpage',             url: 'https://www.apfelpage.de/feed/',                                 category: 'tech',         language: 'de', enabled: false },
   { id: 'apfellike',    name: 'Apfellike',             url: 'https://feeds.feedburner.com/apfellike',                         category: 'tech',         language: 'de', enabled: false },
   { id: 'macgadget',    name: 'MacGadget',             url: 'https://www.macgadget.de/rss.xml',                               category: 'tech',         language: 'de', enabled: false },
+  { id: 'macwelt',      name: 'Macwelt',               url: 'https://www.macwelt.de/feed',                                    category: 'tech',         language: 'de', enabled: false },
   { id: 'ccc',          name: 'CCC Updates',           url: 'https://www.ccc.de/de/rss/updates.xml',                          category: 'tech',         language: 'de', enabled: false },
   { id: 'touchportal',  name: 'TouchPortal.de',        url: 'https://touchportal.de/feed/',                                   category: 'tech',         language: 'de', enabled: false },
   { id: 'informatik-verstehen', name: 'Informatik Verstehen', url: 'https://feeds.feedburner.com/informatik-verstehen',       category: 'tech',         language: 'de', enabled: false },
