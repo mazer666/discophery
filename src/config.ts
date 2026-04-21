@@ -234,6 +234,7 @@ export const CONFIG = {
     reise:         { bg: '#0d2b2b', text: '#34d399' },  // Türkis      — Reisen & Urlaub
     recht:         { bg: '#2b1a0d', text: '#fcd34d' },  // Dunkelgelb  — Recht & Justiz
     streaming:     { bg: '#0a1f2e', text: '#00a8e1' },  // Amazon-Teal — Streaming-Dienste
+    mac:           { bg: '#1c1e21', text: '#c8cdd4' },  // Silber      — Apple & Mac
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

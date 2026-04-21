@@ -95,10 +95,6 @@ export const FEED_CATALOGUE = [
   // TECHNOLOGIE — Deutsch
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'golem',        name: 'Golem.de',             url: 'https://rss.golem.de/rss.php?feed=RSS2.0',                       category: 'tech',         language: 'de', enabled: true  },
-  { id: 'apfelpage',    name: 'Apfelpage',             url: 'https://www.apfelpage.de/feed/',                                 category: 'tech',         language: 'de', enabled: false },
-  { id: 'apfellike',    name: 'Apfellike',             url: 'https://feeds.feedburner.com/apfellike',                         category: 'tech',         language: 'de', enabled: false },
-  { id: 'macgadget',    name: 'MacGadget',             url: 'https://www.macgadget.de/rss.xml',                               category: 'tech',         language: 'de', enabled: false },
-  { id: 'macwelt',      name: 'Macwelt',               url: 'https://www.macwelt.de/feed',                                    category: 'tech',         language: 'de', enabled: false },
   { id: 'ccc',          name: 'CCC Updates',           url: 'https://www.ccc.de/de/rss/updates.xml',                          category: 'tech',         language: 'de', enabled: false },
   { id: 'touchportal',  name: 'TouchPortal.de',        url: 'https://touchportal.de/feed/',                                   category: 'tech',         language: 'de', enabled: false },
   { id: 'informatik-verstehen', name: 'Informatik Verstehen', url: 'https://feeds.feedburner.com/informatik-verstehen',       category: 'tech',         language: 'de', enabled: false },
@@ -108,7 +104,6 @@ export const FEED_CATALOGUE = [
   { id: 'heise-ct',    name: 'c\'t Magazin',         url: 'https://www.heise.de/ct/feed.xml',                               category: 'tech',         language: 'de', enabled: false },
   { id: 'heise-make',  name: 'Make: Hardware Hacks', url: 'https://www.heise.de/make/rss/hardware-hacks-atom.xml',          category: 'maker',        language: 'de', enabled: false },
   { id: 'heise-foto',  name: 'Heise Foto',           url: 'https://www.heise.de/foto/feed.xml',                             category: 'fotografie',   language: 'de', enabled: false },
-  { id: 'heise-mac',   name: 'Mac & i',              url: 'https://www.heise.de/mac-and-i/feed.xml',                        category: 'tech',         language: 'de', enabled: false },
   { id: 'heise-entertainment', name: 'Heise Entertainment', url: 'https://www.heise.de/rss/heise-Rubrik-Entertainment-atom.xml', category: 'film',    language: 'de', enabled: false },
   { id: 't3n',          name: 't3n',                  url: 'https://t3n.de/rss.xml',                                         category: 'tech',         language: 'de', enabled: false },
   { id: 'winfuture',    name: 'WinFuture',            url: 'https://static.winfuture.de/feeds/WinFuture-News-rss2.0.xml',                                  category: 'tech',         language: 'de', enabled: false },
@@ -130,6 +125,15 @@ export const FEED_CATALOGUE = [
   { id: 'mit-tech',     name: 'MIT Technology Review',url: 'https://www.technologyreview.com/feed/',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'tomshardware', name: "Tom's Hardware",       url: 'https://www.tomshardware.com/feeds/all',                         category: 'tech',         language: 'en', enabled: false },
   { id: 'google-news-tech', name: 'Google News: Tech', url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en', fallbackUrl: 'https://news.google.com/rss/search?q=technology&hl=en-US&gl=US&ceid=US:en', category: 'tech', language: 'en', enabled: true },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // APPLE & MAC
+  // ══════════════════════════════════════════════════════════════════════════
+  { id: 'apfellike',    name: 'Apfellike',    url: 'https://feeds.feedburner.com/apfellike',          category: 'mac', language: 'de', enabled: false },
+  { id: 'apfelpage',    name: 'Apfelpage',    url: 'https://www.apfelpage.de/feed/',                  category: 'mac', language: 'de', enabled: false },
+  { id: 'heise-mac',    name: 'Mac & i',      url: 'https://www.heise.de/mac-and-i/feed.xml',         category: 'mac', language: 'de', enabled: false },
+  { id: 'macgadget',    name: 'MacGadget',    url: 'https://www.macgadget.de/rss.xml',                category: 'mac', language: 'de', enabled: false },
+  { id: 'macwelt',      name: 'Macwelt',      url: 'https://www.macwelt.de/feed',                     category: 'mac', language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // WEB & ENTWICKLUNG
