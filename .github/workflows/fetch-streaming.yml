@@ -33,6 +33,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Playwright + Chromium
+        # --with-deps installiert Chromium und alle benötigten System-Libs
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
       - name: Scrape werstreamt.es
         run: python scripts/fetch_streaming.py
         continue-on-error: true

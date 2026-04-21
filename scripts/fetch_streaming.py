@@ -5,17 +5,21 @@ Unterstützte Anbieter (alle Flatrate-Neu-Seiten):
   Amazon Prime, Netflix, Disney+, Apple TV+,
   Filmfriend, MagentaTV, Netzkino
 
-Läuft als separater GitHub Action (2× täglich), unabhängig vom
-5-Minuten-RSS-Fetch. Ergebnisse werden pro Anbieter in
-data/streaming-{slug}.json gecacht und von fetch_feeds.py in
-feeds.json eingebettet.
+werstreamt.es ist eine JavaScript-SPA (React). Ein einfacher HTTP-Fetch
+liefert nur ein leeres HTML-Skelett. Playwright rendert die Seite
+vollständig wie ein echter Browser und löst das Problem.
 
-Resilience-Schichten:
-  1. Retry mit exponentiellem Backoff (3 Versuche pro Anbieter)
-  2. HTML-Parser + Regex-Fallback (bei veränderter Seitenstruktur)
-  3. Ergebnis-Validierung (< 3 Items = Fehlschlag → Cache-Fallback)
-  4. Anbieter-Isolation (Fehler bei Netflix bricht Amazon nicht ab)
-  5. Date-Preservation (bekannte Titel behalten Erstentdeckungs-Datum)
+Fetch-Strategie:
+  1. Playwright (Chromium, headless) — primär
+  2. urllib — Fallback, falls Playwright nicht installiert ist
+
+Weitere Resilience-Schichten:
+  - Retry mit exponentiellem Backoff (3 Versuche pro Anbieter)
+  - HTML-Parser + Regex-Fallback (bei veränderter DOM-Struktur)
+  - Ergebnis-Validierung (< 3 Items = Fehlschlag → Cache-Fallback)
+  - Anbieter-Isolation (Fehler bei Netflix bricht Amazon nicht ab)
+  - Date-Preservation (bekannte Titel behalten Erstentdeckungs-Datum)
+  - Einzelne Playwright-Session für alle Anbieter (effizienter)
 """
 
 import json
@@ -84,13 +88,12 @@ PROVIDERS = [
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HTML-Parser
+# HTML-Parser (arbeitet auf vollständig gerendertem DOM)
 # ─────────────────────────────────────────────────────────────────────────────
 
 class WerStreamtParser(HTMLParser):
     """
     Extrahiert Film/Serien-Einträge aus werstreamt.es-Listenseiten.
-
     Erkennt Links auf /film/ID/slug/ und /serie/ID/slug/ und liest
     den zugehörigen Titeltext sowie Poster-URLs aus.
     """
@@ -98,8 +101,8 @@ class WerStreamtParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.items  = []
-        self._cur   = None   # Aktuell bearbeiteter Eintrag
-        self._depth = 0      # Verschachtelungstiefe innerhalb des <a>-Tags
+        self._cur   = None
+        self._depth = 0
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
@@ -153,11 +156,10 @@ class WerStreamtParser(HTMLParser):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Regex-Fallback (Plan B wenn HTMLParser zu wenig findet)
+# Regex-Fallback (Plan B bei veränderter DOM-Struktur)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def regex_fallback(html):
-    """Einfachere Extraktion via Regex — robuster bei stark verändertem HTML."""
     items   = []
     pattern = re.compile(
         r'href="(/(film|serie)/\d+/[^"]+/)"[^>]*>'
@@ -182,11 +184,40 @@ def regex_fallback(html):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HTTP-Fetch
+# HTML aus gerendertem DOM extrahieren
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _build_headers():
-    return {
+def _parse_html(html):
+    """Gemeinsame Parse-Logik für Playwright- und urllib-Ergebnisse."""
+    parser = WerStreamtParser()
+    parser.feed(html)
+    items = parser.items[:MAX_ITEMS]
+    if len(items) < MIN_VALID:
+        items = regex_fallback(html)
+    return items
+
+
+def _fetch_with_playwright(url, context, timeout_ms=35000):
+    """Rendert die Seite vollständig mit Chromium und gibt den DOM zurück."""
+    page = context.new_page()
+    try:
+        page.goto(url, wait_until='networkidle', timeout=timeout_ms)
+        # Warten bis Listeninhalt sichtbar ist
+        try:
+            page.wait_for_selector(
+                'a[href*="/film/"], a[href*="/serie/"]',
+                timeout=20000
+            )
+        except Exception:
+            pass  # Inhalt nehmen wie er ist
+        return page.content()
+    finally:
+        page.close()
+
+
+def _fetch_with_urllib(url, timeout=20):
+    """Einfacher HTTP-Fetch ohne JS-Rendering — Fallback."""
+    headers = {
         'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                            'AppleWebKit/537.36 (KHTML, like Gecko) '
                            'Chrome/124.0.0.0 Safari/537.36',
@@ -194,10 +225,7 @@ def _build_headers():
         'Accept-Language': 'de-AT,de;q=0.9,en;q=0.8',
         'DNT':             '1',
     }
-
-
-def fetch_html(url, timeout=20):
-    req = urllib.request.Request(url, headers=_build_headers())
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read()
         ct  = resp.headers.get('Content-Type', '')
@@ -207,31 +235,31 @@ def fetch_html(url, timeout=20):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Scrape-Logik mit Retry + Fallback
+# Scrape mit Retry
 # ─────────────────────────────────────────────────────────────────────────────
 
-def scrape(url):
+def scrape(url, browser_ctx=None):
     """
     Versucht bis zu MAX_RETRIES Mal zu scrapen.
     Gibt (items, error_or_None) zurück.
     """
+    method = '[Playwright]' if browser_ctx else '[urllib]'
     last_err = None
+
     for attempt in range(MAX_RETRIES):
         if attempt > 0:
             wait = (2 ** attempt) + random.uniform(0.5, 2.5)
             print(f'    Retry {attempt}/{MAX_RETRIES - 1} in {wait:.1f}s …')
             time.sleep(wait)
         try:
-            html = fetch_html(url)
+            if browser_ctx:
+                html = _fetch_with_playwright(url, browser_ctx)
+            else:
+                html = _fetch_with_urllib(url)
 
-            parser = WerStreamtParser()
-            parser.feed(html)
-            items = parser.items[:MAX_ITEMS]
-            print(f'    HTML-Parser: {len(items)} Items')
-
-            if len(items) < MIN_VALID:
-                items = regex_fallback(html)
-                print(f'    Regex-Fallback: {len(items)} Items')
+            items = _parse_html(html)
+            link_count = len(re.findall(r'href="/(film|serie)/\d+/', html))
+            print(f'    {method} DOM-Links: {link_count}, geparst: {len(items)}')
 
             if len(items) >= MIN_VALID:
                 return items, None
@@ -320,29 +348,55 @@ def items_to_articles(items, provider, existing_articles):
 # Einstiegspunkt
 # ─────────────────────────────────────────────────────────────────────────────
 
-def main():
+def _run(browser_ctx):
     total = 0
-    for provider in PROVIDERS:
+    for i, provider in enumerate(PROVIDERS):
         print(f"[{provider['name']}] Scraping …")
         cache = load_cache(provider)
-
-        items, err = scrape(provider['url'])
+        items, err = scrape(provider['url'], browser_ctx)
 
         if err or not items:
             cached_count = len(cache.get('articles', []))
             print(f"  Fehlgeschlagen ({err}). Cache bleibt ({cached_count} Artikel).")
             total += cached_count
-            continue
+        else:
+            articles = items_to_articles(items, provider, cache.get('articles', []))
+            save_cache(provider, articles)
+            print(f"  {len(articles)} Artikel gecacht.")
+            total += len(articles)
 
-        articles = items_to_articles(items, provider, cache.get('articles', []))
-        save_cache(provider, articles)
-        print(f"  {len(articles)} Artikel gecacht.")
-        total += len(articles)
-
-        # Kurze Pause zwischen Anbietern — kein Burst-Muster
-        time.sleep(random.uniform(3.0, 7.0))
+        if i < len(PROVIDERS) - 1:
+            time.sleep(random.uniform(3.0, 7.0))
 
     print(f'\nStreaming-Scrape abgeschlossen. {total} Artikel über alle Anbieter.')
+
+
+def main():
+    try:
+        from playwright.sync_api import sync_playwright
+        print('Playwright verfügbar — starte Chromium …')
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(
+                headless=True,
+                args=['--no-sandbox', '--disable-setuid-sandbox',
+                      '--disable-dev-shm-usage'],
+            )
+            ctx = browser.new_context(
+                locale='de-AT',
+                user_agent=(
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+                    '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                ),
+                viewport={'width': 1280, 'height': 900},
+            )
+            _run(ctx)
+            browser.close()
+    except ImportError:
+        print('Playwright nicht installiert — nutze urllib Fallback (kein JS-Rendering).')
+        _run(None)
+    except Exception as e:
+        print(f'Playwright-Fehler ({e}) — nutze urllib Fallback.')
+        _run(None)
 
 
 if __name__ == '__main__':
