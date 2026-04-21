@@ -2,6 +2,7 @@ import json
 import urllib.request
 import re
 import os
+import html as html_mod
 import xml.etree.ElementTree as ET
 from urllib.error import URLError
 
@@ -56,6 +57,7 @@ def remove_html_tags(text):
         return ""
     clean = re.sub('<[^<]+?>', ' ', text)
     clean = re.sub(r'\s+', ' ', clean).strip()
+    clean = html_mod.unescape(clean)
     if len(clean) > 200:
         return clean[:199] + '…'
     return clean
@@ -104,7 +106,7 @@ def parse_xml(xml_string, feed):
                 image = image_el.findtext(f'{{{IMAGE_NS}}}loc')
             articles.append({
                 "id": hash_url(loc),
-                "title": title or '(kein Titel)',
+                "title": html_mod.unescape(title) or '(kein Titel)',
                 "url": loc,
                 "image": image,
                 "description": '',
@@ -139,7 +141,7 @@ def parse_xml(xml_string, feed):
             if url:
                 articles.append({
                     "id": hash_url(url),
-                    "title": title.strip(),
+                    "title": html_mod.unescape(title.strip()),
                     "url": url,
                     "image": None,
                     "description": remove_html_tags(desc),
@@ -163,10 +165,10 @@ def parse_xml(xml_string, feed):
                 title = item.findtext('title') or item.findtext('{*}title') or '(kein Titel)'
                 desc = item.findtext('description') or item.findtext('{*}description') or ''
                 date = item.findtext('pubDate') or item.findtext('{*}pubDate') or item.findtext('{*}date') or ""
-                
+
                 articles.append({
                     "id": hash_url(url),
-                    "title": title.strip(),
+                    "title": html_mod.unescape(title.strip()),
                     "url": url,
                     "image": None,
                     "description": remove_html_tags(desc),

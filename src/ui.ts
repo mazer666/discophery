@@ -425,11 +425,15 @@ function _createIconSizePicker() {
 
 function _createSyncIntervalPicker() {
   const intervals = [
-    { v: 0, t: 'Manuell' },
-    { v: 5, t: '5m' },
-    { v: 10, t: '10m' },
-    { v: 30, t: '30m' },
-    { v: 60, t: '60m' }
+    { v: 0,   t: 'Manuell' },
+    { v: 5,   t: '5m' },
+    { v: 10,  t: '10m' },
+    { v: 15,  t: '15m' },
+    { v: 20,  t: '20m' },
+    { v: 30,  t: '30m' },
+    { v: 45,  t: '45m' },
+    { v: 60,  t: '60m' },
+    { v: 120, t: '2h' },
   ];
   const current = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '', 10) 
     ?? CONFIG.REFRESH_INTERVAL_MINUTES;
