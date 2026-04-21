@@ -272,6 +272,8 @@ function _openSettingsModal() {
   _renderSettingsContent();
   backdrop.classList.add('modal-backdrop--open');
   backdrop.ariaHidden = 'false';
+  const modal = document.getElementById('settings-modal');
+  if (modal) modal.scrollTop = 0;
   document.getElementById('btn-close-settings')?.focus();
 }
 

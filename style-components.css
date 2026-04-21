@@ -459,6 +459,7 @@
 /* Icon-Size Picker */
 .icon-size-picker {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
