@@ -1,8 +1,12 @@
-name: Prefetch Amazon Prime (werstreamt.es)
+name: Prefetch Streaming (werstreamt.es)
 
+# Scrapet neue Flatrate-Inhalte von 7 Streaming-Anbietern via werstreamt.es.
 # Läuft 2× täglich zu ungenauen Uhrzeiten + zufälliger Verzögerung,
-# damit der Fetch-Pattern nicht wie ein offensichtlicher Bot aussieht.
-# Neue Prime-Inhalte erscheinen typisch wöchentlich — 2× täglich reicht.
+# damit der Fetch-Pattern nicht wie ein regulärer Bot aussieht.
+# Neue Streaming-Inhalte erscheinen typisch wöchentlich — 2× täglich reicht.
+#
+# Anbieter: Amazon Prime, Netflix, Disney+, Apple TV+,
+#           Filmfriend, MagentaTV, Netzkino
 
 on:
   schedule:
@@ -11,7 +15,7 @@ on:
   workflow_dispatch:        # Manueller Trigger zum Testen
 
 jobs:
-  fetch-prime:
+  fetch-streaming:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -30,14 +34,14 @@ jobs:
           python-version: '3.12'
 
       - name: Scrape werstreamt.es
-        run: python scripts/fetch_prime.py
+        run: python scripts/fetch_streaming.py
         continue-on-error: true
 
-      - name: Commit and push cache
+      - name: Commit and push caches
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/amazon-prime-cache.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update amazon-prime cache"
+          git add data/streaming-*.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update streaming caches"
           git push origin main
         continue-on-error: true

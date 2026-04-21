@@ -53,3 +53,56 @@ Ein persönlicher, werbefreier News-Feed als Single-Page-App (SPA). Fokus auf Sc
 - **Paywall-Labeling**: Die App erkennt Paywall-Marker (z.B. (g+), [plus]) im Titel/Text und markiert diese Artikel visuell.
 - **Google News URLs**: Google-News-RSS-Links werden serverseitig aufgelöst, um direkte Klicks zu ermöglichen.
 - **CORS-Hürde**: Ohne Proxy können RSS-Feeds nicht direkt im Browser geladen werden.
+
+---
+
+## 🎬 Streaming-Feeds (HTML-Scraping)
+
+Manche Feeds haben keinen RSS-Feed und werden stattdessen per HTML-Scraping befüllt. Aktuell betrifft das neue Flatrate-Inhalte bei Streaming-Diensten.
+
+### Architektur
+
+```
+.github/workflows/fetch-streaming.yml   (2× täglich, 07:17 + 19:43 UTC)
+  └─ scripts/fetch_streaming.py
+       ├─ scrapet werstreamt.es pro Anbieter
+       ├─ speichert in data/streaming-{slug}.json
+       └─ Fehler eines Anbieters brechen andere nicht ab
+
+.github/workflows/fetch.yml             (alle 5 Minuten)
+  └─ scripts/fetch_feeds.py
+       ├─ RSS-Feeds wie bisher
+       └─ liest data/streaming-*.json und bettet Artikel in feeds.json ein
+```
+
+### Feed-Typ `html` in feeds.ts
+
+Einträge mit `type: 'html'` werden von `fetch_feeds.py` beim RSS-Loop **übersprungen** — sie haben keinen echten RSS-Feed. Der Browser fetcht diese URLs nie direkt. Stattdessen liefert der Pre-Fetch-Cache die Artikel.
+
+### Resilienz-Schichten (pro Anbieter)
+
+1. **Retry mit Backoff** — 3 Versuche, exponentielle Wartezeit
+2. **HTML-Parser + Regex-Fallback** — zwei unabhängige Extraktionsstrategien
+3. **Ergebnis-Validierung** — weniger als 3 Items gilt als Fehlschlag
+4. **Cache-Fallback** — letztes gültiges Ergebnis bleibt erhalten
+5. **Date-Preservation** — bekannte Titel behalten ihr Erstentdeckungs-Datum
+6. **Anbieter-Isolation** — Fehler bei Netflix bricht Amazon Prime nicht ab
+7. **Zeitliches Muster** — ungenaue Cron-Zeiten + 0–10 Min Zufalls-Delay
+
+### Unterstützte Anbieter
+
+| Feed-ID             | Anbieter          | Cache-Datei                      |
+|---------------------|-------------------|----------------------------------|
+| `amazon-prime-new`  | Amazon Prime      | `data/streaming-amazon-prime.json` |
+| `netflix-new`       | Netflix           | `data/streaming-netflix.json`    |
+| `disney-plus-new`   | Disney+           | `data/streaming-disney-plus.json`|
+| `apple-tv-new`      | Apple TV+         | `data/streaming-apple-tv.json`   |
+| `filmfriend-new`    | Filmfriend        | `data/streaming-filmfriend.json` |
+| `magentatv-new`     | MagentaTV         | `data/streaming-magentatv.json`  |
+| `netzkino-new`      | Netzkino          | `data/streaming-netzkino.json`   |
+
+### Neuen Anbieter hinzufügen
+
+1. Eintrag in `PROVIDERS`-Liste in `scripts/fetch_streaming.py` ergänzen
+2. Passenden Eintrag mit `type: 'html'` in `src/feeds.ts` hinzufügen
+3. Kategorie `streaming` in `src/config.ts` ist bereits vorhanden

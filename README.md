@@ -14,6 +14,7 @@ Diese App aggregiert RSS-Feeds deiner Lieblingsseiten und präsentiert sie in ei
 - **Paywall-Erkennung** — Automatische Markierung von Inhalten hinter Bezahlschranken.
 - **Offline-Ready** — Dank Service-Worker auch ohne aktive Internetverbindung nutzbar.
 - **Voll anpassbar** — Integrierter Feed-Manager für Katalog- und benutzerdefinierte Feeds.
+- **Streaming-Neu-Feeds** — Neue Inhalte bei Amazon Prime, Netflix, Disney+, Apple TV+, Filmfriend, MagentaTV und Netzkino (via werstreamt.es, 2× täglich aktualisiert).
 
 ---
 
@@ -24,7 +25,7 @@ Diese App aggregiert RSS-Feeds deiner Lieblingsseiten und präsentiert sie in ei
 - **Sprache**: [TypeScript](https://www.typescriptlang.org/) für Typsicherheit und Wartbarkeit.
 - **Styling**: CSS Custom Properties (Variables) mit Support für Dark/Light Mode.
 - **Datenquelle**: Hybrid-Modell:
-  - **A: Pre-fetched** — Über eine GitHub Action werden Standard-Feeds in `data/feeds.json` zwischengespeichert.
+  - **A: Pre-fetched** — Über GitHub Actions werden RSS-Feeds (alle 5 Min) und Streaming-Inhalte (2× täglich) in `data/feeds.json` zwischengespeichert.
   - **B: Proxy-Fallback** — Benutzerdefinierte Feeds werden via CORS-Proxy geladen.
 
 ---

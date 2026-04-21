@@ -324,10 +324,16 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // STREAMING
   // type:'html' = kein RSS — Inhalte werden serverseitig via GitHub Action
-  // gescrapt und in data/amazon-prime-cache.json zwischengespeichert.
-  // Der Browser fetcht diese URL nie direkt.
+  // durch fetch_streaming.py gescrapt (werstreamt.es) und in
+  // data/streaming-{slug}.json gecacht. Der Browser fetcht diese URL nie direkt.
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'amazon-prime-new', name: 'Amazon Prime – Neu', url: 'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/', category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'netflix-new',      name: 'Netflix – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-netflix/option-flatrate/neu/',      category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'disney-plus-new',  name: 'Disney+ – Neu',      url: 'https://www.werstreamt.es/filme-serien/anbieter-disney-plus/option-flatrate/neu/',  category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'apple-tv-new',     name: 'Apple TV+ – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-apple-tv/option-flatrate/neu/',     category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'filmfriend-new',   name: 'Filmfriend – Neu',   url: 'https://www.werstreamt.es/filme-serien/anbieter-filmfriend/option-flatrate/neu/',   category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'magentatv-new',    name: 'MagentaTV – Neu',    url: 'https://www.werstreamt.es/filme-serien/anbieter-magentatv/option-flatrate/neu/',    category: 'streaming', language: 'de', enabled: false, type: 'html' },
+  { id: 'netzkino-new',     name: 'Netzkino – Neu',     url: 'https://www.werstreamt.es/filme-serien/anbieter-netzkino/option-flatrate/neu/',     category: 'streaming', language: 'de', enabled: false, type: 'html' },
 
 ];
 

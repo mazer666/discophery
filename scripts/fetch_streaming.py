@@ -1,15 +1,20 @@
 """
-Scraper für neue Amazon Prime Video Inhalte via werstreamt.es.
+Scraper für neue Streaming-Inhalte via werstreamt.es.
+
+Unterstützte Anbieter (alle Flatrate-Neu-Seiten):
+  Amazon Prime, Netflix, Disney+, Apple TV+,
+  Filmfriend, MagentaTV, Netzkino
 
 Läuft als separater GitHub Action (2× täglich), unabhängig vom
-5-Minuten-RSS-Fetch. Ergebnis wird in data/amazon-prime-cache.json
-gespeichert und von fetch_feeds.py in feeds.json eingebettet.
+5-Minuten-RSS-Fetch. Ergebnisse werden pro Anbieter in
+data/streaming-{slug}.json gecacht und von fetch_feeds.py in
+feeds.json eingebettet.
 
 Resilience-Schichten:
-  1. Retry mit exponentiellem Backoff (3 Versuche)
-  2. HTML-Parser + Regex-Fallback (falls Seitenstruktur sich ändert)
-  3. Ergebnis-Validierung (< 3 Items = Fehlschlag)
-  4. Cache-Fallback (letztes gültiges Ergebnis bleibt erhalten)
+  1. Retry mit exponentiellem Backoff (3 Versuche pro Anbieter)
+  2. HTML-Parser + Regex-Fallback (bei veränderter Seitenstruktur)
+  3. Ergebnis-Validierung (< 3 Items = Fehlschlag → Cache-Fallback)
+  4. Anbieter-Isolation (Fehler bei Netflix bricht Amazon nicht ab)
   5. Date-Preservation (bekannte Titel behalten Erstentdeckungs-Datum)
 """
 
@@ -20,13 +25,62 @@ import os
 import time
 import random
 from html.parser import HTMLParser
-from urllib.error import URLError
 
-CACHE_FILE   = 'data/amazon-prime-cache.json'
-TARGET_URL   = 'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/'
-MAX_ITEMS    = 30
-MIN_VALID    = 3   # Weniger Treffer = Fehlschlag, Cache wird verwendet
-MAX_RETRIES  = 3
+MAX_ITEMS   = 30
+MIN_VALID   = 3   # Weniger Treffer = Fehlschlag, Cache bleibt erhalten
+MAX_RETRIES = 3
+
+PROVIDERS = [
+    {
+        'id':    'amazon-prime-new',
+        'name':  'Amazon Prime – Neu',
+        'label': 'Amazon Prime Video',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-prime-video/option-flatrate/neu/',
+        'slug':  'amazon-prime',
+    },
+    {
+        'id':    'netflix-new',
+        'name':  'Netflix – Neu',
+        'label': 'Netflix',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-netflix/option-flatrate/neu/',
+        'slug':  'netflix',
+    },
+    {
+        'id':    'disney-plus-new',
+        'name':  'Disney+ – Neu',
+        'label': 'Disney+',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-disney-plus/option-flatrate/neu/',
+        'slug':  'disney-plus',
+    },
+    {
+        'id':    'apple-tv-new',
+        'name':  'Apple TV+ – Neu',
+        'label': 'Apple TV+',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-apple-tv/option-flatrate/neu/',
+        'slug':  'apple-tv',
+    },
+    {
+        'id':    'filmfriend-new',
+        'name':  'Filmfriend – Neu',
+        'label': 'Filmfriend',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-filmfriend/option-flatrate/neu/',
+        'slug':  'filmfriend',
+    },
+    {
+        'id':    'magentatv-new',
+        'name':  'MagentaTV – Neu',
+        'label': 'MagentaTV',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-magentatv/option-flatrate/neu/',
+        'slug':  'magentatv',
+    },
+    {
+        'id':    'netzkino-new',
+        'name':  'Netzkino – Neu',
+        'label': 'Netzkino',
+        'url':   'https://www.werstreamt.es/filme-serien/anbieter-netzkino/option-flatrate/neu/',
+        'slug':  'netzkino',
+    },
+]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -43,15 +97,14 @@ class WerStreamtParser(HTMLParser):
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.items = []
-        self._cur  = None   # Aktuell bearbeiteter Eintrag
-        self._depth = 0     # Verschachtelungstiefe innerhalb des <a>-Tags
+        self.items  = []
+        self._cur   = None   # Aktuell bearbeiteter Eintrag
+        self._depth = 0      # Verschachtelungstiefe innerhalb des <a>-Tags
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
 
         if self._cur is not None:
-            # Innerhalb eines erkannten <a>-Tags: Bilder einsammeln
             self._depth += 1
             if tag == 'img':
                 src = (attrs_dict.get('src') or
@@ -65,7 +118,6 @@ class WerStreamtParser(HTMLParser):
             return
 
         href = attrs_dict.get('href', '')
-        # Muster: /film/12345/titel-slug/ oder /serie/12345/titel-slug/
         if re.match(r'^/(film|serie)/\d+/[^/"]+', href):
             content_type = 'Film' if '/film/' in href else 'Serie'
             url = 'https://www.werstreamt.es' + href
@@ -86,9 +138,8 @@ class WerStreamtParser(HTMLParser):
             if self._depth > 0:
                 self._depth -= 1
             return
-        # <a> schließt — Eintrag abschließen
-        item = self._cur
-        self._cur   = None
+        item      = self._cur
+        self._cur = None
         self._depth = 0
         if item['title'] and len(item['title']) >= 1:
             if not any(x['url'] == item['url'] for x in self.items):
@@ -108,11 +159,10 @@ class WerStreamtParser(HTMLParser):
 def regex_fallback(html):
     """Einfachere Extraktion via Regex — robuster bei stark verändertem HTML."""
     items   = []
-    # href="/film/12345/slug/" oder /serie/…
     pattern = re.compile(
-        r'href="(/(film|serie)/\d+/[^"]+/)"[^>]*>'  # href + öffnendes >
-        r'(?:[^<]*(?:<(?!/?a)[^>]*>[^<]*)*?)'        # optionale Kinder-Tags
-        r'([^<]{2,150})',                             # erster relevanter Textknoten
+        r'href="(/(film|serie)/\d+/[^"]+/)"[^>]*>'
+        r'(?:[^<]*(?:<(?!/?a)[^>]*>[^<]*)*?)'
+        r'([^<]{2,150})',
         re.I | re.S
     )
     for m in pattern.finditer(html):
@@ -157,7 +207,7 @@ def fetch_html(url, timeout=20):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Haupt-Scrape-Logik mit Retry + Fallback
+# Scrape-Logik mit Retry + Fallback
 # ─────────────────────────────────────────────────────────────────────────────
 
 def scrape(url):
@@ -169,52 +219,56 @@ def scrape(url):
     for attempt in range(MAX_RETRIES):
         if attempt > 0:
             wait = (2 ** attempt) + random.uniform(0.5, 2.5)
-            print(f'  Retry {attempt}/{MAX_RETRIES - 1} in {wait:.1f}s …')
+            print(f'    Retry {attempt}/{MAX_RETRIES - 1} in {wait:.1f}s …')
             time.sleep(wait)
         try:
             html = fetch_html(url)
 
-            # Strategie 1: HTML-Parser
             parser = WerStreamtParser()
             parser.feed(html)
             items = parser.items[:MAX_ITEMS]
-            print(f'  HTML-Parser: {len(items)} Items')
+            print(f'    HTML-Parser: {len(items)} Items')
 
-            # Strategie 2: Regex-Fallback
             if len(items) < MIN_VALID:
                 items = regex_fallback(html)
-                print(f'  Regex-Fallback: {len(items)} Items')
+                print(f'    Regex-Fallback: {len(items)} Items')
 
             if len(items) >= MIN_VALID:
                 return items, None
 
             last_err = f'Zu wenig Items: {len(items)} (Minimum: {MIN_VALID})'
-            print(f'  Versuch {attempt + 1}: {last_err}')
+            print(f'    Versuch {attempt + 1}: {last_err}')
 
         except Exception as e:
             last_err = str(e)
-            print(f'  Versuch {attempt + 1} fehlgeschlagen: {e}')
+            print(f'    Versuch {attempt + 1} fehlgeschlagen: {e}')
 
     return [], last_err
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Cache
+# Cache pro Anbieter
 # ─────────────────────────────────────────────────────────────────────────────
 
-def load_cache():
-    if os.path.exists(CACHE_FILE):
+def cache_path(provider):
+    return f"data/streaming-{provider['slug']}.json"
+
+
+def load_cache(provider):
+    path = cache_path(provider)
+    if os.path.exists(path):
         try:
-            with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f'  Cache lesen fehlgeschlagen: {e}')
+            print(f'    Cache lesen fehlgeschlagen ({path}): {e}')
     return {'fetched_at': 0, 'articles': []}
 
 
-def save_cache(articles):
+def save_cache(provider, articles):
     os.makedirs('data', exist_ok=True)
-    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+    path = cache_path(provider)
+    with open(path, 'w', encoding='utf-8') as f:
         json.dump({'fetched_at': int(time.time()), 'articles': articles},
                   f, ensure_ascii=False)
 
@@ -233,13 +287,13 @@ def _hash_url(url):
     return hex(abs(h))[2:]
 
 
-def items_to_articles(items, existing_articles):
+def items_to_articles(items, provider, existing_articles):
     """
     Wandelt gescrapte Items in Artikel-Objekte um.
     Bereits bekannte URLs behalten ihr ursprüngliches Entdeckungs-Datum.
     """
-    known = {a['id']: a for a in existing_articles}
-    now   = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    known  = {a['id']: a for a in existing_articles}
+    now    = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
     result = []
     for item in items:
         aid = _hash_url(item['url'])
@@ -251,9 +305,9 @@ def items_to_articles(items, existing_articles):
                 'title':       item['title'],
                 'url':         item['url'],
                 'image':       item['image'],
-                'description': f"{item['content_type']} · Neu bei Amazon Prime Video",
-                'source':      'Amazon Prime – Neu',
-                'sourceId':    'amazon-prime-new',
+                'description': f"{item['content_type']} · Neu bei {provider['label']}",
+                'source':      provider['name'],
+                'sourceId':    provider['id'],
                 'category':    'streaming',
                 'date':        now,
                 'dismissed':   False,
@@ -267,20 +321,28 @@ def items_to_articles(items, existing_articles):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
-    print('Scraping werstreamt.es — Amazon Prime Neu …')
-    cache = load_cache()
+    total = 0
+    for provider in PROVIDERS:
+        print(f"[{provider['name']}] Scraping …")
+        cache = load_cache(provider)
 
-    items, err = scrape(TARGET_URL)
+        items, err = scrape(provider['url'])
 
-    if err or not items:
-        print(f'  Scrape fehlgeschlagen ({err}). '
-              f'Nutze Cache ({len(cache.get("articles", []))} Artikel).')
-        return cache.get('articles', [])
+        if err or not items:
+            cached_count = len(cache.get('articles', []))
+            print(f"  Fehlgeschlagen ({err}). Cache bleibt ({cached_count} Artikel).")
+            total += cached_count
+            continue
 
-    articles = items_to_articles(items, cache.get('articles', []))
-    save_cache(articles)
-    print(f'  {len(articles)} Artikel in Cache gespeichert.')
-    return articles
+        articles = items_to_articles(items, provider, cache.get('articles', []))
+        save_cache(provider, articles)
+        print(f"  {len(articles)} Artikel gecacht.")
+        total += len(articles)
+
+        # Kurze Pause zwischen Anbietern — kein Burst-Muster
+        time.sleep(random.uniform(3.0, 7.0))
+
+    print(f'\nStreaming-Scrape abgeschlossen. {total} Artikel über alle Anbieter.')
 
 
 if __name__ == '__main__':
