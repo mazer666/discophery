@@ -316,7 +316,7 @@ function _normalizeGoogleNewsSitemapEntry(urlEl, feed) {
 
   const title = _text(urlEl, 'news\\:title') || '(kein Titel)';
   const date  = _text(urlEl, 'news\\:publication_date');
-  const image = _text(urlEl, 'image\\:loc');
+  const image = _absImg(_text(urlEl, 'image\\:loc'));
 
   return {
     id:          _hashUrl(articleUrl),
@@ -446,22 +446,28 @@ function _extractImage(item, rawDescription) {
   // 1. Media RSS Namespace
   const mediaContent   = item.querySelector('content[url]');
   const mediaThumbnail = item.querySelector('thumbnail[url]');
-  if (mediaContent)   return mediaContent.getAttribute('url');
-  if (mediaThumbnail) return mediaThumbnail.getAttribute('url');
+  if (mediaContent)   return _absImg(mediaContent.getAttribute('url'));
+  if (mediaThumbnail) return _absImg(mediaThumbnail.getAttribute('url'));
 
   // 2. Enclosure (häufig bei Podcasts und manchen RSS-Feeds)
   const enclosure = item.querySelector('enclosure[type^="image"]');
-  if (enclosure) return enclosure.getAttribute('url');
+  if (enclosure) return _absImg(enclosure.getAttribute('url'));
 
   // 3. Erstes Bild aus dem HTML der Description extrahieren
   // DOMParser für HTML verwenden — nicht innerHTML! (Sam)
   if (rawDescription) {
     const htmlDoc = new DOMParser().parseFromString(rawDescription, 'text/html');
     const img     = htmlDoc.querySelector('img[src]');
-    if (img) return img.getAttribute('src');
+    if (img) return _absImg(img.getAttribute('src'));
   }
 
   return null;
+}
+
+function _absImg(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('//')) return 'https:' + url;
+  return url;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

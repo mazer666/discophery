@@ -6,7 +6,8 @@ import html as html_mod
 import xml.etree.ElementTree as ET
 from urllib.error import URLError
 
-MAX_ARTICLES = 20
+MAX_ARTICLES       = 20
+MAX_TOTAL_ARTICLES = 2000  # Gesamtlimit feeds.json — verhindert unbegrenztes Wachstum
 
 def parse_feeds_js():
     # Suche Pfad relativ zum Root (für GitHub Action) oder relativ zum Script
@@ -258,12 +259,18 @@ def main():
     }
 
     for feed in feeds:
+        # Nur aktivierte Feeds vorab fetchen — deaktivierte Feeds werden im Browser via Proxy geladen
+        if not feed.get('enabled', True):
+            continue
         print(f"Fetching {feed['name']}...")
         articles = fetch_feed_with_fallback(feed, headers)
         all_articles.extend(articles)
         print(f"  -> Found {len(articles)}")
+        if len(all_articles) >= MAX_TOTAL_ARTICLES:
+            print(f"Gesamtlimit {MAX_TOTAL_ARTICLES} erreicht, stoppe früh.")
+            break
 
-    # sort logic normally happens in JS
+    all_articles = all_articles[:MAX_TOTAL_ARTICLES]
 
     if not os.path.exists('data'):
         os.makedirs('data')
