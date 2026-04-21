@@ -129,11 +129,17 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // APPLE & MAC
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'apfellike',    name: 'Apfellike',    url: 'https://feeds.feedburner.com/apfellike',          category: 'mac', language: 'de', enabled: false },
-  { id: 'apfelpage',    name: 'Apfelpage',    url: 'https://www.apfelpage.de/feed/',                  category: 'mac', language: 'de', enabled: false },
-  { id: 'heise-mac',    name: 'Mac & i',      url: 'https://www.heise.de/mac-and-i/feed.xml',         category: 'mac', language: 'de', enabled: false },
-  { id: 'macgadget',    name: 'MacGadget',    url: 'https://www.macgadget.de/rss.xml',                category: 'mac', language: 'de', enabled: false },
-  { id: 'macwelt',      name: 'Macwelt',      url: 'https://www.macwelt.de/feed',                     category: 'mac', language: 'de', enabled: false },
+  { id: 'apfellike',       name: 'Apfellike',        url: 'https://feeds.feedburner.com/apfellike',                  category: 'mac', language: 'de', enabled: false },
+  { id: 'apfelpage',       name: 'Apfelpage',        url: 'https://www.apfelpage.de/feed/',                          category: 'mac', language: 'de', enabled: false },
+  { id: 'heise-mac',       name: 'Mac & i',          url: 'https://www.heise.de/mac-and-i/feed.xml',                 category: 'mac', language: 'de', enabled: false },
+  { id: 'macgadget',       name: 'MacGadget',        url: 'https://www.macgadget.de/rss.xml',                        category: 'mac', language: 'de', enabled: false },
+  { id: 'macwelt',         name: 'Macwelt',          url: 'https://www.macwelt.de/feed',                             category: 'mac', language: 'de', enabled: false },
+  { id: '9to5mac',         name: '9to5Mac',          url: 'https://9to5mac.com/feed/',                               category: 'mac', language: 'en', enabled: false },
+  { id: 'appleinsider',    name: 'AppleInsider',     url: 'https://appleinsider.com/rss/news/',                      category: 'mac', language: 'en', enabled: false },
+  { id: 'daring-fireball', name: 'Daring Fireball',  url: 'https://daringfireball.net/feeds/main',                   category: 'mac', language: 'en', enabled: false },
+  { id: 'macrumors',       name: 'MacRumors',        url: 'https://feeds.macrumors.com/MacRumors-All',               category: 'mac', language: 'en', enabled: false },
+  { id: 'macstories',      name: 'MacStories',       url: 'https://www.macstories.net/feed/',                        category: 'mac', language: 'en', enabled: false },
+  { id: 'six-colors',      name: 'Six Colors',       url: 'https://sixcolors.com/feed/',                             category: 'mac', language: 'en', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // WEB & ENTWICKLUNG
