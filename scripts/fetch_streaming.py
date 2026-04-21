@@ -210,7 +210,15 @@ def _fetch_with_playwright(url, context, timeout_ms=35000):
             )
         except Exception:
             pass  # Inhalt nehmen wie er ist
-        return page.content()
+        html = page.content()
+        # Debug: ersten 3000 Zeichen ausgeben wenn keine Links gefunden
+        link_count = len(re.findall(r'href="/(film|serie)/\d+/', html))
+        if link_count == 0:
+            print(f'    DEBUG: Kein film/serie-Link im DOM. Seitentitel: {page.title()!r}')
+            print(f'    DEBUG HTML (erste 2000 Zeichen):')
+            print(html[:2000])
+            print('    --- Ende Debug ---')
+        return html
     finally:
         page.close()
 
