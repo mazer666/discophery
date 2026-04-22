@@ -209,37 +209,6 @@ button {
   color: var(--color-text-primary);
 }
 
-.app-header__search {
-  flex: 1;
-  max-width: 300px;
-  margin: 0 var(--space-4);
-  position: relative;
-}
-
-.app-header__search input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3) var(--space-2) 36px;
-  border-radius: 99px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  transition: border-color var(--transition-fast);
-}
-
-.app-header__search input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.app-header__search svg {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-secondary);
-}
-
 .app-header__actions {
   display: flex;
   align-items: center;
@@ -375,3 +344,67 @@ button {
   }
 }
 
+
+/* ── Scroll-to-top FAB ───────────────────────────────────────────────────── */
+
+.scroll-top-fab {
+  position: fixed;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  right: var(--space-4);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 90;
+  opacity: 0;
+  transform: scale(0.7) translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.scroll-top-fab--visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-top-fab:hover {
+  background: var(--color-accent-hover, var(--color-accent));
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* ── Refresh-Button Spin-Animation ──────────────────────────────────────── */
+
+@keyframes discophery-spin {
+  to { transform: rotate(360deg); }
+}
+
+.icon-button--spinning svg {
+  animation: discophery-spin 1s linear infinite;
+}
+
+/* ── Update-Banner ───────────────────────────────────────────────────────── */
+
+.update-banner {
+  position: fixed;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  z-index: 200;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}

@@ -35,6 +35,7 @@ export function _ensureShellVisible() {
 
 document.addEventListener('discophery:articles', ((e: CustomEvent) => {
   _allArticles = e.detail.articles ?? [];
+  document.getElementById('btn-refresh')?.classList.remove('icon-button--spinning');
   try { localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_REFRESH, Date.now().toString()); } catch {}
   _renderUI();
 }) as EventListener);
@@ -290,6 +291,26 @@ function _renderSettingsContent() {
   if (!container) return;
   container.innerHTML = '';
 
+  // Suchfeld
+  const searchWrap = document.createElement('div');
+  searchWrap.className = 'settings-search';
+  const searchIcon = document.createElement('span');
+  searchIcon.className = 'settings-search__icon';
+  searchIcon.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+  const searchInput = document.createElement('input');
+  searchInput.type = 'search';
+  searchInput.id = 'input-app-search';
+  searchInput.placeholder = 'Artikel suchen …';
+  searchInput.value = _searchQuery;
+  searchInput.setAttribute('aria-label', 'Artikel durchsuchen');
+  searchInput.addEventListener('input', (e) => {
+    _searchQuery = (e.target as HTMLInputElement).value.toLowerCase();
+    _renderUI();
+  });
+  searchWrap.appendChild(searchIcon);
+  searchWrap.appendChild(searchInput);
+  container.appendChild(searchWrap);
+
   // Icons
   const iconDisplay = `<svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
   const iconFilters = `<svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`;
@@ -540,13 +561,20 @@ function _applyTheme(value) {
 
 function _wireStaticButtons() {
   document.getElementById('btn-refresh')
-    ?.addEventListener('click', () => { _showState('loading'); loadAllFeeds(); });
-
-  document.getElementById('input-app-search')
-    ?.addEventListener('input', (e) => {
-      _searchQuery = (e.target as HTMLInputElement).value.toLowerCase();
-      _renderUI();
+    ?.addEventListener('click', () => {
+      document.getElementById('btn-refresh')?.classList.add('icon-button--spinning');
+      if (_allArticles.length === 0) _showState('loading');
+      loadAllFeeds();
     });
+
+  // Scroll-to-top FAB
+  const fabScrollTop = document.getElementById('btn-scroll-top');
+  if (fabScrollTop) {
+    window.addEventListener('scroll', () => {
+      fabScrollTop.classList.toggle('scroll-top-fab--visible', window.scrollY > 300);
+    }, { passive: true });
+    fabScrollTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
 
   document.getElementById('btn-settings')    ?.addEventListener('click', _openSettingsModal);
   document.getElementById('btn-close-settings')?.addEventListener('click', _closeSettingsModal);
@@ -589,9 +617,25 @@ function _wireStaticButtons() {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
+function _showUpdateBanner() {
+  const banner = document.createElement('div');
+  banner.className = 'update-banner';
+  banner.innerHTML =
+    `<span>Neues Update verfügbar</span>
+     <button class="btn btn--primary update-banner__btn" style="white-space:nowrap">Jetzt neu laden</button>`;
+  banner.querySelector('button')?.addEventListener('click', () => location.reload());
+  document.body.appendChild(banner);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   _wireStaticButtons();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) _showUpdateBanner();
+    });
+  }
 });
 
 // --- Auto-generated global exports for Vite migration ---
@@ -618,3 +662,4 @@ document.addEventListener('DOMContentLoaded', () => {
 (window as any)._startAutoRefresh = _startAutoRefresh;
 (window as any)._applyTheme = _applyTheme;
 (window as any)._wireStaticButtons = _wireStaticButtons;
+(window as any)._showUpdateBanner = _showUpdateBanner;
