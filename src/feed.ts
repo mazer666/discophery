@@ -314,7 +314,7 @@ function _normalizeGoogleNewsSitemapEntry(urlEl, feed) {
   const articleUrl = _text(urlEl, 'loc');
   if (!articleUrl) return null;
 
-  const title = _text(urlEl, 'news\\:title') || '(kein Titel)';
+  const title = _decodeEntities(_text(urlEl, 'news\\:title') || '(kein Titel)');
   const date  = _text(urlEl, 'news\\:publication_date');
   const image = _absImg(_text(urlEl, 'image\\:loc'));
 
@@ -354,7 +354,7 @@ function _normalizeRssItem(item, feed) {
 
   return {
     id:          _hashUrl(url),
-    title:       _text(item, 'title') || '(kein Titel)',
+    title:       _decodeEntities(_text(item, 'title') || '(kein Titel)'),
     url,
     image:       _extractImage(item, rawDescription),
     description: _cleanText(rawDescription, CONFIG.DESCRIPTION_MAX_LENGTH),
@@ -384,7 +384,7 @@ function _normalizeAtomEntry(entry, feed) {
 
   return {
     id:          _hashUrl(url),
-    title:       _text(entry, 'title') || '(kein Titel)',
+    title:       _decodeEntities(_text(entry, 'title') || '(kein Titel)'),
     url,
     image:       _extractImage(entry, rawDescription),
     description: _cleanText(rawDescription, CONFIG.DESCRIPTION_MAX_LENGTH),
@@ -413,6 +413,12 @@ function _normalizeAtomEntry(entry, feed) {
 function _text(parent, selector) {
   const el = parent.querySelector(selector);
   return el?.textContent?.trim() || null;
+}
+
+function _decodeEntities(str: string): string {
+  return str
+    .replace(/&#(\d+);/g,        (_, n) => String.fromCodePoint(+n))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCodePoint(parseInt(h, 16)));
 }
 
 /**
