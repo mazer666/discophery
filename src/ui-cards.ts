@@ -15,6 +15,9 @@
  * ausschließlich über textContent oder als Attributwert (href, src).
  */
 
+import { CONFIG } from './config';
+import { dismissArticle, undismissArticle } from './filter';
+
 /** Mindest-Swipe-Distanz in px bis Dismiss ausgelöst wird */
 const SWIPE_THRESHOLD = 80;
 

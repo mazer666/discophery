@@ -12,6 +12,11 @@
  * Setzt voraus: config.js, feeds.js, feed-manager.js
  */
 
+import { CONFIG } from './config';
+import { FEED_CATALOGUE } from './feeds';
+import { isFeedActive, getCustomFeeds, setFeedActive, setCategoryActive, removeCustomFeed, addCustomFeed, isValidFeedUrl } from './feed-manager';
+import { loadAllFeeds } from './feed';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL ÖFFNEN / SCHLIESSEN
 // ═══════════════════════════════════════════════════════════════════════════
@@ -358,10 +363,10 @@ function _updateGroupCounter(feedId, nowActive) {
  */
 function _filterFeeds(query) {
   const q = query.toLowerCase().trim();
-  for (const row of document.querySelectorAll('#feed-list .feed-row')) {
+  for (const row of document.querySelectorAll<HTMLElement>('#feed-list .feed-row')) {
     row.classList.toggle('feed-row--hidden', !!q && !row.dataset.feedName?.includes(q));
   }
-  for (const group of document.querySelectorAll('#feed-list .feed-group')) {
+  for (const group of document.querySelectorAll<HTMLDetailsElement>('#feed-list .feed-group')) {
     const visible = group.querySelectorAll('.feed-row:not(.feed-row--hidden)').length;
     group.style.display = visible === 0 ? 'none' : '';
     if (q) group.open = true;
@@ -379,8 +384,8 @@ function _filterFeeds(query) {
  * @returns {Promise<void>}
  */
 async function _checkFeedUrl() {
-  const urlInput  = document.getElementById('cf-url');
-  const nameInput = document.getElementById('cf-name');
+  const urlInput  = document.getElementById('cf-url')  as HTMLInputElement | null;
+  const nameInput = document.getElementById('cf-name') as HTMLInputElement | null;
   const preview   = document.getElementById('feed-preview');
   const checkBtn  = document.getElementById('btn-check-feed');
   const url       = urlInput?.value?.trim();
@@ -448,7 +453,7 @@ function _showPreview(el, title, error) {
  * @returns {void}
  */
 function _populateCategorySelect() {
-  const sel = document.getElementById('cf-category');
+  const sel = document.getElementById('cf-category') as HTMLSelectElement | null;
   if (!sel || sel.options.length > 1) return;
   sel.textContent = '';
   for (const cat of Object.keys(CONFIG.CATEGORIES).sort()) {
@@ -497,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('feed-manager-backdrop')
     ?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeFeedManager(); });
   document.getElementById('feed-search')
-    ?.addEventListener('input', (e) => _filterFeeds(e.target.value));
+    ?.addEventListener('input', (e) => _filterFeeds((e.target as HTMLInputElement).value));
   document.getElementById('btn-check-feed')
     ?.addEventListener('click', _checkFeedUrl);
   document.getElementById('custom-feed-form')

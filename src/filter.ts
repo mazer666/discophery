@@ -14,6 +14,8 @@
  * Schreibt nie direkt in den DOM — das ist Aufgabe von ui.js.
  */
 
+import { CONFIG } from './config';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // INTERNER STATE — gespiegelt aus localStorage für schnellen Zugriff
 // ═══════════════════════════════════════════════════════════════════════════
@@ -157,7 +159,7 @@ export function getBlockedKeywords() {
  * @param {string} articleId - Hash-ID des Artikels (aus feed.js)
  * @returns {void}
  */
-function dismissArticle(articleId) {
+export function dismissArticle(articleId) {
   _ensureLoaded();
 
   if (_state.dismissed.includes(articleId)) return;
@@ -191,7 +193,7 @@ function isDismissed(articleId) {
  * @param {string} articleId
  * @returns {void}
  */
-function undismissArticle(articleId) {
+export function undismissArticle(articleId) {
   _ensureLoaded();
   const idx = _state.dismissed.indexOf(articleId);
   if (idx === -1) return;

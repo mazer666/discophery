@@ -8,6 +8,7 @@ declare global {
     getActiveFeeds: () => FeedConfig[];
     getCustomFeeds: () => FeedConfig[];
     setFeedActive: (id: string, active: boolean) => void;
+    setCategoryActive: (cat: string, active: boolean) => void;
     isFeedActive: (id: string) => boolean;
     addCustomFeed: (data: any) => FeedConfig;
     removeCustomFeed: (id: string) => void;
@@ -46,3 +47,4 @@ declare global {
 }
 
 export {};
+
