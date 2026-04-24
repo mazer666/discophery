@@ -576,6 +576,21 @@ function _wireStaticButtons() {
     fabScrollTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   }
 
+  // Filter-chips: bei Scroll-Down ausblenden, bei Scroll-Up sofort wieder einblenden
+  const filterChips = document.getElementById('filter-chips');
+  if (filterChips) {
+    let _lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y > _lastScrollY && y > 80) {
+        filterChips.classList.add('filter-chips--hidden');
+      } else if (y < _lastScrollY) {
+        filterChips.classList.remove('filter-chips--hidden');
+      }
+      _lastScrollY = y;
+    }, { passive: true });
+  }
+
   document.getElementById('btn-settings')    ?.addEventListener('click', _openSettingsModal);
   document.getElementById('btn-close-settings')?.addEventListener('click', _closeSettingsModal);
   document.getElementById('settings-modal-backdrop')

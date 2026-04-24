@@ -253,9 +253,18 @@ button {
   /* Kein sichtbarer Scrollbalken — nativer auf Mobile */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  position: sticky;
+  top: var(--header-height);
+  z-index: 90;
+  background: var(--color-bg);
+  transition: transform 250ms ease;
 }
 
 .filter-chips::-webkit-scrollbar { display: none; }
+
+.filter-chips--hidden {
+  transform: translateY(-100%);
+}
 
 .chip {
   display: inline-flex;
