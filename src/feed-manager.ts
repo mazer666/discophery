@@ -26,12 +26,38 @@ import { FEED_CATALOGUE } from './feeds';
  * @returns {import('./config.js').FeedConfig[]}
  */
 export function getActiveFeeds() {
-  const savedIds = _loadActiveIds();
-  const custom   = getCustomFeeds();
+  let savedIds = _loadActiveIds();
+  const custom = getCustomFeeds();
 
   if (savedIds === null) {
     return []; // Frischer Start ohne Feeds
   }
+
+  // Auto-Aktivierung: Wenn dem Katalog neue Feeds mit enabled:true hinzugefügt
+  // wurden, die der User noch nie gesehen hat, fügen wir sie zur aktiven Liste
+  // hinzu. So tauchen z.B. neue Streaming-Feeds automatisch auf.
+  const seenIds = _loadSeenCatalogueIds();
+  const newlyEnabled = FEED_CATALOGUE
+    .filter(f => f.enabled && !seenIds.includes(f.id) && !savedIds.includes(f.id))
+    .map(f => f.id);
+  if (newlyEnabled.length > 0) {
+    savedIds = [...new Set([...savedIds, ...newlyEnabled])];
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_FEEDS, JSON.stringify(savedIds));
+    } catch (err) {
+      console.warn('Auto-Aktivierung neuer Feeds fehlgeschlagen:', err.message);
+    }
+  }
+  // Alle aktuell im Katalog vorhandenen Feed-IDs als "gesehen" markieren,
+  // damit sie beim nächsten Start nicht erneut auto-aktiviert werden, falls
+  // der User sie bewusst deaktiviert.
+  try {
+    const allCatalogueIds = FEED_CATALOGUE.map(f => f.id);
+    localStorage.setItem(
+      CONFIG.STORAGE_KEYS.SEEN_CATALOGUE_IDS,
+      JSON.stringify(allCatalogueIds),
+    );
+  } catch { /* localStorage voll → ignorieren */ }
 
   const fromCatalogue = FEED_CATALOGUE.filter(f => savedIds.includes(f.id));
   return [...fromCatalogue, ...custom];
@@ -207,6 +233,15 @@ function _loadActiveIds() {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : null;
   } catch { return null; }
+}
+
+function _loadSeenCatalogueIds() {
+  try {
+    const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.SEEN_CATALOGUE_IDS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
 }
 
 // --- Auto-generated global exports for Vite migration ---

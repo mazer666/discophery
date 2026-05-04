@@ -1,22 +1,24 @@
 """
 HTML-Scraper für werstreamt.es Listing-Seiten.
 
-Der RSS-Feed (`?rss`) liefert nur einen aktuellen Eintrag; die normale
-Listing-Seite (URL ohne `?rss`) rendert alle Filme/Serien serverseitig in
-Schema.org-Microdata-Blöcken:
+Die Listing-Seiten gruppieren neue Filme/Serien nach Hinzufügedatum:
 
-    <li data-contentid="3048047"
-        itemprop="itemListElement" itemscope
-        itemtype="https://schema.org/ListItem http://schema.org/Movie">
-      <meta itemprop="dateCreated" content="2023-01-01" />
-      <a href="film/details/3048047/sonne-und-beton/" itemprop="url">
-        <img itemprop="image" src="https://…/poster.jpg" alt="Sonne und Beton" />
-        <strong itemprop="name">Sonne und Beton</strong>
-        <span>Drama, 2023</span>
-      </a>
-    </li>
+    <h2>Heute erschienen</h2>
+    <div class="row dayGroup">
+      <ul class="content ...">
+        <li data-contentid="..."
+            itemprop="itemListElement" itemscope
+            itemtype="http://schema.org/Movie">
+          <a href="film/details/.../..." itemprop="url">
+            <img itemprop="image" src="..." />
+            <strong itemprop="name">Titel</strong>
+            <span>Genre, Jahr</span>
+          </a>
+        </li>
+        ...
 
-Wir parsen genau diese Microdata heraus.
+Wir parsen die Schema.org-Microdata UND die <h2>-Gruppenheader, um das
+korrekte "Hinzufügedatum" beim Streaming-Anbieter zu setzen.
 """
 
 import html as html_mod
@@ -25,33 +27,71 @@ from datetime import datetime, timezone, timedelta
 from html.parser import HTMLParser
 
 
+_GERMAN_MONTHS = {
+    'januar': 1, 'februar': 2, 'märz': 3, 'maerz': 3, 'april': 4,
+    'mai': 5, 'juni': 6, 'juli': 7, 'august': 8, 'september': 9,
+    'oktober': 10, 'november': 11, 'dezember': 12,
+}
+
+
+def _parse_group_date(header_text, today=None):
+    """Wandelt 'Heute erschienen' / 'Gestern erschienen' / 'Am 2. Mai erschienen'
+    in ein date-Objekt um. Fällt auf today zurück."""
+    today = today or datetime.now(timezone.utc).date()
+    t = (header_text or '').strip().lower()
+    if not t:
+        return today
+    if 'heute' in t:
+        return today
+    if 'gestern' in t and 'vorgestern' not in t:
+        return today - timedelta(days=1)
+    if 'vorgestern' in t:
+        return today - timedelta(days=2)
+    m = re.search(r'(\d{1,2})\.\s*([a-zäöü]+)', t)
+    if m:
+        day = int(m.group(1))
+        month = _GERMAN_MONTHS.get(m.group(2))
+        if month:
+            year = today.year
+            try:
+                d = datetime(year, month, day, tzinfo=timezone.utc).date()
+            except ValueError:
+                return today
+            # Liegt das Datum in der Zukunft → Vorjahr (z.B. Dez bei Jahreswechsel)
+            if d > today:
+                d = d.replace(year=year - 1)
+            return d
+    return today
+
+
 class _ListingParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.entries = []
-        self._cur = None       # aktuell offener <li>-Eintrag
+        self._cur = None
         self._li_depth = 0
-        self._capture = None   # 'name' | 'genre' | None
+        self._capture = None      # 'name' | 'genre' | 'h2' | None
         self._buf = []
-        # Genre/Jahr stehen in einem <span> direkt im .details-Block
         self._in_details = False
         self._details_depth = 0
-
-    # ---- Tag-Handler -----------------------------------------------------
+        self._current_group = ''  # zuletzt gelesener <h2>-Header
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+
+        # H2-Gruppenheader (außerhalb der Movie-<li>-Blöcke)
+        if tag == 'h2' and self._cur is None:
+            self._capture = 'h2'
+            self._buf = []
+            return
+
         if tag == 'li':
             itemtype = a.get('itemtype', '')
-            if 'schema.org/Movie' in itemtype or 'schema.org/TVSeries' in itemtype \
-               or 'Movie' in itemtype or 'TVSeries' in itemtype:
+            if 'Movie' in itemtype or 'TVSeries' in itemtype:
                 self._cur = {
                     'contentid': a.get('data-contentid', ''),
-                    'url': '',
-                    'image': '',
-                    'name': '',
-                    'genre': '',
-                    'date': '',
+                    'url': '', 'image': '', 'name': '', 'genre': '',
+                    'group': self._current_group,
                 }
                 self._li_depth = 1
                 return
@@ -61,9 +101,7 @@ class _ListingParser(HTMLParser):
         if self._cur is None:
             return
 
-        if tag == 'meta' and a.get('itemprop') == 'dateCreated':
-            self._cur['date'] = a.get('content', '')
-        elif tag == 'a' and a.get('itemprop') == 'url' and not self._cur['url']:
+        if tag == 'a' and a.get('itemprop') == 'url' and not self._cur['url']:
             self._cur['url'] = a.get('href', '')
         elif tag == 'img' and a.get('itemprop') == 'image' and not self._cur['image']:
             self._cur['image'] = a.get('src') or a.get('data-src') or ''
@@ -80,6 +118,12 @@ class _ListingParser(HTMLParser):
             self._buf = []
 
     def handle_endtag(self, tag):
+        if self._capture == 'h2' and tag == 'h2':
+            self._current_group = ''.join(self._buf).strip()
+            self._capture = None
+            self._buf = []
+            return
+
         if self._cur is None:
             return
 
@@ -109,7 +153,7 @@ class _ListingParser(HTMLParser):
                 self._buf = []
 
     def handle_data(self, data):
-        if self._capture and self._cur is not None:
+        if self._capture:
             self._buf.append(data)
 
 
@@ -149,14 +193,15 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
         return []
 
     base = _site_root(feed['url'])
+    today = datetime.now(timezone.utc).date()
     articles = []
     seen = set()
-    # werstreamt.es sortiert "neu" absteigend nach Hinzufügedatum, gibt aber im
-    # HTML nur das Produktionsjahr ("2023-01-01") an. Damit das Frontend die
-    # Filme oben in der Liste anzeigt, setzen wir das Datum auf jetzt minus
-    # einer Minute pro Position (erhält die Reihenfolge der Seite).
-    now = datetime.now(timezone.utc)
-    for idx, info in enumerate(parser.entries):
+
+    # Pro Gruppe einen Sub-Index, damit Artikel innerhalb eines Tages stabil
+    # absteigend sortiert sind (idx*60s Offset)
+    group_indices = {}
+
+    for info in parser.entries:
         url = _absolutize(info['url'], base)
         if url in seen:
             continue
@@ -164,19 +209,25 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
 
         name = html_mod.unescape(info['name']).strip()
         genre = html_mod.unescape(info['genre']).strip()
-        production_date = info['date'] or ''
+        group = info.get('group', '')
 
-        # Jahr aus dateCreated oder Genre-Text extrahieren
+        # Jahr für Titel-Anzeige
         year = ''
-        m = re.search(r'\b(19|20)\d{2}\b', production_date) or re.search(r'\b(19|20)\d{2}\b', genre)
+        m = re.search(r'\b(19|20)\d{2}\b', genre)
         if m:
             year = m.group(0)
-
         title = f"{name} ({year})" if year and year not in name else name
         description = genre or (f"Jahr: {year}" if year else '')
 
-        # Hinzufügedatum approximieren: jetzt minus idx Minuten (Reihenfolge!)
-        added_at = (now - timedelta(minutes=idx)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        # Hinzufügedatum aus h2-Gruppe, plus Sub-Index für stabile Sortierung
+        added_date = _parse_group_date(group, today)
+        idx = group_indices.get(group, 0)
+        group_indices[group] = idx + 1
+        # Mittag des Hinzufüge-Tags minus idx Minuten — bleibt im selben Tag
+        added_at = datetime(
+            added_date.year, added_date.month, added_date.day,
+            12, 0, 0, tzinfo=timezone.utc,
+        ) - timedelta(minutes=idx)
 
         articles.append({
             "id": _hash_url(url),
@@ -187,7 +238,7 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
             "source": feed['name'],
             "sourceId": feed['id'],
             "category": feed.get('category', 'streaming'),
-            "date": added_at,
+            "date": added_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             "dismissed": False,
             "isPaywall": False,
         })

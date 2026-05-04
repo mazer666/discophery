@@ -186,6 +186,9 @@ export const CONFIG = {
     FAVICON_SIZE:        'discophery_favicon_size',
     /** 'true' | 'false' — Paywall-Artikel ausblenden */
     HIDE_PAYWALL:        'discophery_hide_paywall',
+    /** Array von Feed-IDs aus dem Katalog, die der User schon einmal "gesehen" hat
+     *  (für Auto-Aktivierung neu hinzugefügter enabled:true-Feeds). */
+    SEEN_CATALOGUE_IDS:  'discophery_seen_catalogue_ids',
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
