@@ -21,6 +21,7 @@ Wir parsen genau diese Microdata heraus.
 
 import html as html_mod
 import re
+from datetime import datetime, timezone, timedelta
 from html.parser import HTMLParser
 
 
@@ -150,7 +151,12 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
     base = _site_root(feed['url'])
     articles = []
     seen = set()
-    for info in parser.entries:
+    # werstreamt.es sortiert "neu" absteigend nach Hinzufügedatum, gibt aber im
+    # HTML nur das Produktionsjahr ("2023-01-01") an. Damit das Frontend die
+    # Filme oben in der Liste anzeigt, setzen wir das Datum auf jetzt minus
+    # einer Minute pro Position (erhält die Reihenfolge der Seite).
+    now = datetime.now(timezone.utc)
+    for idx, info in enumerate(parser.entries):
         url = _absolutize(info['url'], base)
         if url in seen:
             continue
@@ -158,16 +164,19 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
 
         name = html_mod.unescape(info['name']).strip()
         genre = html_mod.unescape(info['genre']).strip()
-        date = info['date'] or ''
+        production_date = info['date'] or ''
 
         # Jahr aus dateCreated oder Genre-Text extrahieren
         year = ''
-        m = re.search(r'\b(19|20)\d{2}\b', date) or re.search(r'\b(19|20)\d{2}\b', genre)
+        m = re.search(r'\b(19|20)\d{2}\b', production_date) or re.search(r'\b(19|20)\d{2}\b', genre)
         if m:
             year = m.group(0)
 
         title = f"{name} ({year})" if year and year not in name else name
         description = genre or (f"Jahr: {year}" if year else '')
+
+        # Hinzufügedatum approximieren: jetzt minus idx Minuten (Reihenfolge!)
+        added_at = (now - timedelta(minutes=idx)).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         articles.append({
             "id": _hash_url(url),
@@ -178,7 +187,7 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
             "source": feed['name'],
             "sourceId": feed['id'],
             "category": feed.get('category', 'streaming'),
-            "date": date,
+            "date": added_at,
             "dismissed": False,
             "isPaywall": False,
         })
