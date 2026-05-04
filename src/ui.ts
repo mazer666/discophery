@@ -577,18 +577,44 @@ function _wireStaticButtons() {
   }
 
   // Filter-chips: bei Scroll-Down ausblenden, bei Scroll-Up sofort wieder einblenden
-  const filterChips = document.getElementById('filter-chips');
-  if (filterChips) {
+  const filterChips        = document.getElementById('filter-chips');
+  const filterChipsWrapper = document.getElementById('filter-chips-wrapper');
+  if (filterChipsWrapper) {
     let _lastScrollY = window.scrollY;
     window.addEventListener('scroll', () => {
       const y = window.scrollY;
       if (y > _lastScrollY && y > 80) {
-        filterChips.classList.add('filter-chips--hidden');
+        filterChipsWrapper.classList.add('filter-chips--hidden');
       } else if (y < _lastScrollY) {
-        filterChips.classList.remove('filter-chips--hidden');
+        filterChipsWrapper.classList.remove('filter-chips--hidden');
       }
       _lastScrollY = y;
     }, { passive: true });
+  }
+
+  // Desktop-Navigation: Pfeile links/rechts zum horizontalen Scrollen der Chips
+  const filterPrev = document.getElementById('filter-nav-prev');
+  const filterNext = document.getElementById('filter-nav-next');
+  if (filterChips && filterPrev && filterNext) {
+    const updateFilterArrows = () => {
+      const max = filterChips.scrollWidth - filterChips.clientWidth;
+      const overflow = max > 1;
+      const x = filterChips.scrollLeft;
+      filterPrev.hidden = !overflow || x <= 0;
+      filterNext.hidden = !overflow || x >= max - 1;
+    };
+    const scrollByStep = (dir: 1 | -1) => {
+      const step = Math.max(120, Math.floor(filterChips.clientWidth * 0.7));
+      filterChips.scrollBy({ left: dir * step, behavior: 'smooth' });
+    };
+    filterPrev.addEventListener('click', () => scrollByStep(-1));
+    filterNext.addEventListener('click', () => scrollByStep(1));
+    filterChips.addEventListener('scroll', updateFilterArrows, { passive: true });
+    window.addEventListener('resize', updateFilterArrows);
+    // Nach jeder Chip-Neuberechnung Pfeil-Sichtbarkeit aktualisieren
+    new MutationObserver(() => requestAnimationFrame(updateFilterArrows))
+      .observe(filterChips, { childList: true });
+    requestAnimationFrame(updateFilterArrows);
   }
 
   document.getElementById('btn-settings')    ?.addEventListener('click', _openSettingsModal);

@@ -244,27 +244,63 @@ button {
    FILTER-CHIPS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.filter-chips {
-  display: flex;
-  gap: var(--space-2);
-  margin-top: var(--header-height);
-  padding: var(--space-2) var(--space-4);
-  overflow-x: auto;
-  /* Kein sichtbarer Scrollbalken — nativer auf Mobile */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.filter-chips-wrapper {
   position: sticky;
   top: var(--header-height);
+  margin-top: var(--header-height);
   z-index: 90;
   background: var(--color-bg);
   transition: transform 250ms ease;
 }
 
-.filter-chips::-webkit-scrollbar { display: none; }
-
-.filter-chips--hidden {
+.filter-chips-wrapper.filter-chips--hidden {
   transform: translateY(-100%);
 }
+
+.filter-chips {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  overflow-x: auto;
+  /* Kein sichtbarer Scrollbalken — nativer auf Mobile */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.filter-chips::-webkit-scrollbar { display: none; }
+
+.filter-nav-btn {
+  /* Standardmäßig versteckt — nur auf Desktop sichtbar (siehe Media Query) */
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.filter-nav-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-accent);
+}
+
+.filter-nav-btn[hidden] {
+  display: none !important;
+}
+
+.filter-nav-btn--prev { left: var(--space-2); }
+.filter-nav-btn--next { right: var(--space-2); }
 
 .chip {
   display: inline-flex;
@@ -342,11 +378,21 @@ button {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (min-width: 1024px) {
-  .filter-chips {
-    padding: var(--space-4) var(--space-6);
+  .filter-chips-wrapper {
     max-width: 1440px;
     margin: var(--header-height) auto 0;
   }
+
+  .filter-chips {
+    padding: var(--space-4) 56px;
+  }
+
+  .filter-nav-btn {
+    display: flex;
+  }
+
+  .filter-nav-btn--prev { left: var(--space-4); }
+  .filter-nav-btn--next { right: var(--space-4); }
 
   .app-main {
     padding-top: var(--space-4);
