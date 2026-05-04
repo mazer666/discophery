@@ -1,16 +1,22 @@
 """
 HTML-Scraper für werstreamt.es Listing-Seiten.
 
-Der RSS-Feed (`?rss`) liefert nur einen aktuellen Eintrag – der Rest sind uralte
-Daten. Stattdessen scrapen wir die "echte" Listing-Seite (URL ohne `?rss`).
+Der RSS-Feed (`?rss`) liefert nur einen aktuellen Eintrag; die normale
+Listing-Seite (URL ohne `?rss`) rendert alle Filme/Serien serverseitig in
+Schema.org-Microdata-Blöcken:
 
-Die Seite rendert die Filme/Serien serverseitig im initialen HTML; Bilder werden
-zwar lazy nachgeladen, der eigentliche Eintrag (Link, Titel, Jahr, Genre) ist
-aber im ausgelieferten HTML enthalten.
+    <li data-contentid="3048047"
+        itemprop="itemListElement" itemscope
+        itemtype="https://schema.org/ListItem http://schema.org/Movie">
+      <meta itemprop="dateCreated" content="2023-01-01" />
+      <a href="film/details/3048047/sonne-und-beton/" itemprop="url">
+        <img itemprop="image" src="https://…/poster.jpg" alt="Sonne und Beton" />
+        <strong itemprop="name">Sonne und Beton</strong>
+        <span>Drama, 2023</span>
+      </a>
+    </li>
 
-Aufruf:
-    from fetch_werstreamt import scrape_werstreamt
-    articles = scrape_werstreamt(html, feed)
+Wir parsen genau diese Microdata heraus.
 """
 
 import html as html_mod
@@ -18,81 +24,104 @@ import re
 from html.parser import HTMLParser
 
 
-_DETAIL_URL_RE = re.compile(r'^/(?:film|serie)/[^?#"]+/?$', re.I)
-_YEAR_RE = re.compile(r'\b(19|20)\d{2}\b')
-
-
 class _ListingParser(HTMLParser):
-    """Sammelt alle Detailseiten-Links samt Kontext (Titel, Bild, Jahr)."""
-
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.entries = {}            # href -> dict
-        self._current_href = None    # href des aktuell offenen <a>
-        self._a_depth = 0            # Schachtelungstiefe der <a>
-        self._text_buffer = []       # Text-Fragmente innerhalb des <a>
-        # Letztes <img> im aktuellen <a>:
-        self._current_img = None
+        self.entries = []
+        self._cur = None       # aktuell offener <li>-Eintrag
+        self._li_depth = 0
+        self._capture = None   # 'name' | 'genre' | None
+        self._buf = []
+        # Genre/Jahr stehen in einem <span> direkt im .details-Block
+        self._in_details = False
+        self._details_depth = 0
+
+    # ---- Tag-Handler -----------------------------------------------------
 
     def handle_starttag(self, tag, attrs):
-        attrs_d = dict(attrs)
-        if tag == 'a':
-            href = attrs_d.get('href') or ''
-            if self._a_depth == 0 and _DETAIL_URL_RE.match(href.split('?')[0]):
-                self._current_href = href
-                self._text_buffer = []
-                self._current_img = None
-            if self._current_href is not None:
-                self._a_depth += 1
-        elif tag == 'img' and self._current_href is not None:
-            # Bevorzugt data-src / data-lazy-src für lazy geladene Bilder
-            src = (attrs_d.get('data-src')
-                   or attrs_d.get('data-lazy-src')
-                   or attrs_d.get('data-original')
-                   or attrs_d.get('src')
-                   or '')
-            alt = attrs_d.get('alt') or ''
-            if src and not src.startswith('data:'):
-                self._current_img = src
-            if alt:
-                self._text_buffer.append(alt)
+        a = dict(attrs)
+        if tag == 'li':
+            itemtype = a.get('itemtype', '')
+            if 'schema.org/Movie' in itemtype or 'schema.org/TVSeries' in itemtype \
+               or 'Movie' in itemtype or 'TVSeries' in itemtype:
+                self._cur = {
+                    'contentid': a.get('data-contentid', ''),
+                    'url': '',
+                    'image': '',
+                    'name': '',
+                    'genre': '',
+                    'date': '',
+                }
+                self._li_depth = 1
+                return
+            if self._cur is not None:
+                self._li_depth += 1
+
+        if self._cur is None:
+            return
+
+        if tag == 'meta' and a.get('itemprop') == 'dateCreated':
+            self._cur['date'] = a.get('content', '')
+        elif tag == 'a' and a.get('itemprop') == 'url' and not self._cur['url']:
+            self._cur['url'] = a.get('href', '')
+        elif tag == 'img' and a.get('itemprop') == 'image' and not self._cur['image']:
+            self._cur['image'] = a.get('src') or a.get('data-src') or ''
+        elif tag == 'strong' and a.get('itemprop') == 'name':
+            self._capture = 'name'
+            self._buf = []
+        elif tag == 'div' and 'details' in (a.get('class') or ''):
+            self._in_details = True
+            self._details_depth = 1
+        elif tag == 'div' and self._in_details:
+            self._details_depth += 1
+        elif tag == 'span' and self._in_details and not self._cur['genre']:
+            self._capture = 'genre'
+            self._buf = []
 
     def handle_endtag(self, tag):
-        if tag == 'a' and self._current_href is not None:
-            self._a_depth -= 1
-            if self._a_depth == 0:
-                self._flush()
+        if self._cur is None:
+            return
+
+        if self._capture == 'name' and tag == 'strong':
+            self._cur['name'] = ''.join(self._buf).strip()
+            self._capture = None
+            self._buf = []
+        elif self._capture == 'genre' and tag == 'span':
+            self._cur['genre'] = ''.join(self._buf).strip()
+            self._capture = None
+            self._buf = []
+        elif tag == 'div' and self._in_details:
+            self._details_depth -= 1
+            if self._details_depth <= 0:
+                self._in_details = False
+
+        if tag == 'li':
+            self._li_depth -= 1
+            if self._li_depth <= 0:
+                if self._cur.get('url') and self._cur.get('name'):
+                    self.entries.append(self._cur)
+                self._cur = None
+                self._li_depth = 0
+                self._capture = None
+                self._in_details = False
+                self._details_depth = 0
+                self._buf = []
 
     def handle_data(self, data):
-        if self._current_href is not None and data:
-            self._text_buffer.append(data)
-
-    def _flush(self):
-        href = self._current_href
-        text = ' '.join(t.strip() for t in self._text_buffer if t.strip())
-        text = re.sub(r'\s+', ' ', text).strip()
-        existing = self.entries.get(href)
-        # Mehrere Vorkommen desselben Links zusammenführen – das mit dem
-        # längsten Titel/Bild gewinnt.
-        merged = existing or {'title': '', 'image': None}
-        if len(text) > len(merged['title']):
-            merged['title'] = text
-        if self._current_img and not merged.get('image'):
-            merged['image'] = self._current_img
-        self.entries[href] = merged
-        self._current_href = None
-        self._text_buffer = []
-        self._current_img = None
+        if self._capture and self._cur is not None:
+            self._buf.append(data)
 
 
 def _absolutize(url, base):
+    if not url:
+        return url
     if url.startswith('http://') or url.startswith('https://'):
         return url
     if url.startswith('//'):
         return 'https:' + url
     if url.startswith('/'):
         return base.rstrip('/') + url
-    return url
+    return base.rstrip('/') + '/' + url
 
 
 def _site_root(feed_url):
@@ -120,38 +149,36 @@ def scrape_werstreamt(html_text, feed, max_articles=20):
 
     base = _site_root(feed['url'])
     articles = []
-    for href, info in parser.entries.items():
-        title = html_mod.unescape(info.get('title') or '').strip()
-        if not title:
+    seen = set()
+    for info in parser.entries:
+        url = _absolutize(info['url'], base)
+        if url in seen:
             continue
-        # Titel-Aufräumen: doppelte Leerzeichen, redundante Suffixe entfernen
-        title = re.sub(r'\s+', ' ', title)
-        # Manche Links enthalten zusätzlich "Auf Streaming-Anbieter ansehen" o.Ä.
-        title = re.sub(r'\s*\|\s*werstreamt\.es.*$', '', title, flags=re.I)
-        if len(title) < 2:
-            continue
+        seen.add(url)
 
-        url = _absolutize(href, base)
-        image = info.get('image')
-        if image:
-            image = _absolutize(image, base)
+        name = html_mod.unescape(info['name']).strip()
+        genre = html_mod.unescape(info['genre']).strip()
+        date = info['date'] or ''
 
-        # Jahr aus Titel ziehen (häufig "Titel (2024)")
+        # Jahr aus dateCreated oder Genre-Text extrahieren
         year = ''
-        m = _YEAR_RE.search(title)
+        m = re.search(r'\b(19|20)\d{2}\b', date) or re.search(r'\b(19|20)\d{2}\b', genre)
         if m:
             year = m.group(0)
+
+        title = f"{name} ({year})" if year and year not in name else name
+        description = genre or (f"Jahr: {year}" if year else '')
 
         articles.append({
             "id": _hash_url(url),
             "title": title,
             "url": url,
-            "image": image,
-            "description": f"Jahr: {year}" if year else '',
+            "image": _absolutize(info['image'], base) or None,
+            "description": description,
             "source": feed['name'],
             "sourceId": feed['id'],
             "category": feed.get('category', 'streaming'),
-            "date": '',
+            "date": date,
             "dismissed": False,
             "isPaywall": False,
         })
@@ -171,7 +198,6 @@ def normalize_werstreamt_url(url):
         return url
     url = re.sub(r'[?&]rss(=[^&]*)?(?=&|$)', '', url)
     url = re.sub(r'\?&', '?', url)
-    url = re.sub(r'\?$', '', url)
-    # Falls "?rss" am Anfang stand und nun ein "&" am Anfang der Query bleibt
     url = re.sub(r'/&', '/?', url)
+    url = re.sub(r'\?$', '', url)
     return url
