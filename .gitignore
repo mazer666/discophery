@@ -27,3 +27,4 @@ dist-ssr
 
 # TypeScript
 *.tsbuildinfo
+scripts/__pycache__/

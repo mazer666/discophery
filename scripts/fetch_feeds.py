@@ -3,8 +3,17 @@ import urllib.request
 import re
 import os
 import html as html_mod
+import sys
 import xml.etree.ElementTree as ET
 from urllib.error import URLError
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from fetch_werstreamt import (
+    is_werstreamt_url,
+    normalize_werstreamt_url,
+    scrape_werstreamt,
+)
 
 MAX_ARTICLES       = 20
 MAX_TOTAL_ARTICLES = 2000  # Gesamtlimit feeds.json — verhindert unbegrenztes Wachstum
@@ -231,6 +240,20 @@ def fetch_url(url, headers, timeout=10):
         return content.decode('utf-8', errors='ignore')
 
 def fetch_feed_with_fallback(feed, headers):
+    # werstreamt.es: RSS liefert nur einen aktuellen Eintrag, daher HTML scrapen.
+    if is_werstreamt_url(feed.get('url', '')):
+        target_url = normalize_werstreamt_url(feed['url'])
+        try:
+            html_data = fetch_url(target_url, headers, timeout=15)
+            articles = scrape_werstreamt(html_data, feed, max_articles=MAX_ARTICLES)
+            if articles:
+                return articles
+            print(f"  -> werstreamt scrape lieferte 0 Einträge ({target_url})")
+            return []
+        except Exception as e:
+            print(f"  -> werstreamt scrape failed: {e}")
+            return []
+
     try:
         xml_data = fetch_url(feed['url'], headers)
         articles = parse_xml(xml_data, feed)
