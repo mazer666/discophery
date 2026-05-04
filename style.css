@@ -251,6 +251,8 @@ button {
   z-index: 90;
   background: var(--color-bg);
   transition: transform 250ms ease;
+  display: flex;
+  align-items: center;
 }
 
 .filter-chips-wrapper.filter-chips--hidden {
@@ -258,6 +260,8 @@ button {
 }
 
 .filter-chips {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
@@ -273,9 +277,7 @@ button {
 .filter-nav-btn {
   /* Standardmäßig versteckt — nur auf Desktop sichtbar (siehe Media Query) */
   display: none;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -285,9 +287,8 @@ button {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transition: opacity var(--transition-fast), background var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
 }
 
 .filter-nav-btn:hover {
@@ -299,8 +300,8 @@ button {
   display: none !important;
 }
 
-.filter-nav-btn--prev { left: var(--space-2); }
-.filter-nav-btn--next { right: var(--space-2); }
+.filter-nav-btn--prev { margin-left: var(--space-2); }
+.filter-nav-btn--next { margin-right: var(--space-2); }
 
 .chip {
   display: inline-flex;
@@ -384,15 +385,15 @@ button {
   }
 
   .filter-chips {
-    padding: var(--space-4) 56px;
+    padding: var(--space-4) var(--space-2);
   }
 
   .filter-nav-btn {
-    display: flex;
+    display: inline-flex;
   }
 
-  .filter-nav-btn--prev { left: var(--space-4); }
-  .filter-nav-btn--next { right: var(--space-4); }
+  .filter-nav-btn--prev { margin-left: var(--space-4); margin-right: 0; }
+  .filter-nav-btn--next { margin-right: var(--space-4); margin-left: 0; }
 
   .app-main {
     padding-top: var(--space-4);
