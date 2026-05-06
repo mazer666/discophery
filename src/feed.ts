@@ -62,7 +62,8 @@ export async function previewFeedSource(feed: any) {
   }
 }
 
-export async function loadAllFeeds() {
+export async function loadAllFeeds(options: { forceLive?: boolean } = {}) {
+  const { forceLive = false } = options;
   const activeFeeds = getActiveFeeds();  // feed-manager.js
   const accumulated = [];
   let failCount     = 0;
@@ -76,7 +77,7 @@ export async function loadAllFeeds() {
       try {
         preFetchedData = await res.json();
         // Date-Strings zurück in echte Dates parsen + Paywall-Erkennung nachziehen
-        preFetchedData.forEach(a => { 
+        preFetchedData.forEach(a => {
           if(a.date) a.date = new Date(a.date);
           a.isPaywall = _checkPaywall(a.title || '', a.description || '');
         });
@@ -91,17 +92,33 @@ export async function loadAllFeeds() {
   // 2. Herausfinden welche Feeds wir nicht im JSON haben (z.B. Custom Feeds)
   const activeFeedIds = new Set(activeFeeds.map(f => f.id));
   const availableIdsInJSON = new Set(preFetchedData.map(a => a.sourceId));
-  
+
+  // forceLive: nur werstreamt.es-Einträge aus dem Cache übernehmen (Browser kann kein HTML scrapen);
+  // alle anderen RSS-Feeds direkt über den Proxy neu laden.
+  let preFetchedArticles: any[];
+  let missingFeeds: any[];
+
+  if (forceLive) {
+    const werstreAmtIds = new Set(
+      activeFeeds.filter(f => f.url?.includes('werstreamt.es')).map(f => f.id)
+    );
+    preFetchedArticles = preFetchedData.filter(a =>
+      activeFeedIds.has(a.sourceId) && werstreAmtIds.has(a.sourceId)
+    );
+    missingFeeds = activeFeeds.filter(f => !f.url?.includes('werstreamt.es'));
+  } else {
+    preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
+    missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
+  }
+
   // Alle Artikel die im JSON waren übernehmen
-  const preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
   if (preFetchedArticles.length > 0) {
     accumulated.push(...preFetchedArticles);
     firstFired = true;
     _dispatchArticles(accumulated);
   }
 
-  // 3. Fehlende Feeds via Proxy laden
-  const missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
+  // 3. Fehlende / forceLive-Feeds via Proxy laden
 
   if (missingFeeds.length > 0) {
     const promises = missingFeeds.map(feed =>

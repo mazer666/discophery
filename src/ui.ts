@@ -564,7 +564,7 @@ function _wireStaticButtons() {
     ?.addEventListener('click', () => {
       document.getElementById('btn-refresh')?.classList.add('icon-button--spinning');
       if (_allArticles.length === 0) _showState('loading');
-      loadAllFeeds();
+      loadAllFeeds({ forceLive: true });
     });
 
   // Scroll-to-top FAB

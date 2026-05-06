@@ -348,17 +348,16 @@ def main():
 
     all_articles = []
 
-    for feed in feeds:
-        # Nur aktivierte Feeds vorab fetchen — deaktivierte Feeds werden im Browser via Proxy geladen
-        if not feed.get('enabled', True):
-            continue
+    enabled_feeds = [f for f in feeds if f.get('enabled', True)]
+    per_feed_limit = min(MAX_ARTICLES, max(1, MAX_TOTAL_ARTICLES // max(1, len(enabled_feeds))))
+    print(f"Per-feed limit: {per_feed_limit} ({len(enabled_feeds)} enabled feeds, max total {MAX_TOTAL_ARTICLES})")
+
+    for feed in enabled_feeds:
         print(f"Fetching {feed['name']}...")
         articles = fetch_feed_with_fallback(feed, existing)
+        articles = articles[:per_feed_limit]
         all_articles.extend(articles)
         print(f"  -> Found {len(articles)}")
-        if len(all_articles) >= MAX_TOTAL_ARTICLES:
-            print(f"Gesamtlimit {MAX_TOTAL_ARTICLES} erreicht, stoppe früh.")
-            break
 
     all_articles = all_articles[:MAX_TOTAL_ARTICLES]
 
