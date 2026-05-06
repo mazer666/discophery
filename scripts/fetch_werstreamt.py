@@ -76,6 +76,9 @@ class _ListingParser(HTMLParser):
         self._details_depth = 0
         self._current_group = ''  # zuletzt gelesener <h2>-Header
 
+    # Schema.org types that indicate a watchable content item.
+    _CONTENT_TYPES = ('Movie', 'TVSeries', 'TVEpisode', 'VideoObject', 'CreativeWorkSeason')
+
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
 
@@ -87,7 +90,7 @@ class _ListingParser(HTMLParser):
 
         if tag == 'li':
             itemtype = a.get('itemtype', '')
-            if 'Movie' in itemtype or 'TVSeries' in itemtype:
+            if any(t in itemtype for t in self._CONTENT_TYPES):
                 self._cur = {
                     'contentid': a.get('data-contentid', ''),
                     'url': '', 'image': '', 'name': '', 'genre': '',
@@ -101,11 +104,19 @@ class _ListingParser(HTMLParser):
         if self._cur is None:
             return
 
-        if tag == 'a' and a.get('itemprop') == 'url' and not self._cur['url']:
-            self._cur['url'] = a.get('href', '')
-        elif tag == 'img' and a.get('itemprop') == 'image' and not self._cur['image']:
+        if tag == 'a' and not self._cur['url']:
+            href = a.get('href', '')
+            if href and not href.startswith('#'):
+                # Prefer itemprop="url", but accept any intra-site link as fallback.
+                if a.get('itemprop') == 'url' or '/' in href:
+                    self._cur['url'] = href
+        elif tag == 'img' and not self._cur['image']:
             self._cur['image'] = a.get('src') or a.get('data-src') or ''
         elif tag == 'strong' and a.get('itemprop') == 'name':
+            self._capture = 'name'
+            self._buf = []
+        elif tag == 'strong' and not self._cur['name'] and self._capture is None:
+            # Fallback: capture first <strong> even without itemprop
             self._capture = 'name'
             self._buf = []
         elif tag == 'div' and 'details' in (a.get('class') or ''):

@@ -1,4 +1,5 @@
 import json
+import time
 import urllib.request
 import re
 import os
@@ -18,6 +19,26 @@ from fetch_werstreamt import (
 MAX_ARTICLES       = 20
 MAX_TOTAL_ARTICLES = 2000  # Gesamtlimit feeds.json — verhindert unbegrenztes Wachstum
 
+# Minimum articles below which we fall back to cached streaming data.
+# Streaming content stays relevant for days, so stale data beats zero.
+STREAMING_MIN_ARTICLES = 5
+
+# Headers that look like a real browser — improves scraping success rate.
+WERSTREAMT_HEADERS = {
+    'User-Agent': (
+        'Mozilla/5.0 (X11; Linux x86_64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/124.0.0.0 Safari/537.36'
+    ),
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'de-AT,de;q=0.9,en-US;q=0.8,en;q=0.7',
+}
+
+RSS_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Discophery GitHub Action Prefetch)'
+}
+
+
 def parse_feeds_js():
     # Suche Pfad relativ zum Root (für GitHub Action) oder relativ zum Script
     path = 'src/feeds.ts' if os.path.exists('src/feeds.ts') else '../src/feeds.ts'
@@ -27,7 +48,7 @@ def parse_feeds_js():
 
     with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
-    
+
     # Extract the JS array using regex
     match = re.search(r'(?:export\s+)?const FEED_CATALOGUE = \[(.*?)\];', content, re.DOTALL)
     if not match:
@@ -35,10 +56,15 @@ def parse_feeds_js():
         return []
 
     entries_text = match.group(1)
+
+    # Strip JS line comments so commented-out feed objects are not parsed.
+    # This prevents e.g. `// { id: 'foo', enabled: true }` from being included.
+    entries_text = re.sub(r'^\s*//.*$', '', entries_text, flags=re.MULTILINE)
+
     # Find all objects { ... }
     blocks = re.findall(r'\{[^{}]*\}', entries_text)
     print(f"Found {len(blocks)} potential feed blocks in feeds.ts")
-    
+
     feeds = []
     for b in blocks:
         try:
@@ -59,8 +85,28 @@ def parse_feeds_js():
                 feeds.append(feed_dict)
         except Exception as e:
             print(f"  Error parsing block: {e}")
-            
+
     return feeds
+
+
+def load_existing_feeds():
+    """Load the previously written feeds.json and index articles by sourceId.
+    Used as a fallback when a live fetch returns no usable data."""
+    for path in ('data/feeds.json', '../data/feeds.json'):
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                by_source = {}
+                for a in data:
+                    sid = a.get('sourceId', '')
+                    by_source.setdefault(sid, []).append(a)
+                print(f"Loaded {len(data)} cached articles from {path} for fallback.")
+                return by_source
+            except Exception as e:
+                print(f"  Could not load existing feeds.json: {e}")
+    return {}
+
 
 def remove_html_tags(text):
     if not text:
@@ -77,7 +123,7 @@ def hash_url(url):
     for char in url:
         hash_val = ((hash_val << 5) + hash_val) ^ ord(char)
         hash_val &= 0xFFFFFFFF
-    
+
     if hash_val > 0x7FFFFFFF:
         hash_val -= 0x100000000
     return hex(abs(hash_val))[2:]
@@ -170,7 +216,7 @@ def parse_xml(xml_string, feed):
             url = item.findtext('link') or item.findtext('{*}link') or item.findtext('guid') or item.findtext('{*}guid')
             if not url and 'rdf:about' in item.attrib:
                 url = item.attrib['rdf:about']
-            
+
             if url:
                 title = item.findtext('title') or item.findtext('{*}title') or '(kein Titel)'
                 desc = item.findtext('description') or item.findtext('{*}description') or ''
@@ -189,7 +235,7 @@ def parse_xml(xml_string, feed):
                     "dismissed": False,
                     "isPaywall": check_paywall(title, desc) or is_ad_item(item, feed)
                 })
-    
+
     return articles[:MAX_ARTICLES]
 
 
@@ -239,23 +285,43 @@ def fetch_url(url, headers, timeout=10):
     except Exception:
         return content.decode('utf-8', errors='ignore')
 
-def fetch_feed_with_fallback(feed, headers):
-    # werstreamt.es: RSS liefert nur einen aktuellen Eintrag, daher HTML scrapen.
-    if is_werstreamt_url(feed.get('url', '')):
-        target_url = normalize_werstreamt_url(feed['url'])
+def fetch_werstreamt_with_retry(url, max_articles, feed):
+    """Fetch and scrape a werstreamt.es page with up to 3 attempts."""
+    target_url = normalize_werstreamt_url(url)
+    last_error = None
+    for attempt in range(3):
         try:
-            html_data = fetch_url(target_url, headers, timeout=15)
-            articles = scrape_werstreamt(html_data, feed, max_articles=MAX_ARTICLES)
+            html_data = fetch_url(target_url, WERSTREAMT_HEADERS, timeout=20)
+            articles = scrape_werstreamt(html_data, feed, max_articles=max_articles)
             if articles:
                 return articles
-            print(f"  -> werstreamt scrape lieferte 0 Einträge ({target_url})")
-            return []
+            print(f"  -> 0 Einträge gescraped (Versuch {attempt + 1}/3)")
         except Exception as e:
-            print(f"  -> werstreamt scrape failed: {e}")
-            return []
+            last_error = e
+            print(f"  -> Scraping-Fehler Versuch {attempt + 1}/3: {e}")
+        if attempt < 2:
+            time.sleep(3 * (attempt + 1))
+    if last_error:
+        print(f"  -> Alle Versuche fehlgeschlagen: {last_error}")
+    return []
+
+def fetch_feed_with_fallback(feed, existing):
+    # werstreamt.es: RSS liefert nur einen aktuellen Eintrag, daher HTML scrapen.
+    if is_werstreamt_url(feed.get('url', '')):
+        articles = fetch_werstreamt_with_retry(feed['url'], MAX_ARTICLES, feed)
+        if len(articles) < STREAMING_MIN_ARTICLES:
+            cached = existing.get(feed['id'], [])
+            if cached:
+                # Merge: fresh articles first, fill up with cached ones not already present
+                fresh_ids = {a['id'] for a in articles}
+                extra = [a for a in cached if a['id'] not in fresh_ids]
+                merged = (articles + extra)[:MAX_ARTICLES]
+                print(f"  -> Nur {len(articles)} aktuelle Einträge — mit {len(extra)} gecachten aufgefüllt → {len(merged)} gesamt")
+                return merged
+        return articles
 
     try:
-        xml_data = fetch_url(feed['url'], headers)
+        xml_data = fetch_url(feed['url'], RSS_HEADERS)
         articles = parse_xml(xml_data, feed)
         if articles or not feed.get('fallbackUrl'):
             return articles
@@ -266,7 +332,7 @@ def fetch_feed_with_fallback(feed, headers):
             return []
         print(f"  -> Failed ({e}), trying fallbackUrl …")
     try:
-        xml_data = fetch_url(feed['fallbackUrl'], headers)
+        xml_data = fetch_url(feed['fallbackUrl'], RSS_HEADERS)
         return parse_xml(xml_data, feed)
     except Exception as e:
         print(f"  -> fallbackUrl also failed: {e}")
@@ -275,18 +341,18 @@ def fetch_feed_with_fallback(feed, headers):
 def main():
     print("Parsing feeds.js...")
     feeds = parse_feeds_js()
-    all_articles = []
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Discophery GitHub Action Prefetch)'
-    }
+    print("Loading existing feeds.json for streaming fallback...")
+    existing = load_existing_feeds()
+
+    all_articles = []
 
     for feed in feeds:
         # Nur aktivierte Feeds vorab fetchen — deaktivierte Feeds werden im Browser via Proxy geladen
         if not feed.get('enabled', True):
             continue
         print(f"Fetching {feed['name']}...")
-        articles = fetch_feed_with_fallback(feed, headers)
+        articles = fetch_feed_with_fallback(feed, existing)
         all_articles.extend(articles)
         print(f"  -> Found {len(articles)}")
         if len(all_articles) >= MAX_TOTAL_ARTICLES:

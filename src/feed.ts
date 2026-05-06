@@ -72,7 +72,7 @@ export async function loadAllFeeds() {
   let preFetchedData = [];
   try {
     const res = await fetch('./data/feeds.json?r=' + Date.now());
-    if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+    if (res.ok) {
       try {
         preFetchedData = await res.json();
         // Date-Strings zurück in echte Dates parsen + Paywall-Erkennung nachziehen
