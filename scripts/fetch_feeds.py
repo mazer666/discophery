@@ -373,13 +373,13 @@ def main():
 
     all_articles = all_articles[:MAX_TOTAL_ARTICLES]
 
-    if not os.path.exists('data'):
-        os.makedirs('data')
+    if not os.path.exists('public/data'):
+        os.makedirs('public/data')
 
-    with open('data/feeds.json', 'w', encoding='utf-8') as f:
+    with open('public/data/feeds.json', 'w', encoding='utf-8') as f:
         json.dump(all_articles, f, ensure_ascii=False)
 
-    print(f"Exported {len(all_articles)} articles to data/feeds.json.")
+    print(f"Exported {len(all_articles)} articles to public/data/feeds.json.")
 
 if __name__ == '__main__':
     main()
