@@ -184,68 +184,105 @@ def _hash_url(url):
     return hex(abs(h))[2:]
 
 
-def scrape_werstreamt(html_text, feed, max_articles=20):
-    parser = _ListingParser()
-    try:
-        parser.feed(html_text)
-    except Exception as e:
-        print(f"  werstreamt parser error: {e}")
-        return []
-
+def scrape_werstreamt(html_text, feed, max_articles=20, max_days=7):
     base = _site_root(feed['url'])
     today = datetime.now(timezone.utc).date()
+    cutoff_date = today - timedelta(days=max_days)
+    
     articles = []
     seen = set()
-
-    # Pro Gruppe einen Sub-Index, damit Artikel innerhalb eines Tages stabil
-    # absteigend sortiert sind (idx*60s Offset)
-    group_indices = {}
-
-    for info in parser.entries:
-        url = _absolutize(info['url'], base)
-        if url in seen:
-            continue
-        seen.add(url)
-
-        name = html_mod.unescape(info['name']).strip()
-        genre = html_mod.unescape(info['genre']).strip()
-        group = info.get('group', '')
-
-        # Jahr für Titel-Anzeige
-        year = ''
-        m = re.search(r'\b(19|20)\d{2}\b', genre)
-        if m:
-            year = m.group(0)
-        title = f"{name} ({year})" if year and year not in name else name
-        description = genre or (f"Jahr: {year}" if year else '')
-
-        # Hinzufügedatum aus h2-Gruppe, plus Sub-Index für stabile Sortierung
-        added_date = _parse_group_date(group, today)
-        idx = group_indices.get(group, 0)
-        group_indices[group] = idx + 1
-        # Mittag des Hinzufüge-Tags minus idx Minuten — bleibt im selben Tag
-        added_at = datetime(
-            added_date.year, added_date.month, added_date.day,
-            12, 0, 0, tzinfo=timezone.utc,
-        ) - timedelta(minutes=idx)
-
-        articles.append({
-            "id": _hash_url(url),
-            "title": title,
-            "url": url,
-            "image": _absolutize(info['image'], base) or None,
-            "description": description,
-            "source": feed['name'],
-            "sourceId": feed['id'],
-            "category": feed.get('category', 'streaming'),
-            "date": added_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            "dismissed": False,
-            "isPaywall": False,
-        })
-        if len(articles) >= max_articles:
+    
+    # Wir fetchen ggf. mehrere Seiten
+    current_html = html_text
+    current_url = feed['url']
+    
+    while True:
+        parser = _ListingParser()
+        try:
+            parser.feed(current_html)
+        except Exception as e:
+            print(f"  werstreamt parser error: {e}")
             break
 
-    return articles
+        # Pro Gruppe einen Sub-Index für stabile Sortierung
+        group_indices = {}
+
+        page_has_new = False
+        for info in parser.entries:
+            url = _absolutize(info['url'], base)
+            if url in seen:
+                continue
+            seen.add(url)
+
+            name = html_mod.unescape(info['name']).strip()
+            genre = html_mod.unescape(info['genre']).strip()
+            group = info.get('group', '')
+
+            added_date = _parse_group_date(group, today)
+            
+            # Check if within max_days
+            if added_date < cutoff_date:
+                continue
+            
+            page_has_new = True
+            
+            # Jahr für Titel-Anzeige
+            year = ''
+            m = re.search(r'\b(19|20)\d{2}\b', genre)
+            if m:
+                year = m.group(0)
+            title = f"{name} ({year})" if year and year not in name else name
+            description = genre or (f"Jahr: {year}" if year else '')
+
+            idx = group_indices.get(group, 0)
+            group_indices[group] = idx + 1
+            added_at = datetime(
+                added_date.year, added_date.month, added_date.day,
+                12, 0, 0, tzinfo=timezone.utc,
+            ) - timedelta(minutes=idx)
+
+            articles.append({
+                "id": _hash_url(url),
+                "title": title,
+                "url": url,
+                "image": _absolutize(info['image'], base) or None,
+                "description": description,
+                "source": feed['name'],
+                "sourceId": feed['id'],
+                "category": feed.get('category', 'streaming'),
+                "date": added_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                "dismissed": False,
+                "isPaywall": False,
+            })
+            if len(articles) >= 100: # Limit um Endlosschleifen zu verhindern
+                break
+
+        if len(articles) >= 100 or not page_has_new:
+            break
+            
+        # Nächste Seite finden
+        next_match = re.search(r'href="([^"]+)"[^>]*class="next"', current_html)
+        if not next_match:
+            # Versuche anderen Selektor
+            next_match = re.search(r'class="next"[^>]*href="([^"]+)"', current_html)
+            
+        if next_match:
+            next_url = _absolutize(next_match.group(1), base)
+            if next_url == current_url:
+                break
+            try:
+                # Wir importieren fetch_url hier um Circular Imports zu vermeiden falls nötig
+                # Aber fetch_feeds importiert uns. Wir brauchen eine fetch_url Funktion.
+                # Wir gehen davon aus dass sie im globalen Scope von fetch_feeds ist.
+                # Besser: Wir geben die next_url zurück oder werfen eine Exception.
+                # Einfacher: Wir machen die Schleife in fetch_feeds.
+                break # Für jetzt stoppen wir nach einer Seite in DIESER Funktion
+            except:
+                break
+        else:
+            break
+
+    return articles[:max_articles]
 
 
 def is_werstreamt_url(url):

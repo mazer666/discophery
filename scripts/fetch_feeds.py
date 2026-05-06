@@ -13,6 +13,8 @@ from fetch_werstreamt import (
     is_werstreamt_url,
     normalize_werstreamt_url,
     scrape_werstreamt,
+    _site_root,
+    _absolutize,
 )
 
 MAX_ARTICLES       = 50
@@ -279,20 +281,56 @@ def fetch_url(url, headers, timeout=10):
     except Exception:
         return content.decode('utf-8', errors='ignore')
 
+def fetch_streaming_feed(feed, headers):
+    """Spezielle Logik für werstreamt.es Scraper mit Pagination Support."""
+    target_url = normalize_werstreamt_url(feed['url'])
+    base = _site_root(target_url)
+    
+    all_articles = []
+    current_url = target_url
+    
+    # Max. 3 Seiten fetchen um mindestens 7 Tage abzudecken
+    for page in range(3):
+        try:
+            print(f"  Fetching page {page+1}: {current_url}")
+            html_data = fetch_url(current_url, headers, timeout=15)
+            # scrape_werstreamt handles one page and returns articles
+            articles = scrape_werstreamt(html_data, feed, max_articles=MAX_ARTICLES, max_days=7)
+            
+            # Neue Artikel hinzufügen (Duplikate vermeiden)
+            new_count = 0
+            seen_ids = {a['id'] for a in all_articles}
+            for a in articles:
+                if a['id'] not in seen_ids:
+                    all_articles.append(a)
+                    new_count += 1
+            
+            if new_count == 0 or len(all_articles) >= MAX_ARTICLES:
+                break
+                
+            # Nächste Seite finden
+            next_match = re.search(r'href="([^"]+)"[^>]*class="next"', html_data)
+            if not next_match:
+                next_match = re.search(r'class="next"[^>]*href="([^"]+)"', html_data)
+            
+            if next_match:
+                next_url = _absolutize(next_match.group(1), base)
+                if next_url == current_url:
+                    break
+                current_url = next_url
+            else:
+                break
+                
+        except Exception as e:
+            print(f"  -> Streaming fetch error: {e}")
+            break
+            
+    return all_articles[:MAX_ARTICLES]
+
 def fetch_feed_with_fallback(feed, headers):
     # werstreamt.es: RSS liefert nur einen aktuellen Eintrag, daher HTML scrapen.
     if is_werstreamt_url(feed.get('url', '')):
-        target_url = normalize_werstreamt_url(feed['url'])
-        try:
-            html_data = fetch_url(target_url, headers, timeout=15)
-            articles = scrape_werstreamt(html_data, feed, max_articles=MAX_ARTICLES)
-            if articles:
-                return articles
-            print(f"  -> werstreamt scrape lieferte 0 Einträge ({target_url})")
-            return []
-        except Exception as e:
-            print(f"  -> werstreamt scrape failed: {e}")
-            return []
+        return fetch_streaming_feed(feed, headers)
 
     try:
         xml_data = fetch_url(feed['url'], headers)
