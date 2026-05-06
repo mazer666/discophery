@@ -286,25 +286,56 @@ def fetch_url(url, headers, timeout=10):
     except Exception:
         return content.decode('utf-8', errors='ignore')
 
-def fetch_werstreamt_with_retry(url, max_articles, feed):
-    """Fetch and scrape a werstreamt.es page with up to 3 attempts."""
-    target_url = normalize_werstreamt_url(url)
+def _fetch_werstreamt_page(url, feed, max_articles):
+    """Fetch and scrape a single werstreamt.es URL with up to 3 retry attempts."""
     last_error = None
     for attempt in range(3):
         try:
-            html_data = fetch_url(target_url, WERSTREAMT_HEADERS, timeout=20)
+            html_data = fetch_url(url, WERSTREAMT_HEADERS, timeout=20)
             articles = scrape_werstreamt(html_data, feed, max_articles=max_articles)
-            if articles:
-                return articles
-            print(f"  -> 0 Einträge gescraped (Versuch {attempt + 1}/3)")
+            return articles, None
         except Exception as e:
             last_error = e
-            print(f"  -> Scraping-Fehler Versuch {attempt + 1}/3: {e}")
+            print(f"  -> Fehler Versuch {attempt + 1}/3: {e}")
         if attempt < 2:
             time.sleep(3 * (attempt + 1))
-    if last_error:
-        print(f"  -> Alle Versuche fehlgeschlagen: {last_error}")
-    return []
+    return [], last_error
+
+
+def fetch_werstreamt_with_retry(url, max_articles, feed):
+    """Fetch and scrape werstreamt.es, paginating (?filterStart=N) until max_articles is reached."""
+    target_url = normalize_werstreamt_url(url)
+    all_articles = []
+    seen_ids = set()
+    MAX_PAGES = 3
+
+    for page in range(MAX_PAGES):
+        if len(all_articles) >= max_articles:
+            break
+
+        page_url = f"{target_url}?filterStart={page}" if page > 0 else target_url
+        remaining = max_articles - len(all_articles)
+        articles, error = _fetch_werstreamt_page(page_url, feed, remaining)
+
+        if error and not articles:
+            print(f"  -> Seite {page + 1} fehlgeschlagen: {error}")
+            break
+
+        new_articles = [a for a in articles if a['id'] not in seen_ids]
+        for a in new_articles:
+            seen_ids.add(a['id'])
+        all_articles.extend(new_articles)
+        print(f"  -> Seite {page + 1}: {len(new_articles)} neue Einträge")
+
+        if not articles:
+            break  # Page returned nothing — no point fetching further
+
+        if page < MAX_PAGES - 1 and len(all_articles) < max_articles:
+            time.sleep(2)  # Polite delay between pages
+
+    if not all_articles:
+        print(f"  -> Alle Versuche fehlgeschlagen für {url}")
+    return all_articles
 
 def fetch_feed_with_fallback(feed, existing):
     # werstreamt.es: RSS liefert nur einen aktuellen Eintrag, daher HTML scrapen.

@@ -93,22 +93,61 @@ export async function loadAllFeeds(options: { forceLive?: boolean } = {}) {
   const activeFeedIds = new Set(activeFeeds.map(f => f.id));
   const availableIdsInJSON = new Set(preFetchedData.map(a => a.sourceId));
 
-  // forceLive: nur werstreamt.es-Einträge aus dem Cache übernehmen (Browser kann kein HTML scrapen);
-  // alle anderen RSS-Feeds direkt über den Proxy neu laden.
+  const _isWerstreamt = (f: any) => f.url?.includes('werstreamt.es');
+  const werstreAmtIds = new Set(activeFeeds.filter(_isWerstreamt).map(f => f.id));
+
+  // Build a per-feed map of cached werstreamt.es articles for fallback
+  const _cachedBySourceId = new Map<string, any[]>();
+  preFetchedData
+    .filter(a => activeFeedIds.has(a.sourceId) && werstreAmtIds.has(a.sourceId))
+    .forEach(a => {
+      const arr = _cachedBySourceId.get(a.sourceId) || [];
+      arr.push(a);
+      _cachedBySourceId.set(a.sourceId, arr);
+    });
+
+  // Determine which feeds use the CORS proxy and which try a direct browser RSS fetch.
+  // werstreamt.es blocks cloud IPs (GitHub Actions, allorigins, corsproxy) — but the user's
+  // browser (residential IP) can reach it directly if CORS headers are present on the RSS.
   let preFetchedArticles: any[];
   let missingFeeds: any[];
+  let werstreAmtFeedsToRefresh: any[];
 
   if (forceLive) {
-    const werstreAmtIds = new Set(
-      activeFeeds.filter(f => f.url?.includes('werstreamt.es')).map(f => f.id)
-    );
-    preFetchedArticles = preFetchedData.filter(a =>
-      activeFeedIds.has(a.sourceId) && werstreAmtIds.has(a.sourceId)
-    );
-    missingFeeds = activeFeeds.filter(f => !f.url?.includes('werstreamt.es'));
+    // Reload all non-werstreamt feeds via proxy; attempt live direct RSS for werstreamt.es
+    missingFeeds = activeFeeds.filter(f => !_isWerstreamt(f));
+    werstreAmtFeedsToRefresh = activeFeeds.filter(_isWerstreamt);
+    preFetchedArticles = [];  // will be populated after direct RSS attempt below
   } else {
+    // Normal: use feeds.json for everything; only proxy-load truly missing non-werstreamt feeds
     preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
-    missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
+    missingFeeds = activeFeeds.filter(f => !_isWerstreamt(f) && !availableIdsInJSON.has(f.id));
+    // For werstreamt.es feeds missing from feeds.json, also try direct RSS
+    werstreAmtFeedsToRefresh = activeFeeds.filter(f => _isWerstreamt(f) && !availableIdsInJSON.has(f.id));
+  }
+
+  // 2b. Try direct RSS fetch for werstreamt.es feeds (no proxy, uses browser's residential IP).
+  // On success: fresh articles replace cached ones for that feed.
+  // On failure (CORS blocked / 403): silently fall back to cached feeds.json data.
+  if (werstreAmtFeedsToRefresh.length > 0) {
+    const directResults = await Promise.allSettled(
+      werstreAmtFeedsToRefresh.map(feed => _tryDirectRssFetch(feed))
+    );
+    const freshSourceIds = new Set<string>();
+    const freshArticles: any[] = [];
+    directResults.forEach((result, i) => {
+      if (result.status === 'fulfilled' && result.value.length > 0) {
+        freshArticles.push(...result.value);
+        freshSourceIds.add(werstreAmtFeedsToRefresh[i].id);
+        console.info(`werstreamt.es Direktabruf OK: ${werstreAmtFeedsToRefresh[i].name} → ${result.value.length} Artikel`);
+      }
+    });
+    // For feeds where direct fetch failed, use cached data as fallback
+    const cachedFallback: any[] = [];
+    for (const [sourceId, articles] of _cachedBySourceId) {
+      if (!freshSourceIds.has(sourceId)) cachedFallback.push(...articles);
+    }
+    preFetchedArticles = [...preFetchedArticles, ...freshArticles, ...cachedFallback];
   }
 
   // Alle Artikel die im JSON waren übernehmen
@@ -641,6 +680,24 @@ function _deduplicateById(articles) {
   });
 }
 
+/**
+ * Versucht, den RSS-Feed einer werstreamt.es-Seite direkt aus dem Browser abzurufen
+ * (ohne CORS-Proxy, da Cloud-IPs von werstreamt.es geblockt werden).
+ * Funktioniert nur wenn der User-Browser eine residential IP hat UND
+ * werstreamt.es CORS-Header auf dem RSS-Endpoint sendet.
+ * Wirft einen Fehler wenn der Abruf fehlschlägt — der Aufrufer fällt dann auf
+ * gecachte feeds.json-Daten zurück.
+ */
+async function _tryDirectRssFetch(feed: any): Promise<any[]> {
+  const rssUrl = feed.url.replace(/\/+$/, '') + '/?rss';
+  const resp = await _fetchWithTimeout(rssUrl, CONFIG.FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const text = await resp.text();
+  const articles = _parseXml(text, feed);
+  if (articles.length === 0) throw new Error('Keine Artikel geparst');
+  return articles;
+}
+
 // ─── Start — hört auf das discophery:ready Event von auth.js ────────────
 
 document.addEventListener('discophery:ready', () => {
@@ -649,6 +706,7 @@ document.addEventListener('discophery:ready', () => {
 
 // --- Auto-generated global exports for Vite migration ---
 (window as any).loadAllFeeds = loadAllFeeds;
+(window as any)._tryDirectRssFetch = _tryDirectRssFetch;
 (window as any).previewFeedSource = previewFeedSource;
 (window as any)._dispatchArticles = _dispatchArticles;
 (window as any)._loadFeed = _loadFeed;
