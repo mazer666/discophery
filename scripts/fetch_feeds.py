@@ -30,6 +30,9 @@ def parse_feeds_js():
     with open(path, 'r', encoding='utf-8') as f:
         content = f.read()
     
+    # 1. Kommentare entfernen um deaktivierte/auskommentierte Feeds zu ignorieren
+    content = re.sub(r'^\s*//.*$', '', content, flags=re.MULTILINE)
+    
     # Extract the JS array using regex
     match = re.search(r'(?:export\s+)?const FEED_CATALOGUE = \[(.*?)\];', content, re.DOTALL)
     if not match:
@@ -89,10 +92,34 @@ def parse_xml(xml_string, feed):
     try:
         # Strip encoding declaration
         xml_string = re.sub(r'<\?xml[^>]*\?>', '', xml_string)
+        
+        # Malformed XML fix: Junk before/after document element (e.g. Go Asia)
+        # Extract everything from the first <tag> to the last </tag> that matches root tags
+        start_match = re.search(r'<(rss|feed|rdf:RDF|urlset)\b', xml_string, re.IGNORECASE)
+        if start_match:
+            tag_name = start_match.group(1)
+            # Find the last closing tag of THIS root element
+            end_tag = f'</{tag_name}>'
+            # rfind is better for trailing junk
+            end_pos = xml_string.lower().rfind(end_tag.lower())
+            if end_pos != -1:
+                xml_string = xml_string[start_match.start() : end_pos + len(end_tag)]
+        else:
+            xml_string = xml_string.strip()
+            
         root = ET.fromstring(xml_string)
     except Exception as e:
-        print(f"  XML Error for {feed['name']}: {e}")
-        return []
+        # Second attempt: try a very simple strip of everything after the last '>'
+        try:
+            fixed_xml = xml_string.strip()
+            if not fixed_xml.endswith('>'):
+                fixed_xml = fixed_xml[:fixed_xml.rfind('>')+1]
+                root = ET.fromstring(fixed_xml)
+            else:
+                raise e
+        except:
+            print(f"  XML Error for {feed['name']}: {e}")
+            return []
 
     # Atom vs RSS/RDF vs Google News Sitemap handling
     tag = root.tag.lower()

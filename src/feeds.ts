@@ -61,7 +61,7 @@ export const FEED_CATALOGUE = [
   // { id: 'meinbezirk-linz',   name: 'Mein Bezirk Linz',          url: 'https://www.meinbezirk.at/linz/c-lokales/rss',                  category: 'lokal',        language: 'de', enabled: false },
   // { id: 'meinbezirk-salzburg', name: 'Mein Bezirk Salzburg',    url: 'https://www.meinbezirk.at/salzburg/c-lokales/rss',              category: 'lokal',        language: 'de', enabled: false },
   // { id: 'meinbezirk-innsbruck', name: 'Mein Bezirk Innsbruck',  url: 'https://www.meinbezirk.at/innsbruck/c-lokales/rss',             category: 'lokal',        language: 'de', enabled: false },
-  { id: 'noen-top', name: 'NÖN Topstories', url: 'https://www.noen.at/collection/376781027/xml/rss', category: 'lokal', language: 'de', enabled: true },
+  { id: 'noen-top', name: 'NÖN Topstories', url: 'https://news.google.com/rss/search?q=site:noen.at+when:1d&hl=de&gl=AT&ceid=AT:de', category: 'lokal', language: 'de', enabled: true },
   { id: 'noen-am', name: 'NÖN Amstetten', url: 'https://www.noen.at/amstetten/xml/rss', category: 'lokal', language: 'de', enabled: false },
   { id: 'noen-ba', name: 'NÖN Baden', url: 'https://www.noen.at/baden/xml/rss', category: 'lokal', language: 'de', enabled: false },
   { id: 'noen-bl', name: 'NÖN Bruck/Leitha', url: 'https://www.noen.at/bruck/xml/rss', category: 'lokal', language: 'de', enabled: false },
@@ -162,9 +162,9 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // GADGETS & HARDWARE
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'geeky-gadgets', name: 'Geeky Gadgets', url: 'https://www.geeky-gadgets.com/feed', category: 'gadgets', language: 'en', enabled: true },
+  { id: 'geeky-gadgets', name: 'Geeky Gadgets', url: 'https://news.google.com/rss/search?q=site:geeky-gadgets.com+when:7d&hl=en-US&gl=US&ceid=US:en', category: 'gadgets', language: 'en', enabled: true },
   { id: 'ilovegadgets', name: 'iLoveGadgets', url: 'https://www.ilovegadgets.de/feed/', category: 'gadgets', language: 'de', enabled: true },
-  { id: 'gizmodo', name: 'Gizmodo', url: 'https://gizmodo.com/feed', category: 'gadgets', language: 'en', enabled: true },
+  { id: 'gizmodo', name: 'Gizmodo', url: 'https://news.google.com/rss/search?q=site:gizmodo.com+when:7d&hl=en-US&gl=US&ceid=US:en', category: 'gadgets', language: 'en', enabled: true },
 
   // ══════════════════════════════════════════════════════════════════════════
   // GAMING & GEEK
@@ -173,12 +173,12 @@ export const FEED_CATALOGUE = [
   { id: 'spiegel-games', name: 'Spiegel Games', url: 'https://www.spiegel.de/netzwelt/games/index.rss', category: 'gaming', language: 'de', enabled: false },
   { id: 'gaminggadgets', name: 'GamingGadgets.io', url: 'https://gaminggadgets.io/feed', category: 'gaming', language: 'de', enabled: true },
   { id: 'gamepro', name: 'GamePro', url: 'https://www.gamepro.de/feed.cfm', category: 'gaming', language: 'de', enabled: false },
-  { id: '4players', name: '4Players', url: 'https://www.4players.de/4players.php/rss/-/index.html', category: 'gaming', language: 'de', enabled: true },
+  { id: '4players', name: '4Players', url: 'https://feeds2.feedburner.com/4playersNews', category: 'gaming', language: 'de', enabled: true },
   { id: 'pcgames', name: 'PC Games', url: 'https://www.pcgames.de/rss/feed/rss2.0/', category: 'gaming', language: 'de', enabled: false },
   { id: 'computerbase', name: 'Computerbase', url: 'https://www.computerbase.de/rss/news.xml', category: 'gadgets', language: 'de', enabled: true },
   { id: 'hardwareluxx', name: 'Hardwareluxx', url: 'https://www.hardwareluxx.de/hwl.feed', category: 'gadgets', language: 'de', enabled: true },
   { id: 'notebookcheck', name: 'Notebookcheck (DE)', url: 'https://www.notebookcheck.com/RSS-Feed-Alle-Artikel.89848.0.html', category: 'gadgets', language: 'de', enabled: true },
-  { id: 'bgg', name: 'BoardGameGeek News', url: 'https://boardgamegeek.com/rss/boardgamenews', category: 'gaming', language: 'en', enabled: true },
+  { id: 'bgg', name: 'BoardGameGeek News', url: 'https://news.google.com/rss/search?q=site:boardgamegeek.com+when:7d&hl=en-US&gl=US&ceid=US:en', category: 'gaming', language: 'en', enabled: true },
   { id: 'polygon', name: 'Polygon', url: 'https://www.polygon.com/rss/index.xml', category: 'gaming', language: 'en', enabled: false },
   { id: 'ign', name: 'IGN', url: 'https://www.ign.com/rss/v2/articles/feed', category: 'gaming', language: 'en', enabled: true },
   { id: 'eurogamer', name: 'Eurogamer', url: 'https://www.eurogamer.net/?format=rss', category: 'gaming', language: 'en', enabled: false },
@@ -203,11 +203,11 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // MUSIK
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'amazona', name: 'amazona.de', url: 'https://www.amazona.de/feed', category: 'musik', language: 'de', enabled: true },
+  { id: 'amazona', name: 'amazona.de', url: 'https://news.google.com/rss/search?q=site:amazona.de+when:7d&hl=de&gl=DE&ceid=DE:de', category: 'musik', language: 'de', enabled: true },
   { id: 'hifi-today', name: 'HiFi Today', url: 'https://www.hifi-today.de/news/feed', category: 'musik', language: 'de', enabled: false },
   { id: 'spiegel-musik', name: 'Spiegel Musik', url: 'https://www.spiegel.de/kultur/musik/index.rss', category: 'musik', language: 'de', enabled: false },
   { id: 'bonedo', name: 'Bonedo', url: 'https://www.bonedo.de/feed/', category: 'musik', language: 'de', enabled: true },
-  { id: 'gearnews', name: 'Gearnews', url: 'https://www.gearnews.de/feed/', category: 'musik', language: 'de', enabled: true },
+  { id: 'gearnews', name: 'Gearnews', url: 'https://news.google.com/rss/search?q=site:gearnews.de+when:7d&hl=de&gl=DE&ceid=DE:de', category: 'musik', language: 'de', enabled: true },
   { id: 'musikreviews', name: 'musikreviews.de', url: 'http://musikreviews.de/feeds/reviews/', category: 'musik', language: 'de', enabled: true },
   { id: 'pitchfork', name: 'Pitchfork', url: 'https://pitchfork.com/rss/news/', category: 'musik', language: 'en', enabled: false },
   // { id: 'ra',           name: 'Resident Advisor',      url: 'https://www.residentadvisor.net/xml/news.xml',                   category: 'musik',        language: 'en', enabled: false },
@@ -226,7 +226,7 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'spektrum', name: 'Spektrum.de', url: 'https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406', category: 'wissenschaft', language: 'de', enabled: true },
   { id: 'scinexx', name: 'Scinexx', url: 'https://www.scinexx.de/feed/', category: 'wissenschaft', language: 'de', enabled: true },
-  { id: 'nasa', name: 'NASA Breaking News', url: 'https://www.nasa.gov/rss/dyn/breaking_news.rss', category: 'weltraum', language: 'en', enabled: true },
+  { id: 'nasa', name: 'NASA Breaking News', url: 'https://www.nasa.gov/news-release/feed/', category: 'weltraum', language: 'en', enabled: true },
   { id: 'space-com', name: 'Space.com', url: 'https://www.space.com/feeds/all', category: 'weltraum', language: 'en', enabled: true },
   { id: 'newscientist', name: 'New Scientist', url: 'https://www.newscientist.com/feed/home/', category: 'wissenschaft', language: 'en', enabled: true },
   { id: 'popular-sci', name: 'Popular Science', url: 'https://www.popsci.com/feed/', category: 'wissenschaft', language: 'en', enabled: true },
