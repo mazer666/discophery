@@ -519,23 +519,25 @@ function _hasPaywallCategory(entry: Element): boolean {
 function _checkPaywall(title: string, description: string) {
   const t = title.toLowerCase();
   const d = description.toLowerCase();
-  
-  // Golem G+, Zeit-Plus, FAZ+, etc.
+
+  // Use regex for markers where plain includes() would create false positives.
+  // e.g. 'p+' would match "Top+", "App+", "Disney+" — all streaming titles.
+  // \b before the letter requires a word boundary so only standalone markers hit.
   const markers: (string | RegExp)[] = [
-    '(g+)', '[g+]', 'g+',           // Golem (ohne \b da + kein WortZeichen ist)
+    '(g+)', '[g+]',  /\bg\+/i,      // Golem: (G+) [G+] G+
     'heise+',                        // Heise+
-    '[plus]', '(plus)', 'plus:', 'plus-artikel', // Allgemein
-    '(p+)', '[p+]', 'p+',            // Varianten
+    '[plus]', '(plus)', 'plus-artikel', // [plus] (plus) Plus-Artikel
+    '(p+)', '[p+]',  /\bp\+/i,      // (P+) [P+] P+
     'paywall', 'bezahlschranke',
-    'abonnement', 'premium-inhalt', 'premium artikel', 'premium plus',
-    'nur für abonnenten', 'exklusiv für abonnenten'
+    'premium-inhalt', 'premium artikel', 'premium plus',
+    'nur für abonnenten', 'exklusiv für abonnenten',
   ];
 
   for (const m of markers) {
-    if (typeof m === 'string') {
-      if (t.includes(m) || d.includes(m)) return true;
-    } else {
+    if (m instanceof RegExp) {
       if (m.test(t) || m.test(d)) return true;
+    } else {
+      if (t.includes(m) || d.includes(m)) return true;
     }
   }
   return false;

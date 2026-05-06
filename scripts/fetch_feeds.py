@@ -259,12 +259,13 @@ def check_paywall(title, description):
     t = title.lower()
     d = description.lower()
     markers = [
-        r'\(g\+\)', r'\[g\+\]', r'\bg\+\b',
+        r'\(g\+\)', r'\[g\+\]', r'\bg\+',
         r'heise\+',
-        r'\[plus\]', r'\(plus\)', r'\bplus:',
-        r'\[p\+\]', r'\(p\+\)',
-        'paywall', 'bezahlschranke', 'abonnement', 'premium',
-        'nur für abonnenten', 'exklusiv für abonnenten'
+        r'\[plus\]', r'\(plus\)', r'plus-artikel',
+        r'\[p\+\]', r'\(p\+\)', r'\bp\+',
+        r'paywall', r'bezahlschranke',
+        r'premium-inhalt', r'premium artikel', r'premium plus',
+        r'nur für abonnenten', r'exklusiv für abonnenten'
     ]
     for m in markers:
         if re.search(m, t) or re.search(m, d):
