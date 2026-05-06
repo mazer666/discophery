@@ -148,12 +148,23 @@ def parse_xml(xml_string, feed):
             if not date: date = entry.findtext('updated')
             if not date: date = entry.findtext('published')
 
+            image = None
+            # Atom media:content
+            media = entry.find('{http://search.yahoo.com/mrss/}content')
+            if media is not None:
+                image = media.get('url')
+            # Link with image type
+            if not image:
+                img_link = entry.find('atom:link[@rel="enclosure"]', ns)
+                if img_link is not None and 'image' in (img_link.get('type') or ''):
+                    image = img_link.get('href')
+
             if url:
                 articles.append({
                     "id": hash_url(url),
                     "title": html_mod.unescape(title.strip()),
                     "url": url,
-                    "image": None,
+                    "image": image,
                     "description": remove_html_tags(desc),
                     "source": feed['name'],
                     "sourceId": feed['id'],
@@ -307,7 +318,7 @@ def main():
     all_articles = []
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Discophery GitHub Action Prefetch)'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     }
 
     for feed in feeds:
