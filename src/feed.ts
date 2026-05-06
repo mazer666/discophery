@@ -107,15 +107,15 @@ export async function loadAllFeeds() {
     const promises = missingFeeds.map(feed =>
       _loadFeed(feed)
         .then(articles => {
-          accumulated.push(...articles);
-          if (!firstFired && accumulated.length > 0) {
-            firstFired = true;
+          if (articles.length > 0) {
+            accumulated.push(...articles);
+            // Inkrementelles Update: Zeige Artikel sobald sie da sind
             _dispatchArticles(accumulated);
           }
         })
         .catch(err => {
           failCount++;
-          console.warn('Feed fehlgeschlagen:', err?.message ?? err);
+          console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
         })
     );
 
@@ -125,7 +125,7 @@ export async function loadAllFeeds() {
     }
   }
 
-  // Finales Update
+  // Sicherstellen, dass wir am Ende auf jeden Fall noch mal rendern
   _dispatchArticles(accumulated);
 }
 
@@ -162,32 +162,28 @@ async function _loadFeed(feed) {
 }
 
 async function _fetchAndParse(url, feed) {
-  let xmlText;
+  const isWerstreamt = _isWerstreamtUrl(url);
+  const targetUrl = isWerstreamt ? _normalizeWerstreamtUrl(url) : url;
+
+  let content;
   try {
-    xmlText = await _fetchWithPrimaryProxy(url);
+    content = await _fetchWithPrimaryProxy(targetUrl);
   } catch (primaryErr) {
     console.info(`Primärer Proxy fehlgeschlagen für "${feed.name}", versuche Fallback …`);
     try {
-      xmlText = await _fetchWithFallbackProxy(url);
+      content = await _fetchWithFallbackProxy(targetUrl);
     } catch (fallbackErr) {
       throw new Error(`Beide Proxys fehlgeschlagen für "${feed.name}": ${fallbackErr.message}`);
     }
   }
-  if (_isWerstreamtUrl(url)) {
-    const htmlText = await _fetchHtml(url);
-    return _scrapeWerstreamt(htmlText, feed);
+
+  if (isWerstreamt) {
+    return _scrapeWerstreamt(content, feed);
   }
 
-  return _parseXml(xmlText, feed);
+  return _parseXml(content, feed);
 }
 
-async function _fetchHtml(url) {
-  try {
-    return await _fetchWithPrimaryProxy(_normalizeWerstreamtUrl(url));
-  } catch (err) {
-    return await _fetchWithFallbackProxy(_normalizeWerstreamtUrl(url));
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PROXY-REQUESTS

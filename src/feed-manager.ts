@@ -30,7 +30,11 @@ export function getActiveFeeds() {
   const custom = getCustomFeeds();
 
   if (savedIds === null) {
-    return []; // Frischer Start ohne Feeds
+    // Erster Start: Standard-Feeds aus dem Katalog übernehmen
+    savedIds = FEED_CATALOGUE.filter(f => f.enabled).map(f => f.id);
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_FEEDS, JSON.stringify(savedIds));
+    } catch { /* ignorieren */ }
   }
 
   // Auto-Aktivierung: Wenn dem Katalog neue Feeds mit enabled:true hinzugefügt
