@@ -15,8 +15,8 @@ from fetch_werstreamt import (
     scrape_werstreamt,
 )
 
-MAX_ARTICLES       = 20
-MAX_TOTAL_ARTICLES = 2000  # Gesamtlimit feeds.json — verhindert unbegrenztes Wachstum
+MAX_ARTICLES       = 50
+MAX_TOTAL_ARTICLES = 5000  # Gesamtlimit feeds.json — verhindert unbegrenztes Wachstum
 
 def parse_feeds_js():
     # Suche Pfad relativ zum Root (für GitHub Action) oder relativ zum Script
@@ -168,19 +168,40 @@ def parse_xml(xml_string, feed):
         items = root.findall('.//{*}item') or root.findall('.//item')
         for item in items[:MAX_ARTICLES]:
             url = item.findtext('link') or item.findtext('{*}link') or item.findtext('guid') or item.findtext('{*}guid')
-            if not url and 'rdf:about' in item.attrib:
-                url = item.attrib['rdf:about']
+            if not url:
+                # Check for rdf:about (with and without namespace)
+                url = item.get('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about') or item.get('rdf:about')
             
             if url:
                 title = item.findtext('title') or item.findtext('{*}title') or '(kein Titel)'
                 desc = item.findtext('description') or item.findtext('{*}description') or ''
                 date = item.findtext('pubDate') or item.findtext('{*}pubDate') or item.findtext('{*}date') or ""
 
+                image = None
+                # Media RSS
+                media = item.find('{http://search.yahoo.com/mrss/}content')
+                if media is not None:
+                    image = media.get('url')
+                if not image:
+                    thumb = item.find('{http://search.yahoo.com/mrss/}thumbnail')
+                    if thumb is not None:
+                        image = thumb.get('url')
+                # Enclosure
+                if not image:
+                    encl = item.find('enclosure')
+                    if encl is not None and 'image' in (encl.get('type') or ''):
+                        image = encl.get('url')
+                # Description img
+                if not image and desc:
+                    img_m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
+                    if img_m:
+                        image = img_m.group(1)
+
                 articles.append({
                     "id": hash_url(url),
                     "title": html_mod.unescape(title.strip()),
                     "url": url,
-                    "image": None,
+                    "image": image,
                     "description": remove_html_tags(desc),
                     "source": feed['name'],
                     "sourceId": feed['id'],
@@ -221,6 +242,14 @@ def check_paywall(title, description):
         'nur für abonnenten', 'exklusiv für abonnenten'
     ]
     for m in markers:
+        # G+ Marker speziell: nur wenn es wirklich (g+) [g+] oder g+ am Wortende ist
+        if 'g+' in m:
+            if re.search(m, t) or re.search(m, d):
+                return True
+            continue
+
+        if m in t or m in d:
+            return True
         if re.search(m, t) or re.search(m, d):
             return True
     return False

@@ -173,7 +173,20 @@ async function _fetchAndParse(url, feed) {
       throw new Error(`Beide Proxys fehlgeschlagen für "${feed.name}": ${fallbackErr.message}`);
     }
   }
+  if (_isWerstreamtUrl(url)) {
+    const htmlText = await _fetchHtml(url);
+    return _scrapeWerstreamt(htmlText, feed);
+  }
+
   return _parseXml(xmlText, feed);
+}
+
+async function _fetchHtml(url) {
+  try {
+    return await _fetchWithPrimaryProxy(_normalizeWerstreamtUrl(url));
+  } catch (err) {
+    return await _fetchWithFallbackProxy(_normalizeWerstreamtUrl(url));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -533,12 +546,21 @@ function _checkPaywall(title: string, description: string) {
 
   for (const m of markers) {
     if (typeof m === 'string') {
+      // Golem G+ Marker speziell prüfen: nur wenn es wirklich (g+) [g+] oder g+ am Wortende ist
+      if (m === 'g+' || m === '(g+)' || m === '[g+]') {
+        if (new RegExp(`\\(${reEscape(m)}\\)|\\[${reEscape(m)}\\]|\\b${reEscape(m)}(\\s|$)`, 'i').test(t)) return true;
+        continue;
+      }
       if (t.includes(m) || d.includes(m)) return true;
     } else {
       if (m.test(t) || m.test(d)) return true;
     }
   }
   return false;
+}
+
+function reEscape(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -605,6 +627,138 @@ function _parseDate(dateStr) {
   if (!dateStr) return new Date();
   const d = new Date(dateStr);
   return isNaN(d.getTime()) ? new Date() : d;
+}
+
+function _isWerstreamtUrl(url) {
+  return url?.includes('werstreamt.es') ?? false;
+}
+
+function _normalizeWerstreamtUrl(url) {
+  if (!url) return '';
+  return url.replace(/[?&]rss(=[^&]*)?(?=&|$)/g, '')
+            .replace(/\?&/g, '?')
+            .replace(/\/&/g, '/?')
+            .replace(/\?$/g, '');
+}
+
+function _scrapeWerstreamt(html: string, feed: any) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const articles: any[] = [];
+  const base = 'https://www.werstreamt.es';
+  
+  const today = new Date();
+  today.setUTCHours(12, 0, 0, 0);
+
+  // Zuerst versuchen, Items gruppiert nach Datumsheadern (h2) zu finden
+  const headers = Array.from(doc.querySelectorAll('h2'));
+  const seenIds = new Set<string>();
+
+  for (const h2 of headers) {
+    const groupText = h2.textContent?.trim() ?? '';
+    const groupDate = _parseWerstreamtGroupDate(groupText, today);
+    
+    // Suche nach Item-Containern (ul) im nächsten Geschwister-Element oder dessen Kindern
+    let container: Element | null = h2.nextElementSibling;
+    // Manchmal ist das h2 in einem Header-Div, wir suchen das nächste ul oder div.lists
+    while (container && !container.querySelector('li[itemprop="itemListElement"]')) {
+      container = container.nextElementSibling;
+      if (container?.tagName === 'H2') break; // Nächste Gruppe beginnt
+    }
+
+    if (container) {
+      const items = Array.from(container.querySelectorAll('li[itemprop="itemListElement"]'));
+      items.forEach((li, idx) => {
+        const art = _parseWerstreamtItem(li, groupDate, idx, feed, base);
+        if (art && !seenIds.has(art.id)) {
+          articles.push(art);
+          seenIds.add(art.id);
+        }
+      });
+    }
+  }
+
+  // Fallback: Falls keine Header gefunden wurden oder keine Items in Headern, 
+  // alle Items im Dokument suchen (mit heutigem Datum)
+  if (articles.length === 0) {
+    const allItems = Array.from(doc.querySelectorAll('li[itemprop="itemListElement"]'));
+    allItems.forEach((li, idx) => {
+      const art = _parseWerstreamtItem(li, today, idx, feed, base);
+      if (art && !seenIds.has(art.id)) {
+        articles.push(art);
+        seenIds.add(art.id);
+      }
+    });
+  }
+
+  return articles.slice(0, CONFIG.MAX_ARTICLES_PER_FEED);
+}
+
+function _parseWerstreamtItem(li: Element, groupDate: Date, idx: number, feed: any, base: string) {
+  const urlEl = li.querySelector('a[itemprop="url"]');
+  const nameEl = li.querySelector('[itemprop="name"]');
+  const imgEl = li.querySelector('img[itemprop="image"]');
+  const genreEl = li.querySelector('.details span');
+
+  const path = urlEl?.getAttribute('href') ?? '';
+  if (!path || !nameEl) return null;
+
+  const url = path.startsWith('http') ? path : base + (path.startsWith('/') ? '' : '/') + path;
+  const name = nameEl.textContent?.trim() ?? '';
+  const genre = genreEl?.textContent?.trim() ?? '';
+  
+  const yearMatch = genre.match(/\b(19|20)\d{2}\b/);
+  const year = yearMatch ? yearMatch[0] : '';
+  const title = (year && !name.includes(year)) ? `${name} (${year})` : name;
+
+  // Stabile Sortierung: groupDate minus idx Minuten
+  const date = new Date(groupDate);
+  date.setUTCMinutes(date.getUTCMinutes() - idx);
+
+  return {
+    id: _hashUrl(url),
+    title,
+    url,
+    image: imgEl?.getAttribute('src') || imgEl?.getAttribute('data-src') || null,
+    description: genre,
+    source: feed.name,
+    sourceId: feed.id,
+    category: feed.category || 'streaming',
+    date,
+    dismissed: false,
+    isPaywall: false
+  };
+}
+
+function _parseWerstreamtGroupDate(text: string, today: Date) {
+  const t = text.toLowerCase();
+  const d = new Date(today);
+  d.setUTCHours(0,0,0,0);
+
+  if (t.includes('heute')) return d;
+  if (t.includes('gestern')) {
+    d.setUTCDate(d.getUTCDate() - 1);
+    return d;
+  }
+  if (t.includes('vorgestern')) {
+    d.setUTCDate(d.getUTCDate() - 2);
+    return d;
+  }
+
+  const m = t.match(/(\d{1,2})\.\s*([a-zäöü]+)/);
+  if (m) {
+    const day = parseInt(m[1], 10);
+    const months: Record<string, number> = {
+      'januar': 0, 'februar': 1, 'märz': 2, 'maerz': 2, 'april': 3, 'mai': 4,
+      'juni': 5, 'juli': 6, 'august': 7, 'september': 8, 'oktober': 9, 'november': 10, 'dezember': 11
+    };
+    const month = months[m[2]];
+    if (month !== undefined) {
+      d.setUTCMonth(month, day);
+      if (d > today) d.setUTCFullYear(d.getUTCFullYear() - 1);
+      return d;
+    }
+  }
+  return d;
 }
 
 /**
