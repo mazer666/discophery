@@ -62,7 +62,7 @@ export const FEED_CATALOGUE = [
   // { id: 'meinbezirk-salzburg', name: 'Mein Bezirk Salzburg',    url: 'https://www.meinbezirk.at/salzburg/c-lokales/rss',              category: 'lokal',        language: 'de', enabled: false },
   // { id: 'meinbezirk-innsbruck', name: 'Mein Bezirk Innsbruck',  url: 'https://www.meinbezirk.at/innsbruck/c-lokales/rss',             category: 'lokal',        language: 'de', enabled: false },
   { id: 'noen-top', name: 'NÖN Topstories', url: 'https://www.noen.at/collection/376781027/xml/rss', category: 'lokal', language: 'de', enabled: true },
-  { id: 'noen-am', name: 'NÖN Amstetten', url: 'https://www.noen.at/amstetten/xml/rss', category: 'lokal', language: 'de', enabled false },
+  { id: 'noen-am', name: 'NÖN Amstetten', url: 'https://www.noen.at/amstetten/xml/rss', category: 'lokal', language: 'de', enabled: false },
   { id: 'noen-ba', name: 'NÖN Baden', url: 'https://www.noen.at/baden/xml/rss', category: 'lokal', language: 'de', enabled: false },
   { id: 'noen-bl', name: 'NÖN Bruck/Leitha', url: 'https://www.noen.at/bruck/xml/rss', category: 'lokal', language: 'de', enabled: false },
   { id: 'noen-er', name: 'NÖN Erlauftal', url: 'https://www.noen.at/erlauftal/xml/rss', category: 'lokal', language: 'de', enabled: false },
