@@ -33,5 +33,7 @@ jobs:
           git add public/data/feeds.json
           # Do nothing if no changes
           git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto-update feeds.json"
+          # Pull --rebase verhindert Push-Fehler bei gleichzeitigen Workflow-Runs
+          git pull --rebase origin main
           git push origin main
         continue-on-error: true

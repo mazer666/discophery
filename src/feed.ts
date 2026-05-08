@@ -71,7 +71,7 @@ export async function loadAllFeeds() {
   // 1. Static pre-fetched JSON laden (extrem schnell, kein CORS)
   let preFetchedData = [];
   try {
-    const res = await fetch('./data/feeds.json?r=' + Date.now());
+    const res = await fetch('./data/feeds.json?r=' + Date.now(), { cache: 'no-cache' });
     if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
       try {
         preFetchedData = await res.json();

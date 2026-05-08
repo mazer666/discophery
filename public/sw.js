@@ -9,7 +9,7 @@
  * Cache-Version hochzählen wenn sich App-Shell-Dateien ändern.
  */
 
-const CACHE = 'discophery-v10';
+const CACHE = 'discophery-v11';
 
 const APP_SHELL = [
   './',
@@ -44,6 +44,11 @@ self.addEventListener('fetch', (e) => {
 
   if (url.origin !== self.location.origin) return;
   if (e.request.method !== 'GET') return;
+
+  // feeds.json darf nie aus dem SW-Cache kommen — immer frisch vom Netz holen.
+  // Der Cache-Buster (?r=timestamp) im App-Code und cache:'no-cache' im Fetch-Request
+  // sorgen dafür, dass auch der CDN-Cache (GitHub Pages/Fastly) umgangen wird.
+  if (url.pathname.endsWith('/data/feeds.json')) return;
 
   e.respondWith(
     caches.match(e.request).then((cached) => {
