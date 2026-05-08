@@ -9,7 +9,7 @@
  * Cache-Version hochzählen wenn sich App-Shell-Dateien ändern.
  */
 
-const CACHE = 'discophery-v10';
+const CACHE = 'discophery-v11';
 
 const APP_SHELL = [
   './',

@@ -63,69 +63,29 @@ export async function previewFeedSource(feed: any) {
 }
 
 export async function loadAllFeeds() {
-  const activeFeeds = getActiveFeeds();  // feed-manager.js
+  const activeFeeds = getActiveFeeds();
   const accumulated = [];
   let failCount     = 0;
-  let firstFired    = false;
 
-  // 1. Static pre-fetched JSON laden (extrem schnell, kein CORS)
-  let preFetchedData = [];
-  try {
-    const res = await fetch('./data/feeds.json?r=' + Date.now());
-    if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-      try {
-        preFetchedData = await res.json();
-        // Date-Strings zurück in echte Dates parsen + Paywall-Erkennung nachziehen
-        preFetchedData.forEach(a => { 
-          if(a.date) a.date = new Date(a.date);
-          a.isPaywall = _checkPaywall(a.title || '', a.description || '');
-        });
-      } catch (e) {
-        console.warn('feeds.json parse error:', e);
-      }
-    }
-  } catch (err) {
-    console.info('Pre-fetch feeds.json nicht ladbar, falle zurück auf Proxy-Modus.', err);
+  const promises = activeFeeds.map(feed =>
+    _loadFeed(feed)
+      .then(articles => {
+        if (articles.length > 0) {
+          accumulated.push(...articles);
+          _dispatchArticles(accumulated);
+        }
+      })
+      .catch(err => {
+        failCount++;
+        console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
+      })
+  );
+
+  await Promise.allSettled(promises);
+  if (failCount > 0) {
+    console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
   }
 
-  // 2. Herausfinden welche Feeds wir nicht im JSON haben (z.B. Custom Feeds)
-  const activeFeedIds = new Set(activeFeeds.map(f => f.id));
-  const availableIdsInJSON = new Set(preFetchedData.map(a => a.sourceId));
-  
-  // Alle Artikel die im JSON waren übernehmen
-  const preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
-  if (preFetchedArticles.length > 0) {
-    accumulated.push(...preFetchedArticles);
-    firstFired = true;
-    _dispatchArticles(accumulated);
-  }
-
-  // 3. Fehlende Feeds via Proxy laden
-  const missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
-
-  if (missingFeeds.length > 0) {
-    const promises = missingFeeds.map(feed =>
-      _loadFeed(feed)
-        .then(articles => {
-          if (articles.length > 0) {
-            accumulated.push(...articles);
-            // Inkrementelles Update: Zeige Artikel sobald sie da sind
-            _dispatchArticles(accumulated);
-          }
-        })
-        .catch(err => {
-          failCount++;
-          console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
-        })
-    );
-
-    await Promise.allSettled(promises);
-    if (failCount > 0) {
-      console.info(`${failCount} von ${missingFeeds.length} Fallback-Feeds konnten nicht geladen werden.`);
-    }
-  }
-
-  // Sicherstellen, dass wir am Ende auf jeden Fall noch mal rendern
   _dispatchArticles(accumulated);
 }
 
@@ -164,14 +124,18 @@ async function _loadFeed(feed) {
 async function _fetchAndParse(url, feed) {
   const isWerstreamt = _isWerstreamtUrl(url);
   const targetUrl = isWerstreamt ? _normalizeWerstreamtUrl(url) : url;
+  // Cache-Buster am Feed-URL: CORS-Proxys (allorigins.win, corsproxy.io) cachen
+  // ihre Responses nach URL-Schlüssel. Ein frischer Timestamp im Feed-URL erzwingt
+  // einen neuen Proxy-Fetch vom RSS-Server — sonst liefert der Proxy alte Daten.
+  const fetchUrl = isWerstreamt ? targetUrl : _bustProxyCache(targetUrl);
 
   let content;
   try {
-    content = await _fetchWithPrimaryProxy(targetUrl);
+    content = await _fetchWithPrimaryProxy(fetchUrl);
   } catch (primaryErr) {
     console.info(`Primärer Proxy fehlgeschlagen für "${feed.name}", versuche Fallback …`);
     try {
-      content = await _fetchWithFallbackProxy(targetUrl);
+      content = await _fetchWithFallbackProxy(fetchUrl);
     } catch (fallbackErr) {
       throw new Error(`Beide Proxys fehlgeschlagen für "${feed.name}": ${fallbackErr.message}`);
     }
@@ -182,6 +146,12 @@ async function _fetchAndParse(url, feed) {
   }
 
   return _parseXml(content, feed);
+}
+
+/** Hängt einen Timestamp-Parameter an die Feed-URL um den CORS-Proxy-Cache zu umgehen. */
+function _bustProxyCache(url: string): string {
+  const sep = url.includes('?') ? '&' : '?';
+  return url + sep + '_cb=' + Date.now();
 }
 
 
