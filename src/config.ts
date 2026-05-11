@@ -64,12 +64,13 @@ export const CONFIG = {
   /**
    * Fallback-Proxy falls der primäre Proxy nicht antwortet.
    *
-   * Antwortformat von corsproxy.io: direkt der RSS-Text (kein JSON-Wrapper).
-   * feed.js erkennt den Proxy anhand der URL und parst entsprechend.
+   * Antwortformat von cors.eu.org: direkt der RSS-Text (kein JSON-Wrapper).
+   * URL wird URL-encoded an die Basis-URL angehängt:
+   *   PROXY_FALLBACK + encodeURIComponent(feedUrl)
    *
    * @type {string}
    */
-  PROXY_FALLBACK: 'https://corsproxy.io/?',
+  PROXY_FALLBACK: 'https://cors.eu.org/',
 
   // ═══════════════════════════════════════════════════════════════════════════
   // TIMING & PERFORMANCE

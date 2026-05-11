@@ -124,7 +124,7 @@ async function _loadFeed(feed) {
 async function _fetchAndParse(url, feed) {
   const isWerstreamt = _isWerstreamtUrl(url);
   const targetUrl = isWerstreamt ? _normalizeWerstreamtUrl(url) : url;
-  // Cache-Buster am Feed-URL: CORS-Proxys (allorigins.win, corsproxy.io) cachen
+  // Cache-Buster am Feed-URL: CORS-Proxys (allorigins.win, cors.eu.org) cachen
   // ihre Responses nach URL-Schlüssel. Ein frischer Timestamp im Feed-URL erzwingt
   // einen neuen Proxy-Fetch vom RSS-Server — sonst liefert der Proxy alte Daten.
   const fetchUrl = isWerstreamt ? targetUrl : _bustProxyCache(targetUrl);
@@ -137,7 +137,14 @@ async function _fetchAndParse(url, feed) {
     try {
       content = await _fetchWithFallbackProxy(fetchUrl);
     } catch (fallbackErr) {
-      throw new Error(`Beide Proxys fehlgeschlagen für "${feed.name}": ${fallbackErr.message}`);
+      // Letzter Versuch: direkter Fetch ohne Proxy.
+      // Klappt wenn der Server CORS-Header setzt (noen.at erlaubt Heimnetz-IPs direkt).
+      console.info(`Fallback-Proxy fehlgeschlagen für "${feed.name}", versuche direkten Fetch …`);
+      try {
+        content = await _fetchDirect(targetUrl);
+      } catch (directErr) {
+        throw new Error(`Alle Fetch-Methoden fehlgeschlagen für "${feed.name}": ${directErr.message}`);
+      }
     }
   }
 
@@ -165,7 +172,7 @@ async function _fetchWithPrimaryProxy(url) {
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom primären Proxy`);
   const buf     = await resp.arrayBuffer();
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
-  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
+  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
@@ -175,7 +182,17 @@ async function _fetchWithFallbackProxy(url) {
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom Fallback-Proxy`);
   const buf     = await resp.arrayBuffer();
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
-  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
+  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
+  return new TextDecoder(charset, { fatal: false }).decode(buf);
+}
+
+/** Direkter Fetch ohne Proxy — klappt wenn der Server CORS-Header setzt (z.B. noen.at von Heimnetz-IPs). */
+async function _fetchDirect(url: string): Promise<string> {
+  const resp = await _fetchWithTimeout(url, CONFIG.FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status} vom direkten Fetch`);
+  const buf     = await resp.arrayBuffer();
+  const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
+  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
@@ -221,7 +238,7 @@ async function _fetchWithTimeout(url, timeoutMs) {
  */
 function _parseXml(xmlText, feed) {
   // Encoding-Deklaration entfernen — JS-Strings sind Unicode; non-UTF-8-Deklarationen verwirren DOMParser
-  const xml = xmlText.replace(/(<\?xml\b[^>]*?)\s*encoding=["'][^"']*["']/i, '$1');
+  const xml = xmlText.replace(/(<\?xml\b[^>]*?)\s*encoding=["|'][^"|']*["|']/i, '$1');
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
 
   // Parsing-Fehler erkennen (DOMParser wirft keine Exception — er setzt ein Error-Element)
