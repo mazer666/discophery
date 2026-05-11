@@ -67,57 +67,23 @@ export async function loadAllFeeds() {
   const accumulated = [];
   let failCount     = 0;
 
-  // 1. Vorgeladene Artikel aus feeds.json sofort anzeigen (kein CORS, sehr schnell).
-  let preFetchedData: any[] = [];
-  try {
-    const res = await fetch('./data/feeds.json?r=' + Date.now());
-    if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-      try {
-        preFetchedData = await res.json();
-        preFetchedData.forEach(a => {
-          if (a.date) a.date = new Date(a.date);
-          a.isPaywall = _checkPaywall(a.title || '', a.description || '');
-        });
-      } catch (e) {
-        console.warn('feeds.json parse error:', e);
-      }
-    }
-  } catch (err) {
-    console.info('feeds.json nicht ladbar, falle zurück auf Proxy-Modus.', err);
-  }
+  const promises = activeFeeds.map(feed =>
+    _loadFeed(feed)
+      .then(articles => {
+        if (articles.length > 0) {
+          accumulated.push(...articles);
+          _dispatchArticles(accumulated);
+        }
+      })
+      .catch(err => {
+        failCount++;
+        console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
+      })
+  );
 
-  const activeFeedIds      = new Set(activeFeeds.map((f: any) => f.id));
-  const availableIdsInJSON = new Set(preFetchedData.map(a => a.sourceId));
-  const preFetchedArticles = preFetchedData.filter(a => activeFeedIds.has(a.sourceId));
-
-  if (preFetchedArticles.length > 0) {
-    accumulated.push(...preFetchedArticles);
-    _dispatchArticles(accumulated);
-  }
-
-  // 2. Feeds die nicht im JSON sind (z.B. Custom Feeds oder blockierte Server-Feeds)
-  //    direkt via Proxy/Browser nachladen.
-  const missingFeeds = activeFeeds.filter((f: any) => !availableIdsInJSON.has(f.id));
-
-  if (missingFeeds.length > 0) {
-    const promises = missingFeeds.map((feed: any) =>
-      _loadFeed(feed)
-        .then(articles => {
-          if (articles.length > 0) {
-            accumulated.push(...articles);
-            _dispatchArticles(accumulated);
-          }
-        })
-        .catch(err => {
-          failCount++;
-          console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
-        })
-    );
-
-    await Promise.allSettled(promises);
-    if (failCount > 0) {
-      console.info(`${failCount} von ${missingFeeds.length} Feeds konnten nicht geladen werden.`);
-    }
+  await Promise.allSettled(promises);
+  if (failCount > 0) {
+    console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
   }
 
   _dispatchArticles(accumulated);
@@ -171,8 +137,8 @@ async function _fetchAndParse(url, feed) {
     try {
       content = await _fetchWithFallbackProxy(fetchUrl);
     } catch (fallbackErr) {
-      // Beide Proxys fehlgeschlagen — letzter Versuch: direkter Fetch ohne Proxy.
-      // Funktioniert wenn der Server CORS-Header setzt (z.B. noen.at von Heimnetz-IPs).
+      // Letzter Versuch: direkter Fetch ohne Proxy.
+      // Klappt wenn der Server CORS-Header setzt (noen.at erlaubt Heimnetz-IPs direkt).
       console.info(`Fallback-Proxy fehlgeschlagen für "${feed.name}", versuche direkten Fetch …`);
       try {
         content = await _fetchDirect(targetUrl);
@@ -220,7 +186,7 @@ async function _fetchWithFallbackProxy(url) {
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
-/** Direkter Fetch ohne Proxy — klappt wenn der Server CORS-Header setzt (z.B. bei Heimnetz-IPs). */
+/** Direkter Fetch ohne Proxy — klappt wenn der Server CORS-Header setzt (z.B. noen.at von Heimnetz-IPs). */
 async function _fetchDirect(url: string): Promise<string> {
   const resp = await _fetchWithTimeout(url, CONFIG.FETCH_TIMEOUT_MS);
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom direkten Fetch`);
