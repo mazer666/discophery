@@ -101,13 +101,11 @@ export const CONFIG = {
   /**
    * Pause zwischen zwei aufeinanderfolgenden Feed-Requests in Millisekunden.
    *
-   * Verhindert dass der CORS-Proxy bei vielen Feeds gleichzeitig überlastet wird.
-   * Feeds werden sequenziell mit dieser Pause dazwischen geladen.
-   * 200ms Pause = bei 13 Feeds ca. 2,6 Sekunden Gesamtverzögerung — akzeptabel.
+   * Komplett auf 0 gesetzt, um jegliche künstliche Verzögerung beim Abrufen zu vermeiden.
    *
    * @type {number}
    */
-  FETCH_DELAY_BETWEEN_FEEDS_MS: 200,
+  FETCH_DELAY_BETWEEN_FEEDS_MS: 0,
 
   /**
    * Standard-Größe für Favicons in Pixeln.

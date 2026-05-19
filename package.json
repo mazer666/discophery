@@ -4,7 +4,8 @@
   "description": "Ein werbefreier, persönlicher News-Feed als Ersatz für Google Discover. Läuft komplett im Browser, gehostet auf GitHub Pages, Login via Google OAuth.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "fetch": "python3 scripts/fetch_feeds.py",
+    "build": "npm run fetch && vite build",
     "preview": "vite preview"
   },
   "keywords": [
