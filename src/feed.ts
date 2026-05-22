@@ -64,66 +64,28 @@ export async function previewFeedSource(feed: any) {
 
 export async function loadAllFeeds() {
   const activeFeeds = getActiveFeeds();
-  const accumulated: any[] = [];
+  const accumulated = [];
   let failCount     = 0;
 
-  // 1. Static pre-fetched JSON laden (extrem schnell, kein CORS, keine künstlichen Verzögerungen)
-  let preFetchedData: any[] = [];
-  try {
-    const res = await fetch('./data/feeds.json?r=' + Date.now());
-    if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-      try {
-        preFetchedData = await res.json();
-        // Date-Strings zurück in echte Dates parsen + Paywall-Erkennung nachziehen
-        preFetchedData.forEach((a: any) => { 
-          if(a.date) a.date = new Date(a.date);
-          a.isPaywall = _checkPaywall(a.title || '', a.description || '');
-        });
-      } catch (e) {
-        console.warn('feeds.json parse error:', e);
-      }
-    }
-  } catch (err) {
-    console.info('Pre-fetch feeds.json nicht ladbar, falle zurück auf Proxy-Modus.', err);
+  const promises = activeFeeds.map(feed =>
+    _loadFeed(feed)
+      .then(articles => {
+        if (articles.length > 0) {
+          accumulated.push(...articles);
+          _dispatchArticles(accumulated);
+        }
+      })
+      .catch(err => {
+        failCount++;
+        console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
+      })
+  );
+
+  await Promise.allSettled(promises);
+  if (failCount > 0) {
+    console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
   }
 
-  // 2. Herausfinden welche Feeds wir nicht im JSON haben (z.B. Custom Feeds)
-  const activeFeedIds = new Set(activeFeeds.map(f => f.id));
-  const availableIdsInJSON = new Set(preFetchedData.map((a: any) => a.sourceId));
-  
-  // Alle Artikel die im JSON waren übernehmen
-  const preFetchedArticles = preFetchedData.filter((a: any) => activeFeedIds.has(a.sourceId));
-  if (preFetchedArticles.length > 0) {
-    accumulated.push(...preFetchedArticles);
-    _dispatchArticles(accumulated);
-  }
-
-  // 3. Fehlende Feeds via Proxy parallel laden (ohne künstliche Verzögerungen!)
-  const missingFeeds = activeFeeds.filter(f => !availableIdsInJSON.has(f.id));
-
-  if (missingFeeds.length > 0) {
-    const promises = missingFeeds.map(feed =>
-      _loadFeed(feed)
-        .then(articles => {
-          if (articles.length > 0) {
-            accumulated.push(...articles);
-            // Inkrementelles Update: Zeige Artikel sobald sie da sind
-            _dispatchArticles(accumulated);
-          }
-        })
-        .catch(err => {
-          failCount++;
-          console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
-        })
-    );
-
-    await Promise.allSettled(promises);
-    if (failCount > 0) {
-      console.info(`${failCount} von ${missingFeeds.length} Fallback-Feeds konnten nicht geladen werden.`);
-    }
-  }
-
-  // Sicherstellen, dass wir am Ende auf jeden Fall noch mal rendern
   _dispatchArticles(accumulated);
 }
 
@@ -162,7 +124,7 @@ async function _loadFeed(feed) {
 async function _fetchAndParse(url, feed) {
   const isWerstreamt = _isWerstreamtUrl(url);
   const targetUrl = isWerstreamt ? _normalizeWerstreamtUrl(url) : url;
-  // Cache-Buster am Feed-URL: CORS-Proxys (allorigins.win, cors.eu.org) cachen
+  // Cache-Buster am Feed-URL: CORS-Proxys (allorigins.win, corsproxy.io) cachen
   // ihre Responses nach URL-Schlüssel. Ein frischer Timestamp im Feed-URL erzwingt
   // einen neuen Proxy-Fetch vom RSS-Server — sonst liefert der Proxy alte Daten.
   const fetchUrl = isWerstreamt ? targetUrl : _bustProxyCache(targetUrl);
@@ -210,7 +172,7 @@ async function _fetchWithPrimaryProxy(url) {
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom primären Proxy`);
   const buf     = await resp.arrayBuffer();
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
-  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
+  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
@@ -220,7 +182,7 @@ async function _fetchWithFallbackProxy(url) {
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom Fallback-Proxy`);
   const buf     = await resp.arrayBuffer();
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
-  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
+  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
@@ -230,7 +192,7 @@ async function _fetchDirect(url: string): Promise<string> {
   if (!resp.ok) throw new Error(`HTTP ${resp.status} vom direkten Fetch`);
   const buf     = await resp.arrayBuffer();
   const preview = new TextDecoder('ascii', { fatal: false }).decode(new Uint8Array(buf, 0, 200));
-  const charset = preview.match(/encoding=["|'][^"|']+["|']/i)?.[1] ?? 'utf-8';
+  const charset = preview.match(/encoding=["']([^"']+)["']/i)?.[1] ?? 'utf-8';
   return new TextDecoder(charset, { fatal: false }).decode(buf);
 }
 
@@ -276,7 +238,7 @@ async function _fetchWithTimeout(url, timeoutMs) {
  */
 function _parseXml(xmlText, feed) {
   // Encoding-Deklaration entfernen — JS-Strings sind Unicode; non-UTF-8-Deklarationen verwirren DOMParser
-  const xml = xmlText.replace(/(<\?xml\b[^>]*?)\s*encoding=["|'][^"|']*["|']/i, '$1');
+  const xml = xmlText.replace(/(<\?xml\b[^>]*?)\s*encoding=["'][^"']*["']/i, '$1');
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
 
   // Parsing-Fehler erkennen (DOMParser wirft keine Exception — er setzt ein Error-Element)
