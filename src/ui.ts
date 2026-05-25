@@ -547,6 +547,18 @@ function _startAutoRefresh() {
   _refreshTimer = setInterval(() => loadAllFeeds(), mins * 60_000);
 }
 
+function _checkRefreshOnVisible() {
+  if (document.visibilityState !== 'visible') return;
+  const lastStr = localStorage.getItem(CONFIG.STORAGE_KEYS.LAST_REFRESH);
+  if (!lastStr) return;
+  const storedMins = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_INTERVAL) ?? '', 10);
+  const effectiveMins = Number.isNaN(storedMins) ? CONFIG.REFRESH_INTERVAL_MINUTES : storedMins;
+  if (effectiveMins === 0) return;
+  if (Date.now() - parseInt(lastStr, 10) >= effectiveMins * 60_000) {
+    loadAllFeeds();
+  }
+}
+
 function _applyTheme(value) {
   if (value === 'light' || value === 'dark') {
     document.documentElement.dataset.theme = value;
@@ -670,6 +682,7 @@ function _showUpdateBanner() {
 
 document.addEventListener('DOMContentLoaded', () => {
   _wireStaticButtons();
+  document.addEventListener('visibilitychange', _checkRefreshOnVisible);
   if ('serviceWorker' in navigator) {
     const hadController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.register('./sw.js').catch(() => {});
