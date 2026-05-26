@@ -21,8 +21,5 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
-echo "Führe lokalen Feed-Pre-Fetcher aus..."
-python3 scripts/fetch_feeds.py
-
 echo "Starte Dev-Server auf Port 5173..."
 npm run dev -- --port 5173 --strictPort

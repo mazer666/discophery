@@ -67,25 +67,29 @@ export async function loadAllFeeds() {
   const accumulated = [];
   let failCount     = 0;
 
-  const promises = activeFeeds.map(feed =>
-    _loadFeed(feed)
-      .then(articles => {
-        if (articles.length > 0) {
-          accumulated.push(...articles);
-          _dispatchArticles(accumulated);
-        }
-      })
-      .catch(err => {
-        failCount++;
-        console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
-      })
-  );
+  if (activeFeeds.length > 0) {
+    const promises = activeFeeds.map(feed =>
+      _loadFeed(feed)
+        .then(articles => {
+          if (articles.length > 0) {
+            accumulated.push(...articles);
+            // Inkrementelles Update: Zeige Artikel sobald sie da sind
+            _dispatchArticles(accumulated);
+          }
+        })
+        .catch(err => {
+          failCount++;
+          console.warn(`Feed "${feed.name}" fehlgeschlagen:`, err?.message ?? err);
+        })
+    );
 
-  await Promise.allSettled(promises);
-  if (failCount > 0) {
-    console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
+    await Promise.allSettled(promises);
+    if (failCount > 0) {
+      console.info(`${failCount} von ${activeFeeds.length} Feeds konnten nicht geladen werden.`);
+    }
   }
 
+  // Sicherstellen, dass wir am Ende auf jeden Fall noch mal rendern
   _dispatchArticles(accumulated);
 }
 

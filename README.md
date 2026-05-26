@@ -24,9 +24,7 @@ Diese App aggregiert RSS-Feeds deiner Lieblingsseiten und präsentiert sie in ei
 - **Build-Tool**: [Vite](https://vitejs.dev/) für schnelles Development und optimierte Bundles.
 - **Sprache**: [TypeScript](https://www.typescriptlang.org/) für Typsicherheit und Wartbarkeit.
 - **Styling**: CSS Custom Properties (Variables) mit Support für Dark/Light Mode.
-- **Datenquelle**: Hybrid-Modell:
-  - **A: Pre-fetched** — Über GitHub Actions werden RSS-Feeds (alle 5 Min) und Streaming-Inhalte (2× täglich) in `data/feeds.json` zwischengespeichert.
-  - **B: Proxy-Fallback** — Benutzerdefinierte Feeds werden via CORS-Proxy geladen.
+- **Datenquelle**: Rein clientseitig. Alle Feeds (RSS/Atom-Feeds sowie Streaming-Inhalte) werden direkt und parallel über einen CORS-Proxy (`allorigins.win` oder Fallback) geladen und im Browser geparst. Keine serverseitigen Updates erforderlich.
 
 ---
 
@@ -63,9 +61,8 @@ discophery/
 │   ├── feed.ts         ← Feed-Loader & Parser
 │   ├── ui.ts           ← UI-Logik & Event-Handling
 │   └── ...
-├── data/               ← Cache für pre-fetched Feeds (feeds.json)
-├── scripts/            ← Python-Skripte für GitHub Actions
-├── public/             ← Statische Assets (Icons, Manifest)
+├── public/             ← Statische Assets (Icons, Manifest, leere feeds.json)
+├── scripts/            ← Hilfs- und Migrationsskripte
 ├── archive/            ← Veraltete Dokumentation und Code-Relikte
 ├── index.html          ← HTML-Grundgerüst
 └── vite.config.ts      ← Vite Konfiguration

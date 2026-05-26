@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "fetch": "python3 scripts/fetch_feeds.py",
-    "build": "npm run fetch && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "local-ci": "bash scripts/local-ci.sh",
     "postinstall": "node scripts/setup-git-hooks.js"

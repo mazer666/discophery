@@ -18,11 +18,10 @@ Ein persönlicher, werbefreier News-Feed als Single-Page-App (SPA). Fokus auf Sc
 
 ### Datenfluss
 1. **Initialisierung**: `main.ts` lädt, `auth.ts` prüft den Login-Status.
-2. **Datenabruf**: `feed.ts` lädt primär die vorkompilierte `data/feeds.json` (wird stündlich per GitHub Action aktualisiert).
-3. **Fallback**: Falls `feeds.json` nicht verfügbar ist oder ein individueller Feed geladen wird, erfolgt der Abruf über einen CORS-Proxy (`allorigins.win`).
-4. **Verarbeitung**: RSS/Atom-XML wird mit dem nativen `DOMParser` geparst und normalisiert.
-5. **Filterung**: `filter.ts` wendet Keyword- und Source-Filter auf die Artikel an.
-6. **Rendering**: `ui-cards.ts` generiert die HTML-Cards und fügt sie in den DOM ein.
+2. **Datenabruf**: `feed.ts` lädt alle aktivierten Feeds (inklusive RSS/Atom und Streaming-Listen) parallel direkt von den Quellen über einen CORS-Proxy (`allorigins.win` oder Fallback). Es gibt kein serverseitig vorgefertigtes JSON mehr.
+3. **Verarbeitung**: RSS/Atom-XML bzw. werstreamt.es-HTML wird mit dem nativen `DOMParser` des Browsers geparst, normalisiert und in Artikel konvertiert.
+4. **Filterung**: `filter.ts` wendet Keyword- und Source-Filter auf die Artikel an.
+5. **Rendering**: `ui-cards.ts` generiert die HTML-Cards und fügt sie in den DOM ein.
 
 ### Speicher
 - **localStorage**: Alle Benutzereinstellungen (aktive Feeds, ausgeblendete Artikel, Filter) werden lokal gespeichert. Es gibt kein Datenbank-Backend.
@@ -62,47 +61,23 @@ Manche Feeds haben keinen RSS-Feed und werden stattdessen per HTML-Scraping bef�
 
 ### Architektur
 
-```
-.github/workflows/fetch-streaming.yml   (2× täglich, 07:17 + 19:43 UTC)
-  └─ scripts/fetch_streaming.py
-       ├─ scrapet werstreamt.es pro Anbieter
-       ├─ speichert in data/streaming-{slug}.json
-       └─ Fehler eines Anbieters brechen andere nicht ab
-
-.github/workflows/fetch.yml             (alle 5 Minuten)
-  └─ scripts/fetch_feeds.py
-       ├─ RSS-Feeds wie bisher
-       └─ liest data/streaming-*.json und bettet Artikel in feeds.json ein
-```
-
-### Feed-Typ `html` in feeds.ts
-
-Einträge mit `type: 'html'` werden von `fetch_feeds.py` beim RSS-Loop **übersprungen** — sie haben keinen echten RSS-Feed. Der Browser fetcht diese URLs nie direkt. Stattdessen liefert der Pre-Fetch-Cache die Artikel.
-
-### Resilienz-Schichten (pro Anbieter)
-
-1. **Retry mit Backoff** — 3 Versuche, exponentielle Wartezeit
-2. **HTML-Parser + Regex-Fallback** — zwei unabhängige Extraktionsstrategien
-3. **Ergebnis-Validierung** — weniger als 3 Items gilt als Fehlschlag
-4. **Cache-Fallback** — letztes gültiges Ergebnis bleibt erhalten
-5. **Date-Preservation** — bekannte Titel behalten ihr Erstentdeckungs-Datum
-6. **Anbieter-Isolation** — Fehler bei Netflix bricht Amazon Prime nicht ab
-7. **Zeitliches Muster** — ungenaue Cron-Zeiten + 0–10 Min Zufalls-Delay
+Der Client ruft diese Feeds (deren URLs auf `werstreamt.es` verweisen) genau wie die RSS-Feeds über den CORS-Proxy ab.
+`feed.ts` erkennt diese URLs über die Hilfsfunktion `_isWerstreamtUrl(url)` und leitet den geladenen HTML-Inhalt an die clientseitige Scraping-Funktion `_scrapeWerstreamt(content, feed)` weiter, welche die Einträge mittels des nativen `DOMParser` parst.
 
 ### Unterstützte Anbieter
 
-| Feed-ID             | Anbieter          | Cache-Datei                      |
-|---------------------|-------------------|----------------------------------|
-| `amazon-prime-new`  | Amazon Prime      | `data/streaming-amazon-prime.json` |
-| `netflix-new`       | Netflix           | `data/streaming-netflix.json`    |
-| `disney-plus-new`   | Disney+           | `data/streaming-disney-plus.json`|
-| `apple-tv-new`      | Apple TV+         | `data/streaming-apple-tv.json`   |
-| `filmfriend-new`    | Filmfriend        | `data/streaming-filmfriend.json` |
-| `magentatv-new`     | MagentaTV         | `data/streaming-magentatv.json`  |
-| `netzkino-new`      | Netzkino          | `data/streaming-netzkino.json`   |
+| Feed-ID             | Anbieter          | URL-Muster auf werstreamt.es |
+|---------------------|-------------------|-----------------------------|
+| `amazon-prime-new`  | Amazon Prime      | `.../anbieter-prime-video/...` |
+| `netflix-new`       | Netflix           | `.../anbieter-netflix/...` |
+| `disney-plus-new`   | Disney+           | `.../anbieter-disney-plus/...`|
+| `apple-tv-new`      | Apple TV+         | `.../anbieter-apple-tv/...` |
+| `filmfriend-new`    | Filmfriend        | `.../anbieter-filmfriend/...` |
+| `magentatv-new`     | MagentaTV         | `.../anbieter-magentatv/...`  |
+| `netzkino-new`      | Netzkino          | `.../anbieter-netzkino/...`   |
 
 ### Neuen Anbieter hinzufügen
 
-1. Eintrag in `PROVIDERS`-Liste in `scripts/fetch_streaming.py` ergänzen
-2. Passenden Eintrag mit `type: 'html'` in `src/feeds.ts` hinzufügen
-3. Kategorie `streaming` in `src/config.ts` ist bereits vorhanden
+1. Passenden Eintrag in `src/feeds.ts` mit der entsprechenden `werstreamt.es`-URL hinzufügen.
+2. Die Kategorie `streaming` in `src/config.ts` ist bereits vorhanden.
+
