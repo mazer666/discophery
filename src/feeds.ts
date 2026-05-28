@@ -225,7 +225,7 @@ export const FEED_CATALOGUE = [
   // WISSENSCHAFT & WELTRAUM
   // ══════════════════════════════════════════════════════════════════════════
   { id: 'spektrum', name: 'Spektrum.de', url: 'https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406', category: 'wissenschaft', language: 'de', enabled: true },
-  { id: 'scinexx', name: 'Scinexx', url: 'https://www.scinexx.de/feed/', category: 'wissenschaft', language: 'de', enabled: true },
+  //{ id: 'scinexx', name: 'Scinexx', url: 'https://www.scinexx.de/feed/', category: 'wissenschaft', language: 'de', enabled: true },
   { id: 'nasa', name: 'NASA Breaking News', url: 'https://www.nasa.gov/news-release/feed/', category: 'weltraum', language: 'en', enabled: true },
   { id: 'space-com', name: 'Space.com', url: 'https://www.space.com/feeds/all', category: 'weltraum', language: 'en', enabled: true },
   { id: 'newscientist', name: 'New Scientist', url: 'https://www.newscientist.com/feed/home/', category: 'wissenschaft', language: 'en', enabled: true },
@@ -328,8 +328,8 @@ export const FEED_CATALOGUE = [
   // ══════════════════════════════════════════════════════════════════════════
   // RECHT & JUSTIZ
   // ══════════════════════════════════════════════════════════════════════════
-  { id: 'recht-verstehen', name: 'Rechtswissenschaft Verstehen', url: 'https://feeds.feedburner.com/rechtswissenschaft-verstehen', category: 'recht', language: 'de', enabled: false },
-  { id: 'recht-umschau', name: 'Recht Umschau', url: 'https://recht-umschau.de/feed/', category: 'recht', language: 'de', enabled: false },
+  // { id: 'recht-verstehen', name: 'Rechtswissenschaft Verstehen', url: 'https://feeds.feedburner.com/rechtswissenschaft-verstehen', category: 'recht', language: 'de', enabled: false },
+  // { id: 'recht-umschau', name: 'Recht Umschau', url: 'https://recht-umschau.de/feed/', category: 'recht', language: 'de', enabled: false },
 
   // ══════════════════════════════════════════════════════════════════════════
   // STREAMING — werstreamt.es (HTML-Scraping via scripts/fetch_werstreamt.py;
